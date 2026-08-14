@@ -1,0 +1,70 @@
+{
+  "series_id": "20260316_133502",
+  "n_total": 10,
+  "n_completed": 10,
+  "n_failed": 0,
+  "all_metrics": [],
+  "series_dir": "results/20260316_133502",
+  "runs": [
+    {
+      "run_id": 1,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 143.82231950759888
+    },
+    {
+      "run_id": 2,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 144.30034565925598
+    },
+    {
+      "run_id": 3,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 143.60268568992615
+    },
+    {
+      "run_id": 4,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 143.36761164665222
+    },
+    {
+      "run_id": 5,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 143.29897928237915
+    },
+    {
+      "run_id": 6,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 145.9433662891388
+    },
+    {
+      "run_id": 7,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 148.7408504486084
+    },
+    {
+      "run_id": 8,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 143.59406113624573
+    },
+    {
+      "run_id": 9,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 143.3169014453888
+    },
+    {
+      "run_id": 10,
+      "status": "completed",
+      "metrics_files": [],
+      "duration": 143.38590908050537
+    }
+  ]
+}

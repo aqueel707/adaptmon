@@ -1,0 +1,12 @@
+2026-04-02 10:30:39 [INFO] controller.utils: Logging to results/20260402_101705/run_06/ctrl_logs/6/controller.log
+2026-04-02 10:30:39 [INFO] __main__: AdaptMon Controller starting (run_id=6)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/adaptmon/Desktop/adaptmon_v12/adaptmon/controller/controller.py", line 193, in <module>
+    main()
+  File "/home/adaptmon/Desktop/adaptmon_v12/adaptmon/controller/controller.py", line 113, in main
+    switch_configs = json.load(f)
+UnboundLocalError: local variable 'json' referenced before assignment

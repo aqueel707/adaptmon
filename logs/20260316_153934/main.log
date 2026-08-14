@@ -1,0 +1,13 @@
+2026-03-16 15:39:34 [INFO] controller.utils: Logging to logs/20260316_153934/main.log
+2026-03-16 15:39:34 [INFO] __main__: ============================================================
+2026-03-16 15:39:34 [INFO] __main__: AdaptMon Full Experiment
+2026-03-16 15:39:34 [INFO] __main__:   runs=10, duration=120s
+2026-03-16 15:39:34 [INFO] __main__:   attack: start=30s, dur=60s, rate=5000pps
+2026-03-16 15:39:34 [INFO] __main__:   results_dir=results
+2026-03-16 15:39:34 [INFO] __main__: ============================================================
+2026-03-16 15:39:34 [INFO] __main__: Step 1: Skipping P4 compilation (--skip-compile)
+2026-03-16 15:39:34 [INFO] __main__: Step 2: Running experiment series (mock=True)...
+2026-03-16 15:39:34 [INFO] experiments.run_series: Starting experiment series: 10 runs [MOCK]
+2026-03-16 15:39:34 [INFO] experiments.run_series:   Mock data: results/20260316_153934/run_01/switch_1_metrics.csv
+2026-03-16 15:39:34 [INFO] experiments.run_series:   Mock data: results/20260316_153934/run_01/switch_2_metrics.csv
+2026-03-16 15:39:34 [INFO] experiments.run_series: Pausing 3s between runs...

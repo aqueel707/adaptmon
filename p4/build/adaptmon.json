@@ -1,0 +1,2852 @@
+{
+  "header_types" : [
+    {
+      "name" : "scalars_0",
+      "id" : 0,
+      "fields" : [
+        ["tmp", 32, false],
+        ["tmp_0", 32, false],
+        ["tmp_1", 8, false],
+        ["tmp_2", 16, false],
+        ["tmp_3", 16, false],
+        ["tmp_4", 32, false],
+        ["tmp_5", 32, false],
+        ["tmp_6", 32, false],
+        ["tmp_7", 32, false],
+        ["tmp_8", 32, false],
+        ["tmp_9", 32, false],
+        ["tmp_10", 32, false],
+        ["tmp_11", 32, false],
+        ["tmp_12", 32, false],
+        ["tmp_13", 32, false],
+        ["src_port_0", 16, false],
+        ["dst_port_0", 16, false],
+        ["pkt_val_0", 32, false],
+        ["byte_val_0", 32, false],
+        ["metadata_t.flow_index", 12, false],
+        ["metadata_t.do_clone", 1, false],
+        ["metadata_t.do_drop", 1, false],
+        ["metadata_t.pkt_count_val", 32, false],
+        ["metadata_t.byte_count_val", 32, false],
+        ["_padding_0", 2, false]
+      ]
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "fields" : [
+        ["ingress_port", 9, false],
+        ["egress_spec", 9, false],
+        ["egress_port", 9, false],
+        ["instance_type", 32, false],
+        ["packet_length", 32, false],
+        ["enq_timestamp", 32, false],
+        ["enq_qdepth", 19, false],
+        ["deq_timedelta", 32, false],
+        ["deq_qdepth", 19, false],
+        ["ingress_global_timestamp", 48, false],
+        ["egress_global_timestamp", 48, false],
+        ["mcast_grp", 16, false],
+        ["egress_rid", 16, false],
+        ["checksum_error", 1, false],
+        ["parser_error", 32, false],
+        ["priority", 3, false],
+        ["_padding", 3, false]
+      ]
+    },
+    {
+      "name" : "ethernet_t",
+      "id" : 2,
+      "fields" : [
+        ["dstAddr", 48, false],
+        ["srcAddr", 48, false],
+        ["etherType", 16, false]
+      ]
+    },
+    {
+      "name" : "ipv4_t",
+      "id" : 3,
+      "fields" : [
+        ["version", 4, false],
+        ["ihl", 4, false],
+        ["diffserv", 8, false],
+        ["totalLen", 16, false],
+        ["identification", 16, false],
+        ["flags", 3, false],
+        ["fragOffset", 13, false],
+        ["ttl", 8, false],
+        ["protocol", 8, false],
+        ["hdrChecksum", 16, false],
+        ["srcAddr", 32, false],
+        ["dstAddr", 32, false]
+      ]
+    },
+    {
+      "name" : "tcp_t",
+      "id" : 4,
+      "fields" : [
+        ["srcPort", 16, false],
+        ["dstPort", 16, false],
+        ["seqNo", 32, false],
+        ["ackNo", 32, false],
+        ["dataOffset", 4, false],
+        ["res", 3, false],
+        ["ecn", 3, false],
+        ["ctrl", 6, false],
+        ["window", 16, false],
+        ["checksum", 16, false],
+        ["urgentPtr", 16, false]
+      ]
+    },
+    {
+      "name" : "udp_t",
+      "id" : 5,
+      "fields" : [
+        ["srcPort", 16, false],
+        ["dstPort", 16, false],
+        ["len", 16, false],
+        ["checksum", 16, false]
+      ]
+    },
+    {
+      "name" : "cpu_header_t",
+      "id" : 6,
+      "fields" : [
+        ["flow_index", 32, false],
+        ["pkt_count", 32, false],
+        ["byte_count", 32, false],
+        ["reason", 8, false]
+      ]
+    }
+  ],
+  "headers" : [
+    {
+      "name" : "scalars",
+      "id" : 0,
+      "header_type" : "scalars_0",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "header_type" : "standard_metadata",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "ethernet",
+      "id" : 2,
+      "header_type" : "ethernet_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "ipv4",
+      "id" : 3,
+      "header_type" : "ipv4_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "tcp",
+      "id" : 4,
+      "header_type" : "tcp_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "udp",
+      "id" : 5,
+      "header_type" : "udp_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "cpu_hdr",
+      "id" : 6,
+      "header_type" : "cpu_header_t",
+      "metadata" : false,
+      "pi_omit" : true
+    }
+  ],
+  "header_stacks" : [],
+  "header_union_types" : [],
+  "header_unions" : [],
+  "header_union_stacks" : [],
+  "field_lists" : [
+    {
+      "id" : 1,
+      "name" : "empty",
+      "elements" : []
+    }
+  ],
+  "errors" : [
+    ["NoError", 0],
+    ["PacketTooShort", 1],
+    ["NoMatch", 2],
+    ["StackOutOfBounds", 3],
+    ["HeaderTooShort", 4],
+    ["ParserTimeout", 5],
+    ["ParserInvalidArgument", 6]
+  ],
+  "enums" : [],
+  "parsers" : [
+    {
+      "name" : "parser",
+      "id" : 0,
+      "init_state" : "start",
+      "parse_states" : [
+        {
+          "name" : "start",
+          "id" : 0,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "ethernet"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x0800",
+              "mask" : null,
+              "next_state" : "parse_ipv4"
+            },
+            {
+              "type" : "default",
+              "value" : null,
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["ethernet", "etherType"]
+            }
+          ]
+        },
+        {
+          "name" : "parse_ipv4",
+          "id" : 1,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "ipv4"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x06",
+              "mask" : null,
+              "next_state" : "parse_tcp"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x11",
+              "mask" : null,
+              "next_state" : "parse_udp"
+            },
+            {
+              "type" : "default",
+              "value" : null,
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["ipv4", "protocol"]
+            }
+          ]
+        },
+        {
+          "name" : "parse_tcp",
+          "id" : 2,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "tcp"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "default",
+              "value" : null,
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
+        },
+        {
+          "name" : "parse_udp",
+          "id" : 3,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "udp"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "default",
+              "value" : null,
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
+        }
+      ]
+    }
+  ],
+  "parse_vsets" : [],
+  "deparsers" : [
+    {
+      "name" : "deparser",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 366,
+        "column" : 8,
+        "source_fragment" : "AdaptMonDeparser"
+      },
+      "order" : ["cpu_hdr", "ethernet", "ipv4", "tcp", "udp"],
+      "primitives" : []
+    }
+  ],
+  "meter_arrays" : [],
+  "counter_arrays" : [],
+  "register_arrays" : [
+    {
+      "name" : "pkt_counter",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 86,
+        "column" : 24,
+        "source_fragment" : "pkt_counter"
+      },
+      "size" : 4096,
+      "bitwidth" : 32
+    },
+    {
+      "name" : "byte_counter",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 87,
+        "column" : 24,
+        "source_fragment" : "byte_counter"
+      },
+      "size" : 4096,
+      "bitwidth" : 32
+    },
+    {
+      "name" : "flow_src_ip",
+      "id" : 2,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 88,
+        "column" : 24,
+        "source_fragment" : "flow_src_ip"
+      },
+      "size" : 4096,
+      "bitwidth" : 32
+    },
+    {
+      "name" : "flow_dst_ip",
+      "id" : 3,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 89,
+        "column" : 24,
+        "source_fragment" : "flow_dst_ip"
+      },
+      "size" : 4096,
+      "bitwidth" : 32
+    },
+    {
+      "name" : "flow_src_port",
+      "id" : 4,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 90,
+        "column" : 24,
+        "source_fragment" : "flow_src_port"
+      },
+      "size" : 4096,
+      "bitwidth" : 16
+    },
+    {
+      "name" : "flow_dst_port",
+      "id" : 5,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 91,
+        "column" : 24,
+        "source_fragment" : "flow_dst_port"
+      },
+      "size" : 4096,
+      "bitwidth" : 16
+    },
+    {
+      "name" : "flow_protocol",
+      "id" : 6,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 92,
+        "column" : 23,
+        "source_fragment" : "flow_protocol"
+      },
+      "size" : 4096,
+      "bitwidth" : 8
+    },
+    {
+      "name" : "flow_active",
+      "id" : 7,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 93,
+        "column" : 23,
+        "source_fragment" : "flow_active"
+      },
+      "size" : 4096,
+      "bitwidth" : 1
+    }
+  ],
+  "calculations" : [
+    {
+      "name" : "calc",
+      "id" : 0,
+      "algo" : "crc32",
+      "input" : [
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_0"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_1"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_2"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_3"]
+        }
+      ]
+    },
+    {
+      "name" : "calc_0",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 344,
+        "column" : 8,
+        "source_fragment" : "update_checksum( ..."
+      },
+      "algo" : "csum16",
+      "input" : [
+        {
+          "type" : "field",
+          "value" : ["ipv4", "version"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "ihl"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "diffserv"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "totalLen"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "identification"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "flags"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "fragOffset"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "ttl"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "protocol"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "srcAddr"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "dstAddr"]
+        }
+      ]
+    },
+    {
+      "name" : "calc_1",
+      "id" : 2,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 140,
+        "column" : 8,
+        "source_fragment" : "verify_checksum( ..."
+      },
+      "algo" : "csum16",
+      "input" : [
+        {
+          "type" : "field",
+          "value" : ["ipv4", "version"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "ihl"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "diffserv"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "totalLen"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "identification"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "flags"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "fragOffset"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "ttl"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "protocol"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "srcAddr"]
+        },
+        {
+          "type" : "field",
+          "value" : ["ipv4", "dstAddr"]
+        }
+      ]
+    }
+  ],
+  "learn_lists" : [],
+  "actions" : [
+    {
+      "name" : "AdaptMonIngress.drop_pkt",
+      "id" : 0,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "mark_to_drop",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "standard_metadata"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 169,
+            "column" : 8,
+            "source_fragment" : "mark_to_drop(std_meta)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "AdaptMonIngress.forward_l2",
+      "id" : 1,
+      "runtime_data" : [
+        {
+          "name" : "port",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 173,
+            "column" : 8,
+            "source_fragment" : "std_meta.egress_spec = port"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "AdaptMonIngress.forward_l3",
+      "id" : 2,
+      "runtime_data" : [
+        {
+          "name" : "port",
+          "bitwidth" : 9
+        },
+        {
+          "name" : "dst_mac",
+          "bitwidth" : 48
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 177,
+            "column" : 8,
+            "source_fragment" : "std_meta.egress_spec = port"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["ethernet", "dstAddr"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 1
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 178,
+            "column" : 8,
+            "source_fragment" : "hdr.ethernet.dstAddr = dst_mac"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["ipv4", "ttl"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["ipv4", "ttl"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 179,
+            "column" : 8,
+            "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "AdaptMonIngress.do_clone_to_cpu",
+      "id" : 3,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.do_clone"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 183,
+            "column" : 8,
+            "source_fragment" : "meta.do_clone = 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "AdaptMonIngress.do_drop_flow",
+      "id" : 4,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.do_drop"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 187,
+            "column" : 8,
+            "source_fragment" : "meta.do_drop = 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "AdaptMonIngress.nop",
+      "id" : 5,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "AdaptMonIngress.nop",
+      "id" : 6,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "AdaptMonIngress.nop",
+      "id" : 7,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "adaptmon244",
+      "id" : 8,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0002"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 244,
+            "column" : 16,
+            "source_fragment" : "std_meta.egress_spec = 2"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon246",
+      "id" : 9,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0001"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 246,
+            "column" : 16,
+            "source_fragment" : "std_meta.egress_spec = 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon248",
+      "id" : 10,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0001"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 248,
+            "column" : 16,
+            "source_fragment" : "std_meta.egress_spec = 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon250",
+      "id" : 11,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0001"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 250,
+            "column" : 16,
+            "source_fragment" : "std_meta.egress_spec = 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon259",
+      "id" : 12,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "src_port_0"]
+            },
+            {
+              "type" : "field",
+              "value" : ["tcp", "srcPort"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 259,
+            "column" : 16,
+            "source_fragment" : "src_port = hdr.tcp.srcPort"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "dst_port_0"]
+            },
+            {
+              "type" : "field",
+              "value" : ["tcp", "dstPort"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 260,
+            "column" : 16,
+            "source_fragment" : "dst_port = hdr.tcp.dstPort"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon262",
+      "id" : 13,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "src_port_0"]
+            },
+            {
+              "type" : "field",
+              "value" : ["udp", "srcPort"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 262,
+            "column" : 16,
+            "source_fragment" : "src_port = hdr.udp.srcPort"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "dst_port_0"]
+            },
+            {
+              "type" : "field",
+              "value" : ["udp", "dstPort"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 263,
+            "column" : 16,
+            "source_fragment" : "dst_port = hdr.udp.dstPort"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon255",
+      "id" : 14,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "src_port_0"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0000"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 255,
+            "column" : 12,
+            "source_fragment" : "bit<16> src_port = 0"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "dst_port_0"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0000"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 256,
+            "column" : 12,
+            "source_fragment" : "bit<16> dst_port = 0"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon266",
+      "id" : 15,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "srcAddr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 271,
+            "column" : 20,
+            "source_fragment" : "hdr.ipv4.srcAddr"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_0"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "dstAddr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 272,
+            "column" : 20,
+            "source_fragment" : "hdr.ipv4.dstAddr"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_1"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "protocol"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 273,
+            "column" : 20,
+            "source_fragment" : "hdr.ipv4.protocol"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_2"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "src_port_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 274,
+            "column" : 20,
+            "source_fragment" : "src_port"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_3"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "dst_port_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 275,
+            "column" : 20,
+            "source_fragment" : "dst_port"
+          }
+        },
+        {
+          "op" : "modify_field_with_hash_based_offset",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.flow_index"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x00"
+            },
+            {
+              "type" : "calculation",
+              "value" : "calc"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0fff"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 266,
+            "column" : 12,
+            "source_fragment" : "hash( ..."
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_4"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 284,
+            "column" : 38,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_read",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "pkt_val_0"]
+            },
+            {
+              "type" : "register_array",
+              "value" : "pkt_counter"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_4"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 284,
+            "column" : 12,
+            "source_fragment" : "pkt_counter.read(pkt_val, (bit<32>)meta.flow_index)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "pkt_val_0"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "pkt_val_0"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x00000001"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 285,
+            "column" : 12,
+            "source_fragment" : "pkt_val = pkt_val + 1"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_5"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 286,
+            "column" : 30,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "pkt_counter"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_5"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "pkt_val_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 286,
+            "column" : 12,
+            "source_fragment" : "pkt_counter.write((bit<32>)meta.flow_index, pkt_val)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.pkt_count_val"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "pkt_val_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 287,
+            "column" : 12,
+            "source_fragment" : "meta.pkt_count_val = pkt_val"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_6"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 289,
+            "column" : 40,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_read",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "byte_val_0"]
+            },
+            {
+              "type" : "register_array",
+              "value" : "byte_counter"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_6"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 289,
+            "column" : 12,
+            "source_fragment" : "byte_counter.read(byte_val, (bit<32>)meta.flow_index)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "byte_val_0"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "byte_val_0"]
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["standard_metadata", "packet_length"]
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 290,
+            "column" : 12,
+            "source_fragment" : "byte_val = byte_val + (bit<32>)std_meta.packet_length"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_7"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 291,
+            "column" : 31,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "byte_counter"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_7"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "byte_val_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 291,
+            "column" : 12,
+            "source_fragment" : "byte_counter.write((bit<32>)meta.flow_index, byte_val)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.byte_count_val"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "byte_val_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 292,
+            "column" : 12,
+            "source_fragment" : "meta.byte_count_val = byte_val"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_8"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 295,
+            "column" : 30,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "flow_src_ip"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_8"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "srcAddr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 295,
+            "column" : 12,
+            "source_fragment" : "flow_src_ip.write((bit<32>)meta.flow_index, hdr.ipv4.srcAddr)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_9"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 296,
+            "column" : 30,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "flow_dst_ip"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_9"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "dstAddr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 296,
+            "column" : 12,
+            "source_fragment" : "flow_dst_ip.write((bit<32>)meta.flow_index, hdr.ipv4.dstAddr)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_10"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 297,
+            "column" : 32,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "flow_protocol"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_10"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "protocol"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 297,
+            "column" : 12,
+            "source_fragment" : "flow_protocol.write((bit<32>)meta.flow_index, hdr.ipv4.protocol)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_11"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 298,
+            "column" : 32,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "flow_src_port"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_11"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "src_port_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 298,
+            "column" : 12,
+            "source_fragment" : "flow_src_port.write((bit<32>)meta.flow_index, src_port)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_12"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 299,
+            "column" : 32,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "flow_dst_port"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_12"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "dst_port_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 299,
+            "column" : 12,
+            "source_fragment" : "flow_dst_port.write((bit<32>)meta.flow_index, dst_port)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_13"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 300,
+            "column" : 30,
+            "source_fragment" : "(bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "flow_active"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_13"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 300,
+            "column" : 12,
+            "source_fragment" : "flow_active.write((bit<32>)meta.flow_index, 1)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon306",
+      "id" : 16,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "mark_to_drop",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "standard_metadata"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 306,
+            "column" : 16,
+            "source_fragment" : "mark_to_drop(std_meta)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon236",
+      "id" : 17,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.do_clone"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x00"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 236,
+            "column" : 8,
+            "source_fragment" : "meta.do_clone = 0"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.do_drop"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x00"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 237,
+            "column" : 8,
+            "source_fragment" : "meta.do_drop = 0"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon328",
+      "id" : 18,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "add_header",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "cpu_hdr"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 328,
+            "column" : 12,
+            "source_fragment" : "hdr.cpu_hdr.setValid()"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["cpu_hdr", "flow_index"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "metadata_t.flow_index"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 329,
+            "column" : 12,
+            "source_fragment" : "hdr.cpu_hdr.flow_index = (bit<32>)meta.flow_index"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["cpu_hdr", "pkt_count"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.pkt_count_val"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 330,
+            "column" : 12,
+            "source_fragment" : "hdr.cpu_hdr.pkt_count = meta.pkt_count_val"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["cpu_hdr", "byte_count"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.byte_count_val"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 331,
+            "column" : 12,
+            "source_fragment" : "hdr.cpu_hdr.byte_count = meta.byte_count_val"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["cpu_hdr", "reason"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 332,
+            "column" : 12,
+            "source_fragment" : "hdr.cpu_hdr.reason = 1"
+          }
+        },
+        {
+          "op" : "clone_egress_pkt_to_egress",
+          "parameters" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x00000064"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x1"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 333,
+            "column" : 12,
+            "source_fragment" : "clone_preserving_field_list(CloneType.E2E, (bit<32>)100, 0)"
+          }
+        }
+      ]
+    }
+  ],
+  "pipelines" : [
+    {
+      "name" : "ingress",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 162,
+        "column" : 8,
+        "source_fragment" : "AdaptMonIngress"
+      },
+      "init_table" : "tbl_adaptmon236",
+      "tables" : [
+        {
+          "name" : "tbl_adaptmon236",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 236,
+            "column" : 22,
+            "source_fragment" : "= 0; ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [17],
+          "actions" : ["adaptmon236"],
+          "base_default_next" : "node_3",
+          "next_tables" : {
+            "adaptmon236" : "node_3"
+          },
+          "default_entry" : {
+            "action_id" : 17,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon244",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 244,
+            "column" : 37,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [8],
+          "actions" : ["adaptmon244"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "adaptmon244" : null
+          },
+          "default_entry" : {
+            "action_id" : 8,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon246",
+          "id" : 2,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 246,
+            "column" : 37,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [9],
+          "actions" : ["adaptmon246"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "adaptmon246" : null
+          },
+          "default_entry" : {
+            "action_id" : 9,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon248",
+          "id" : 3,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 248,
+            "column" : 37,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [10],
+          "actions" : ["adaptmon248"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "adaptmon248" : null
+          },
+          "default_entry" : {
+            "action_id" : 10,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon250",
+          "id" : 4,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 250,
+            "column" : 37,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [11],
+          "actions" : ["adaptmon250"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "adaptmon250" : null
+          },
+          "default_entry" : {
+            "action_id" : 11,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon255",
+          "id" : 5,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 255,
+            "column" : 12,
+            "source_fragment" : "bit<16> src_port = 0; ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [14],
+          "actions" : ["adaptmon255"],
+          "base_default_next" : "node_13",
+          "next_tables" : {
+            "adaptmon255" : "node_13"
+          },
+          "default_entry" : {
+            "action_id" : 14,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon259",
+          "id" : 6,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 259,
+            "column" : 25,
+            "source_fragment" : "= hdr.tcp.srcPort; ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [12],
+          "actions" : ["adaptmon259"],
+          "base_default_next" : "tbl_adaptmon266",
+          "next_tables" : {
+            "adaptmon259" : "tbl_adaptmon266"
+          },
+          "default_entry" : {
+            "action_id" : 12,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon262",
+          "id" : 7,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 262,
+            "column" : 25,
+            "source_fragment" : "= hdr.udp.srcPort; ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [13],
+          "actions" : ["adaptmon262"],
+          "base_default_next" : "tbl_adaptmon266",
+          "next_tables" : {
+            "adaptmon262" : "tbl_adaptmon266"
+          },
+          "default_entry" : {
+            "action_id" : 13,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon266",
+          "id" : 8,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 266,
+            "column" : 12,
+            "source_fragment" : "hash( ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [15],
+          "actions" : ["adaptmon266"],
+          "base_default_next" : "AdaptMonIngress.drop_table",
+          "next_tables" : {
+            "adaptmon266" : "AdaptMonIngress.drop_table"
+          },
+          "default_entry" : {
+            "action_id" : 15,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "AdaptMonIngress.drop_table",
+          "id" : 9,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 207,
+            "column" : 10,
+            "source_fragment" : "drop_table"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.srcAddr",
+              "target" : ["ipv4", "srcAddr"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.dstAddr",
+              "target" : ["ipv4", "dstAddr"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.protocol",
+              "target" : ["ipv4", "protocol"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 512,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [4, 6],
+          "actions" : ["AdaptMonIngress.do_drop_flow", "AdaptMonIngress.nop"],
+          "base_default_next" : "node_19",
+          "next_tables" : {
+            "AdaptMonIngress.do_drop_flow" : "node_19",
+            "AdaptMonIngress.nop" : "node_19"
+          },
+          "default_entry" : {
+            "action_id" : 6,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "tbl_adaptmon306",
+          "id" : 10,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 306,
+            "column" : 16,
+            "source_fragment" : "mark_to_drop(std_meta)"
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [16],
+          "actions" : ["adaptmon306"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "adaptmon306" : null
+          },
+          "default_entry" : {
+            "action_id" : 16,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "AdaptMonIngress.clone_table",
+          "id" : 11,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 221,
+            "column" : 10,
+            "source_fragment" : "clone_table"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.srcAddr",
+              "target" : ["ipv4", "srcAddr"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.dstAddr",
+              "target" : ["ipv4", "dstAddr"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 512,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [3, 7],
+          "actions" : ["AdaptMonIngress.do_clone_to_cpu", "AdaptMonIngress.nop"],
+          "base_default_next" : "AdaptMonIngress.ipv4_forward",
+          "next_tables" : {
+            "AdaptMonIngress.do_clone_to_cpu" : "AdaptMonIngress.ipv4_forward",
+            "AdaptMonIngress.nop" : "AdaptMonIngress.ipv4_forward"
+          },
+          "default_entry" : {
+            "action_id" : 7,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "AdaptMonIngress.ipv4_forward",
+          "id" : 12,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 193,
+            "column" : 10,
+            "source_fragment" : "ipv4_forward"
+          },
+          "key" : [
+            {
+              "match_type" : "lpm",
+              "name" : "hdr.ipv4.dstAddr",
+              "target" : ["ipv4", "dstAddr"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "lpm",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [1, 2, 0, 5],
+          "actions" : ["AdaptMonIngress.forward_l2", "AdaptMonIngress.forward_l3", "AdaptMonIngress.drop_pkt", "AdaptMonIngress.nop"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "AdaptMonIngress.forward_l2" : null,
+            "AdaptMonIngress.forward_l3" : null,
+            "AdaptMonIngress.drop_pkt" : null,
+            "AdaptMonIngress.nop" : null
+          },
+          "default_entry" : {
+            "action_id" : 0,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : [
+        {
+          "name" : "node_3",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 240,
+            "column" : 12,
+            "source_fragment" : "hdr.ethernet.etherType == 0x0806"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["ethernet", "etherType"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x0806"
+              }
+            }
+          },
+          "true_next" : "node_4",
+          "false_next" : "node_11"
+        },
+        {
+          "name" : "node_4",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 243,
+            "column" : 16,
+            "source_fragment" : "std_meta.ingress_port == 1"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["standard_metadata", "ingress_port"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x0001"
+              }
+            }
+          },
+          "true_next" : "tbl_adaptmon244",
+          "false_next" : "node_6"
+        },
+        {
+          "name" : "node_6",
+          "id" : 2,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 245,
+            "column" : 23,
+            "source_fragment" : "std_meta.ingress_port == 2"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["standard_metadata", "ingress_port"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x0002"
+              }
+            }
+          },
+          "true_next" : "tbl_adaptmon246",
+          "false_next" : "node_8"
+        },
+        {
+          "name" : "node_8",
+          "id" : 3,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 247,
+            "column" : 23,
+            "source_fragment" : "std_meta.ingress_port == 3"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["standard_metadata", "ingress_port"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x0003"
+              }
+            }
+          },
+          "true_next" : "tbl_adaptmon248",
+          "false_next" : "tbl_adaptmon250"
+        },
+        {
+          "name" : "node_11",
+          "id" : 4,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 252,
+            "column" : 19,
+            "source_fragment" : "hdr.ipv4.isValid()"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "d2b",
+              "left" : null,
+              "right" : {
+                "type" : "field",
+                "value" : ["ipv4", "$valid$"]
+              }
+            }
+          },
+          "false_next" : null,
+          "true_next" : "tbl_adaptmon255"
+        },
+        {
+          "name" : "node_13",
+          "id" : 5,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 258,
+            "column" : 16,
+            "source_fragment" : "hdr.tcp.isValid()"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "d2b",
+              "left" : null,
+              "right" : {
+                "type" : "field",
+                "value" : ["tcp", "$valid$"]
+              }
+            }
+          },
+          "true_next" : "tbl_adaptmon259",
+          "false_next" : "node_15"
+        },
+        {
+          "name" : "node_15",
+          "id" : 6,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 261,
+            "column" : 23,
+            "source_fragment" : "hdr.udp.isValid()"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "d2b",
+              "left" : null,
+              "right" : {
+                "type" : "field",
+                "value" : ["udp", "$valid$"]
+              }
+            }
+          },
+          "true_next" : "tbl_adaptmon262",
+          "false_next" : "tbl_adaptmon266"
+        },
+        {
+          "name" : "node_19",
+          "id" : 7,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 305,
+            "column" : 16,
+            "source_fragment" : "meta.do_drop == 1"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["scalars", "metadata_t.do_drop"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x01"
+              }
+            }
+          },
+          "true_next" : "tbl_adaptmon306",
+          "false_next" : "AdaptMonIngress.clone_table"
+        }
+      ]
+    },
+    {
+      "name" : "egress",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 319,
+        "column" : 8,
+        "source_fragment" : "AdaptMonEgress"
+      },
+      "init_table" : "node_25",
+      "tables" : [
+        {
+          "name" : "tbl_adaptmon328",
+          "id" : 13,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 328,
+            "column" : 12,
+            "source_fragment" : "hdr.cpu_hdr.setValid(); ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [18],
+          "actions" : ["adaptmon328"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "adaptmon328" : null
+          },
+          "default_entry" : {
+            "action_id" : 18,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : [
+        {
+          "name" : "node_25",
+          "id" : 8,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 326,
+            "column" : 12,
+            "source_fragment" : "meta.do_clone == 1"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["scalars", "metadata_t.do_clone"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x01"
+              }
+            }
+          },
+          "false_next" : null,
+          "true_next" : "tbl_adaptmon328"
+        }
+      ]
+    }
+  ],
+  "checksums" : [
+    {
+      "name" : "cksum",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 344,
+        "column" : 8,
+        "source_fragment" : "update_checksum( ..."
+      },
+      "target" : ["ipv4", "hdrChecksum"],
+      "type" : "generic",
+      "calculation" : "calc_0",
+      "verify" : false,
+      "update" : true,
+      "if_cond" : {
+        "type" : "expression",
+        "value" : {
+          "op" : "d2b",
+          "left" : null,
+          "right" : {
+            "type" : "field",
+            "value" : ["ipv4", "$valid$"]
+          }
+        }
+      }
+    },
+    {
+      "name" : "cksum_0",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 140,
+        "column" : 8,
+        "source_fragment" : "verify_checksum( ..."
+      },
+      "target" : ["ipv4", "hdrChecksum"],
+      "type" : "generic",
+      "calculation" : "calc_1",
+      "verify" : true,
+      "update" : false,
+      "if_cond" : {
+        "type" : "expression",
+        "value" : {
+          "op" : "d2b",
+          "left" : null,
+          "right" : {
+            "type" : "field",
+            "value" : ["ipv4", "$valid$"]
+          }
+        }
+      }
+    }
+  ],
+  "force_arith" : [],
+  "extern_instances" : [],
+  "field_aliases" : [
+    [
+      "queueing_metadata.enq_timestamp",
+      ["standard_metadata", "enq_timestamp"]
+    ],
+    [
+      "queueing_metadata.enq_qdepth",
+      ["standard_metadata", "enq_qdepth"]
+    ],
+    [
+      "queueing_metadata.deq_timedelta",
+      ["standard_metadata", "deq_timedelta"]
+    ],
+    [
+      "queueing_metadata.deq_qdepth",
+      ["standard_metadata", "deq_qdepth"]
+    ],
+    [
+      "intrinsic_metadata.ingress_global_timestamp",
+      ["standard_metadata", "ingress_global_timestamp"]
+    ],
+    [
+      "intrinsic_metadata.egress_global_timestamp",
+      ["standard_metadata", "egress_global_timestamp"]
+    ],
+    [
+      "intrinsic_metadata.mcast_grp",
+      ["standard_metadata", "mcast_grp"]
+    ],
+    [
+      "intrinsic_metadata.egress_rid",
+      ["standard_metadata", "egress_rid"]
+    ],
+    [
+      "intrinsic_metadata.priority",
+      ["standard_metadata", "priority"]
+    ]
+  ],
+  "program" : "p4/build/adaptmon.p4i",
+  "__meta__" : {
+    "version" : [2, 23],
+    "compiler" : "https://github.com/p4lang/p4c"
+  }
+}

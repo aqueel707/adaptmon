@@ -1,0 +1,569 @@
+2026-04-02 10:17:05 [INFO] controller.utils: Logging to logs/20260402_101705/main.log
+2026-04-02 10:17:05 [INFO] __main__: ============================================================
+2026-04-02 10:17:05 [INFO] __main__: AdaptMon Full Experiment
+2026-04-02 10:17:05 [INFO] __main__:   runs=10, duration=120s
+2026-04-02 10:17:05 [INFO] __main__:   attack: start=30s, dur=60s, rate=5000pps
+2026-04-02 10:17:05 [INFO] __main__:   results_dir=results
+2026-04-02 10:17:05 [INFO] __main__: ============================================================
+2026-04-02 10:17:05 [INFO] __main__: Step 1: Skipping P4 compilation (--skip-compile)
+2026-04-02 10:17:05 [INFO] __main__: Step 2: Running experiment series (mock=False)...
+2026-04-02 10:17:05 [INFO] experiments.run_series: Starting experiment series: 10 runs [REAL]
+2026-04-02 10:17:05 [INFO] experiments.run_series: === Real Run 1 ===
+2026-04-02 10:17:05 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:17:06 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:17:06 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:17:06 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:17:06 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:17:06 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:17:06 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:17:07 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:17:07 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:17:07 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:17:07 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:17:07 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:17:08 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:17:08 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:17:08 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:17:08 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:17:08 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:17:08 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:17:08 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:17:10 [INFO] topo.namespace_topo:   s1: running (pid=3807, thrift=9090)
+2026-04-02 10:17:10 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:17:12 [INFO] topo.namespace_topo:   s2: running (pid=3821, thrift=9091)
+2026-04-02 10:17:15 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:17:16 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:17:16 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:17:16 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:17:18 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:17:20 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:17:22 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:17:22 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_01/topo_config.json
+2026-04-02 10:17:28 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:17:28 [INFO] experiments.run_series: Run 1 in progress (120s)...
+2026-04-02 10:17:58 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:17:58 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:18:58 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:19:28 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:19:28 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:19:29 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:19:29 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:19:29 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:19:29 [INFO] experiments.run_series: === Run 1 complete (144.3s, 0 CSVs) ===
+2026-04-02 10:19:29 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:19:39 [INFO] experiments.run_series: === Real Run 2 ===
+2026-04-02 10:19:39 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:19:40 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:19:40 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:19:40 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:19:40 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:19:40 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:19:40 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:19:41 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:19:41 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:19:41 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:19:41 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:19:41 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:19:42 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:19:42 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:19:42 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:19:42 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:19:42 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:19:42 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:19:42 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:19:44 [INFO] topo.namespace_topo:   s1: running (pid=4153, thrift=9090)
+2026-04-02 10:19:44 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:19:46 [INFO] topo.namespace_topo:   s2: running (pid=4166, thrift=9091)
+2026-04-02 10:19:49 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:19:49 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:19:49 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:19:49 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:19:51 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:19:54 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:19:56 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:19:56 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_02/topo_config.json
+2026-04-02 10:20:01 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:20:01 [INFO] experiments.run_series: Run 2 in progress (120s)...
+2026-04-02 10:20:31 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:20:31 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:21:31 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:22:01 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:22:02 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:22:02 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:22:02 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:22:03 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:22:03 [INFO] experiments.run_series: === Run 2 complete (143.2s, 0 CSVs) ===
+2026-04-02 10:22:03 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:22:13 [INFO] experiments.run_series: === Real Run 3 ===
+2026-04-02 10:22:13 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:22:13 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:22:13 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:22:13 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:22:13 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:22:13 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:22:13 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:22:14 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:22:14 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:22:14 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:22:14 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:22:15 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:22:15 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:22:15 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:22:15 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:22:15 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:22:15 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:22:15 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:22:15 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:22:17 [INFO] topo.namespace_topo:   s1: running (pid=4478, thrift=9090)
+2026-04-02 10:22:17 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:22:19 [INFO] topo.namespace_topo:   s2: running (pid=4491, thrift=9091)
+2026-04-02 10:22:22 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:22:22 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:22:22 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:22:22 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:22:24 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:22:27 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:22:29 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:22:29 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_03/topo_config.json
+2026-04-02 10:22:34 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:22:34 [INFO] experiments.run_series: Run 3 in progress (120s)...
+2026-04-02 10:23:05 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:23:05 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:25:01 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:25:01 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:25:02 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:25:02 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:25:02 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:25:04 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:25:04 [INFO] experiments.run_series: === Run 3 complete (171.9s, 0 CSVs) ===
+2026-04-02 10:25:04 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:25:14 [INFO] experiments.run_series: === Real Run 4 ===
+2026-04-02 10:25:14 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:25:15 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:25:15 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:25:15 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:25:15 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:25:15 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:25:15 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:25:16 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:25:16 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:25:16 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:25:16 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:25:16 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:25:17 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:25:17 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:25:17 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:25:17 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:25:17 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:25:17 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:25:17 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:25:19 [INFO] topo.namespace_topo:   s1: running (pid=4845, thrift=9090)
+2026-04-02 10:25:19 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:25:21 [INFO] topo.namespace_topo:   s2: running (pid=4858, thrift=9091)
+2026-04-02 10:25:24 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:25:24 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:25:25 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:25:25 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:25:27 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:25:29 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:25:31 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:25:31 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_04/topo_config.json
+2026-04-02 10:25:37 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:25:37 [INFO] experiments.run_series: Run 4 in progress (120s)...
+2026-04-02 10:26:07 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:26:07 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:27:07 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:27:37 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:27:37 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:27:38 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:27:38 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:27:38 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:27:38 [INFO] experiments.run_series: === Run 4 complete (144.0s, 0 CSVs) ===
+2026-04-02 10:27:39 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:27:49 [INFO] experiments.run_series: === Real Run 5 ===
+2026-04-02 10:27:49 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:27:49 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:27:49 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:27:49 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:27:49 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:27:50 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:27:50 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:27:50 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:27:50 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:27:50 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:27:50 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:27:51 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:27:51 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:27:51 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:27:51 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:27:51 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:27:51 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:27:51 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:27:51 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:27:53 [INFO] topo.namespace_topo:   s1: running (pid=5248, thrift=9090)
+2026-04-02 10:27:53 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:27:55 [INFO] topo.namespace_topo:   s2: running (pid=5263, thrift=9091)
+2026-04-02 10:27:58 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:27:58 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:27:58 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:27:58 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:28:00 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:28:03 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:28:05 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:28:05 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_05/topo_config.json
+2026-04-02 10:28:10 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:28:10 [INFO] experiments.run_series: Run 5 in progress (120s)...
+2026-04-02 10:28:40 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:28:40 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:29:41 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:30:11 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:30:11 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:30:11 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:30:11 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:30:12 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:30:12 [INFO] experiments.run_series: === Run 5 complete (143.3s, 0 CSVs) ===
+2026-04-02 10:30:12 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:30:22 [INFO] experiments.run_series: === Real Run 6 ===
+2026-04-02 10:30:22 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:30:23 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:30:23 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:30:23 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:30:23 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:30:23 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:30:23 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:30:23 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:30:23 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:30:24 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:30:24 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:30:24 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:30:24 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:30:24 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:30:24 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:30:24 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:30:24 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:30:24 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:30:24 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:30:26 [INFO] topo.namespace_topo:   s1: running (pid=5572, thrift=9090)
+2026-04-02 10:30:26 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:30:28 [INFO] topo.namespace_topo:   s2: running (pid=5585, thrift=9091)
+2026-04-02 10:30:32 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:30:32 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:30:32 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:30:32 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:30:34 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:30:36 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:30:38 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:30:38 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_06/topo_config.json
+2026-04-02 10:30:44 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:30:44 [INFO] experiments.run_series: Run 6 in progress (120s)...
+2026-04-02 10:31:14 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:31:14 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:32:14 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:32:44 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:32:44 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:32:44 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:32:44 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:32:45 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:32:45 [INFO] experiments.run_series: === Run 6 complete (143.3s, 0 CSVs) ===
+2026-04-02 10:32:45 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:32:56 [INFO] experiments.run_series: === Real Run 7 ===
+2026-04-02 10:32:56 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:32:56 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:32:56 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:32:56 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:32:56 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:32:56 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:32:56 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:32:56 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:32:56 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:32:57 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:32:57 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:32:57 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:32:57 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:32:57 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:32:57 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:32:57 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:32:57 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:32:57 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:32:57 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:32:59 [INFO] topo.namespace_topo:   s1: running (pid=5900, thrift=9090)
+2026-04-02 10:32:59 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:33:01 [INFO] topo.namespace_topo:   s2: running (pid=5913, thrift=9091)
+2026-04-02 10:33:04 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:33:04 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:33:04 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:33:04 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:33:06 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:33:08 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:33:10 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:33:10 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_07/topo_config.json
+2026-04-02 10:33:16 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:33:16 [INFO] experiments.run_series: Run 7 in progress (120s)...
+2026-04-02 10:33:46 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:33:46 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:34:46 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:35:16 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:35:16 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:35:16 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:35:16 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:35:17 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:35:17 [INFO] experiments.run_series: === Run 7 complete (141.4s, 0 CSVs) ===
+2026-04-02 10:35:17 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:35:27 [INFO] experiments.run_series: === Real Run 8 ===
+2026-04-02 10:35:27 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:35:28 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:35:28 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:35:28 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:35:29 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:35:29 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:35:29 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:35:29 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:35:29 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:35:29 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:35:29 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:35:31 [INFO] topo.namespace_topo:   s1: running (pid=6219, thrift=9090)
+2026-04-02 10:35:31 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:35:33 [INFO] topo.namespace_topo:   s2: running (pid=6232, thrift=9091)
+2026-04-02 10:35:36 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:35:36 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:35:36 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:35:36 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:35:38 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:35:40 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:35:42 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:35:42 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_08/topo_config.json
+2026-04-02 10:35:48 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:35:48 [INFO] experiments.run_series: Run 8 in progress (120s)...
+2026-04-02 10:36:18 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:36:18 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:37:18 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:37:48 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:37:48 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:37:48 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:37:48 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:37:49 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:37:49 [INFO] experiments.run_series: === Run 8 complete (141.8s, 0 CSVs) ===
+2026-04-02 10:37:49 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:37:59 [INFO] experiments.run_series: === Real Run 9 ===
+2026-04-02 10:37:59 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:38:00 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:38:00 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:38:00 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:38:00 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:38:00 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:38:02 [INFO] topo.namespace_topo:   s1: running (pid=6534, thrift=9090)
+2026-04-02 10:38:02 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:38:04 [INFO] topo.namespace_topo:   s2: running (pid=6547, thrift=9091)
+2026-04-02 10:38:08 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:38:08 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:38:08 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:38:08 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:38:10 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:38:12 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:38:14 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:38:14 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_09/topo_config.json
+2026-04-02 10:38:20 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:38:20 [INFO] experiments.run_series: Run 9 in progress (120s)...
+2026-04-02 10:38:50 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:38:50 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:39:50 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:40:20 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:40:20 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:40:20 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:40:20 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:40:20 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:40:20 [INFO] experiments.run_series: === Run 9 complete (141.5s, 0 CSVs) ===
+2026-04-02 10:40:20 [INFO] experiments.run_series: Pausing 10s between runs...
+2026-04-02 10:40:30 [INFO] experiments.run_series: === Real Run 10 ===
+2026-04-02 10:40:30 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:40:31 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:40:31 [INFO] topo.namespace_topo: Building topology...
+2026-04-02 10:40:31 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-04-02 10:40:31 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-04-02 10:40:31 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-04-02 10:40:31 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-04-02 10:40:31 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-04-02 10:40:31 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-04-02 10:40:31 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-04-02 10:40:32 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-04-02 10:40:32 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-04-02 10:40:32 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:40:32 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:40:32 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+2026-04-02 10:40:32 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+2026-04-02 10:40:32 [INFO] topo.namespace_topo: Topology built successfully
+2026-04-02 10:40:32 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-04-02 10:40:32 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/bmv2-1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:40:34 [INFO] topo.namespace_topo:   s1: running (pid=6880, thrift=9090)
+2026-04-02 10:40:34 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/bmv2-2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-04-02 10:40:36 [INFO] topo.namespace_topo:   s2: running (pid=6893, thrift=9091)
+2026-04-02 10:40:39 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-04-02 10:40:39 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-04-02 10:40:39 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-04-02 10:40:39 [INFO] topo.namespace_topo: Verifying connectivity...
+2026-04-02 10:40:41 [INFO] topo.namespace_topo:   h1->h2 (same switch): OK
+2026-04-02 10:40:43 [INFO] topo.namespace_topo:   h1->h3 (cross switch): OK
+2026-04-02 10:40:45 [INFO] topo.namespace_topo:   h3->h1 (cross switch): OK
+2026-04-02 10:40:45 [INFO] topo.namespace_topo: Topology config: results/20260402_101705/run_10/topo_config.json
+2026-04-02 10:40:51 [INFO] traffic.ns_traffic: Started 4 normal TCP flows
+2026-04-02 10:40:51 [INFO] experiments.run_series: Run 10 in progress (120s)...
+2026-04-02 10:41:21 [INFO] experiments.run_series: ATTACK START
+2026-04-02 10:41:21 [INFO] traffic.ns_traffic: Attack: hping3 SYN flood 10.0.2.1:80 for 60s
+2026-04-02 10:42:21 [INFO] experiments.run_series: ATTACK END
+2026-04-02 10:42:51 [INFO] traffic.ns_traffic: All traffic stopped
+2026-04-02 10:42:51 [INFO] topo.namespace_topo:   s1 stopped
+2026-04-02 10:42:51 [INFO] topo.namespace_topo:   s2 stopped
+2026-04-02 10:42:51 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-04-02 10:42:52 [INFO] topo.namespace_topo: Teardown complete
+2026-04-02 10:42:52 [INFO] experiments.run_series: === Run 10 complete (141.6s, 0 CSVs) ===
+2026-04-02 10:42:52 [INFO] experiments.run_series: Series complete: 10/10 runs succeeded
+2026-04-02 10:42:52 [INFO] __main__: Step 3: Running scalability benchmark...
+2026-04-02 10:42:52 [INFO] experiments.run_series: Scalability experiment starting...
+2026-04-02 10:42:52 [INFO] experiments.run_series:   Testing 100 flows...
+2026-04-02 10:42:53 [INFO] experiments.run_series:   Testing 500 flows...
+2026-04-02 10:42:53 [INFO] experiments.run_series:   Testing 1000 flows...
+2026-04-02 10:42:54 [INFO] experiments.run_series:   Testing 2000 flows...
+2026-04-02 10:42:54 [INFO] experiments.run_series:   Testing 4096 flows...
+2026-04-02 10:42:54 [INFO] experiments.run_series: Scalability results: results/scalability.json
+2026-04-02 10:42:54 [INFO] __main__: Step 4: Running overhead benchmarks...
+2026-04-02 10:42:54 [INFO] analysis.overhead: Benchmarking register polling overhead...
+2026-04-02 10:42:54 [INFO] analysis.overhead: n_flows=100: mean=0.18ms p95=0.28ms
+2026-04-02 10:42:54 [INFO] analysis.overhead: n_flows=500: mean=0.80ms p95=1.03ms
+2026-04-02 10:42:54 [INFO] analysis.overhead: n_flows=1000: mean=1.43ms p95=1.59ms
+2026-04-02 10:42:55 [INFO] analysis.overhead: n_flows=2000: mean=2.88ms p95=3.05ms
+2026-04-02 10:42:55 [INFO] analysis.overhead: n_flows=4096: mean=5.86ms p95=5.95ms
+2026-04-02 10:42:55 [INFO] analysis.overhead: Benchmarking feature extraction overhead...
+2026-04-02 10:42:55 [INFO] analysis.overhead: Benchmarking model inference overhead...
+2026-04-02 10:42:56 [INFO] analysis.overhead: Overhead benchmark saved to results/overhead_benchmark.json
+2026-04-02 10:42:56 [INFO] analysis.overhead: Overhead breakdown saved to results/overhead_breakdown.png
+2026-04-02 10:42:56 [INFO] __main__: Step 5: Generating result graphs...
+2026-04-02 10:42:56 [WARNING] analysis.plots: No metrics CSVs found in results/20260402_101705. Generating synthetic data for demonstration.
+2026-04-02 10:42:56 [ERROR] analysis.plots: anomaly_scores plot failed: 'numpy.ndarray' object has no attribute 'iloc'
+2026-04-02 10:42:57 [INFO] analysis.plots: Saved: results/monitoring_levels.png
+2026-04-02 10:42:57 [INFO] analysis.plots: Saved: results/controller_cpu_usage.png
+2026-04-02 10:42:58 [INFO] analysis.plots: Saved: results/flow_distribution.png
+2026-04-02 10:42:58 [INFO] matplotlib.category: Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-04-02 10:42:58 [INFO] matplotlib.category: Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-04-02 10:42:58 [INFO] analysis.plots: Saved: results/scalability_curve.png
+2026-04-02 10:42:58 [INFO] analysis.plots: Saved: results/entropy_distribution.png
+2026-04-02 10:42:58 [INFO] __main__:   Generated: results/monitoring_levels.png
+2026-04-02 10:42:58 [INFO] __main__:   Generated: results/controller_cpu_usage.png
+2026-04-02 10:42:58 [INFO] __main__:   Generated: results/flow_distribution.png
+2026-04-02 10:42:58 [INFO] __main__:   Generated: results/scalability_curve.png
+2026-04-02 10:42:58 [INFO] __main__:   Generated: results/entropy_distribution.png
+2026-04-02 10:42:58 [INFO] __main__: Step 6: Generating report...
+2026-04-02 10:42:59 [ERROR] __main__: Report generation failed: Can only use .dt accessor with datetimelike values
+2026-04-02 10:42:59 [INFO] __main__: ============================================================
+2026-04-02 10:42:59 [INFO] __main__: Experiment complete. Results at: results
+2026-04-02 10:42:59 [INFO] __main__: ============================================================
+2026-04-02 10:42:59 [INFO] __main__: Generated files:
+2026-04-02 10:42:59 [INFO] __main__:   .gitkeep (0 bytes)
+2026-04-02 10:42:59 [INFO] __main__:   controller_cpu_usage.png (147,069 bytes)
+2026-04-02 10:42:59 [INFO] __main__:   entropy_distribution.png (64,521 bytes)
+2026-04-02 10:42:59 [INFO] __main__:   flow_distribution.png (270,479 bytes)
+2026-04-02 10:42:59 [INFO] __main__:   monitoring_levels.png (70,185 bytes)
+2026-04-02 10:42:59 [INFO] __main__:   overhead_benchmark.json (2,195 bytes)
+2026-04-02 10:42:59 [INFO] __main__:   overhead_breakdown.png (39,913 bytes)
+2026-04-02 10:42:59 [INFO] __main__:   scalability.json (840 bytes)
+2026-04-02 10:42:59 [INFO] __main__:   scalability_curve.png (99,689 bytes)
