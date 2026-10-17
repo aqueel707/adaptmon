@@ -167,6 +167,14 @@ def main():
     logger.info("Installing base forwarding rules...")
     controller.install_forwarding(forwarding_rules)
 
+    # Clone session 100 -> CPU port (mirroring_add 100 255) on every switch
+    mirroring = controller.dpm.install_mirroring_all()
+    for sid, ok in mirroring.items():
+        if ok:
+            logger.info(f"S{sid}: mirroring session 100 -> CPU port 255 configured")
+        else:
+            logger.error(f"S{sid}: mirroring session 100 could not be configured")
+
     # Start monitoring
     controller.start()
 

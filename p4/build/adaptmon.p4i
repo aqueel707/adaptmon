@@ -894,6 +894,16 @@ package V1Switch<H, M>(Parser<H, M> p,
 
 
 
+/* Per-flow monitoring levels (flow_level register, written by the controller) */
+
+
+
+
+
+/* v1model standard_metadata.instance_type values */
+
+
+
 /* ========== HEADERS ========== */
 typedef bit<48> MacAddr;
 typedef bit<32> IPv4Addr;
@@ -941,8 +951,10 @@ header udp_t {
     bit<16> checksum;
 }
 
+/* Prepended to cloned copies only (14 bytes); never on forwarded packets */
 header cpu_header_t {
     bit<32> flow_index;
+    bit<8> flow_level;
     bit<32> pkt_count;
     bit<32> byte_count;
     bit<8> reason;
@@ -956,13 +968,15 @@ struct headers_t {
     cpu_header_t cpu_hdr;
 }
 
-@field_list(0)
 struct metadata_t {
-    bit<12> flow_index;
-    bit<1> do_clone;
+    /* Fields tagged CLONE_FIELDS are copied into the E2E clone */
+    @field_list(1) bit<32> flow_index;
+    @field_list(1) bit<2> flow_level;
+    @field_list(1) bit<32> pkt_count_val;
+    @field_list(1) bit<32> byte_count_val;
     bit<1> do_drop;
-    bit<32> pkt_count_val;
-    bit<32> byte_count_val;
+    bit<16> l4_sport;
+    bit<16> l4_dport;
 }
 
 /* ========== REGISTERS ========== */
@@ -974,6 +988,9 @@ register<bit<16>>(4096) flow_src_port;
 register<bit<16>>(4096) flow_dst_port;
 register<bit<8>>(4096) flow_protocol;
 register<bit<1>>(4096) flow_active;
+register<bit<48>>(4096) flow_first_ts; /* ingress_global_timestamp, us */
+register<bit<48>>(4096) flow_last_ts;
+register<bit<2>>(4096) flow_level; /* controller-written (Thrift) */
 
 /* ========== PARSER ========== */
 parser AdaptMonParser(
@@ -1062,10 +1079,6 @@ control AdaptMonIngress(
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
-    action do_clone_to_cpu() {
-        meta.do_clone = 1;
-    }
-
     action do_drop_flow() {
         meta.do_drop = 1;
     }
@@ -1087,40 +1100,32 @@ control AdaptMonIngress(
         default_action = drop_pkt();
     }
 
+    /* Per-flow (5-tuple) drop rules installed at DROP level */
     table drop_table {
         key = {
-            hdr.ipv4.srcAddr: exact;
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.srcAddr : exact;
+            hdr.ipv4.dstAddr : exact;
             hdr.ipv4.protocol: exact;
+            meta.l4_sport : exact;
+            meta.l4_dport : exact;
         }
         actions = {
             do_drop_flow;
             nop;
         }
-        size = 512;
-        default_action = nop();
-    }
-
-    table clone_table {
-        key = {
-            hdr.ipv4.srcAddr: exact;
-            hdr.ipv4.dstAddr: exact;
-        }
-        actions = {
-            do_clone_to_cpu;
-            nop;
-        }
-        size = 512;
+        size = 4096;
         default_action = nop();
     }
 
     /* ---- apply ---- */
     apply {
-        meta.do_clone = 0;
         meta.do_drop = 0;
+        meta.flow_level = 0;
 
-        // Pass ARP packets through by flooding to all ports
-        if (hdr.ethernet.etherType == 0x0806) {
+        if (std_meta.ingress_port == 255) {
+            /* Nothing is injected from the CPU port */
+            mark_to_drop(std_meta);
+        } else if (hdr.ethernet.etherType == 0x0806) {
             // ARP: send out all ports except ingress
             // Simple approach: use multicast or just forward based on ingress
             if (std_meta.ingress_port == 1) {
@@ -1135,65 +1140,67 @@ control AdaptMonIngress(
         } else if (hdr.ipv4.isValid()) {
 
             /* Compute flow hash index using 5-tuple */
-            bit<16> src_port = 0;
-            bit<16> dst_port = 0;
+            meta.l4_sport = 0;
+            meta.l4_dport = 0;
 
             if (hdr.tcp.isValid()) {
-                src_port = hdr.tcp.srcPort;
-                dst_port = hdr.tcp.dstPort;
+                meta.l4_sport = hdr.tcp.srcPort;
+                meta.l4_dport = hdr.tcp.dstPort;
             } else if (hdr.udp.isValid()) {
-                src_port = hdr.udp.srcPort;
-                dst_port = hdr.udp.dstPort;
+                meta.l4_sport = hdr.udp.srcPort;
+                meta.l4_dport = hdr.udp.dstPort;
             }
 
+            /* index = crc32(5-tuple) mod MAX_FLOWS, so all slots are usable */
             hash(
                 meta.flow_index,
                 HashAlgorithm.crc32,
-                (bit<1>)0,
+                (bit<32>)0,
                 {
                     hdr.ipv4.srcAddr,
                     hdr.ipv4.dstAddr,
                     hdr.ipv4.protocol,
-                    src_port,
-                    dst_port
+                    meta.l4_sport,
+                    meta.l4_dport
                 },
-                (bit<12>)(4096 - 1)
+                (bit<32>)4096
             );
 
             /* Update counters */
             bit<32> pkt_val;
             bit<32> byte_val;
+            bit<48> now = std_meta.ingress_global_timestamp;
 
-            pkt_counter.read(pkt_val, (bit<32>)meta.flow_index);
+            pkt_counter.read(pkt_val, meta.flow_index);
+            if (pkt_val == 0) {
+                /* Empty slot (new or aged-out by the controller) */
+                flow_first_ts.write(meta.flow_index, now);
+            }
             pkt_val = pkt_val + 1;
-            pkt_counter.write((bit<32>)meta.flow_index, pkt_val);
+            pkt_counter.write(meta.flow_index, pkt_val);
             meta.pkt_count_val = pkt_val;
 
-            byte_counter.read(byte_val, (bit<32>)meta.flow_index);
+            byte_counter.read(byte_val, meta.flow_index);
             byte_val = byte_val + (bit<32>)std_meta.packet_length;
-            byte_counter.write((bit<32>)meta.flow_index, byte_val);
+            byte_counter.write(meta.flow_index, byte_val);
             meta.byte_count_val = byte_val;
+            flow_last_ts.write(meta.flow_index, now);
 
             /* Store flow 5-tuple info */
-            flow_src_ip.write((bit<32>)meta.flow_index, hdr.ipv4.srcAddr);
-            flow_dst_ip.write((bit<32>)meta.flow_index, hdr.ipv4.dstAddr);
-            flow_protocol.write((bit<32>)meta.flow_index, hdr.ipv4.protocol);
-            flow_src_port.write((bit<32>)meta.flow_index, src_port);
-            flow_dst_port.write((bit<32>)meta.flow_index, dst_port);
-            flow_active.write((bit<32>)meta.flow_index, 1);
+            flow_src_ip.write(meta.flow_index, hdr.ipv4.srcAddr);
+            flow_dst_ip.write(meta.flow_index, hdr.ipv4.dstAddr);
+            flow_protocol.write(meta.flow_index, hdr.ipv4.protocol);
+            flow_src_port.write(meta.flow_index, meta.l4_sport);
+            flow_dst_port.write(meta.flow_index, meta.l4_dport);
+            flow_active.write(meta.flow_index, 1);
 
-            /* Check drop table */
+            /* Monitoring level set by the controller for this flow */
+            flow_level.read(meta.flow_level, meta.flow_index);
+
+            /* A DROP flow is still forwarded to egress, so its clone is made
+             * there; egress then discards the original */
             drop_table.apply();
-
-            if (meta.do_drop == 1) {
-                mark_to_drop(std_meta);
-            } else {
-                /* Check clone table */
-                clone_table.apply();
-
-                /* Forward */
-                ipv4_forward.apply();
-            }
+            ipv4_forward.apply();
         } // end ipv4.isValid
     } // end apply
 }
@@ -1204,16 +1211,36 @@ control AdaptMonEgress(
     inout metadata_t meta,
     inout standard_metadata_t std_meta)
 {
+    /* Index 0 only: data-plane totals for the inspection-reduction metric */
+    counter(1, CounterType.packets) fwd_counter; /* originals sent out    */
+    counter(1, CounterType.packets) clone_counter; /* copies sent to CPU    */
+    counter(1, CounterType.packets) drop_counter; /* originals dropped     */
+
     apply {
-        /* Clone packet to CPU if requested */
-        if (meta.do_clone == 1) {
-            /* Prepend CPU header */
+        if (std_meta.instance_type == 2) {
+            /* The cloned copy: prepend the CPU header from the preserved
+             * field list. Only clones ever carry cpu_hdr. */
             hdr.cpu_hdr.setValid();
-            hdr.cpu_hdr.flow_index = (bit<32>)meta.flow_index;
+            hdr.cpu_hdr.flow_index = meta.flow_index;
+            hdr.cpu_hdr.flow_level = (bit<8>)meta.flow_level;
             hdr.cpu_hdr.pkt_count = meta.pkt_count_val;
             hdr.cpu_hdr.byte_count = meta.byte_count_val;
             hdr.cpu_hdr.reason = 1;
-            clone_preserving_field_list(CloneType.E2E, (bit<32>)100, 0);
+            clone_counter.count(0);
+        } else if (std_meta.instance_type == 0
+                   && hdr.ipv4.isValid()) {
+            /* The original: clone it if the flow is at CLONE or above,
+             * then forward it unchanged (or drop it at DROP) */
+            if (meta.flow_level >= 2) {
+                clone_preserving_field_list(
+                    CloneType.E2E, (bit<32>)100, 1);
+            }
+            if (meta.do_drop == 1) {
+                mark_to_drop(std_meta);
+                drop_counter.count(0);
+            } else {
+                fwd_counter.count(0);
+            }
         }
     }
 }

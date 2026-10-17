@@ -31,6 +31,22 @@ def ip_str_to_int(ip_str: str) -> int:
         return 0
 
 
+def flow_slot(src_ip: str, dst_ip: str, protocol: int,
+              sport: int, dport: int, n_slots: int = 4096) -> int:
+    """
+    Register slot the P4 program assigns to a 5-tuple: bmv2's crc32 (the
+    standard reflected CRC-32, as zlib) over the byte-packed hash fields
+    {srcAddr, dstAddr, protocol, l4_sport, l4_dport}, modulo MAX_FLOWS.
+    """
+    import zlib
+    import struct
+    data = struct.pack(
+        "!IIBHH", ip_str_to_int(src_ip), ip_str_to_int(dst_ip),
+        protocol, sport, dport,
+    )
+    return zlib.crc32(data) % n_slots
+
+
 def flow_key(src_ip: str, dst_ip: str, protocol: int) -> str:
     """Create a canonical string key for a flow."""
     return f"{src_ip}:{dst_ip}:{protocol}"

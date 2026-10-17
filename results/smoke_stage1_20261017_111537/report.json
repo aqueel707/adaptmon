@@ -1,0 +1,179 @@
+{
+  "out_dir": "/home/adaptmon/Desktop/adaptmon_v12/adaptmon/results/smoke_stage1_20261017_111537",
+  "checks": {
+    "mirroring_session_100_port_255": {
+      "pass": true,
+      "mirroring_get": {
+        "1": "MirroringSessionConfig(port=255, mgid=None)",
+        "2": "MirroringSessionConfig(port=255, mgid=None)"
+      }
+    },
+    "flow_slot_matches_bmv2_crc32": {
+      "pass": true,
+      "predicted": {
+        "L0_normal": 1608,
+        "L1_monitor": 3305,
+        "L2_clone": 778,
+        "L3_drop": 2475,
+        "X2_clone_2hop": 198
+      },
+      "observed": {
+        "L0_normal": [
+          1608
+        ],
+        "L1_monitor": [
+          3305
+        ],
+        "L2_clone": [
+          778
+        ],
+        "L3_drop": [
+          2475
+        ],
+        "X2_clone_2hop": [
+          198
+        ]
+      }
+    },
+    "flow_level_written": {
+      "pass": true,
+      "levels": {
+        "L0_normal": 0,
+        "L1_monitor": 1,
+        "L2_clone": 2,
+        "L3_drop": 3,
+        "X2_clone_2hop": 2
+      },
+      "drop_rule_handle": 0
+    },
+    "capture_h1_matches_sent": {
+      "pass": true,
+      "counts": {
+        "L0_normal": 30,
+        "L1_monitor": 30,
+        "L2_clone": 30,
+        "L3_drop": 30,
+        "X2_clone_2hop": 30
+      }
+    },
+    "originals_byte_identical_l2_path": {
+      "pass": true,
+      "per_flow": {
+        "L0_normal": true,
+        "L1_monitor": true,
+        "L2_clone": true
+      },
+      "packets_compared": 90,
+      "non_udp_or_foreign_packets_at_h2": 0
+    },
+    "originals_identical_after_l3_rewrite_2hop": {
+      "pass": true,
+      "packets_compared": 30,
+      "lengths_equal": true,
+      "rewrite_applied": "ttl-=2, ipv4 checksum recomputed; dst MAC unchanged (forward_l3 sets the same host MAC h1 already used)"
+    },
+    "drop_flow_not_delivered": {
+      "pass": true,
+      "delivered": 0
+    },
+    "clones_only_for_level_ge_clone_s1": {
+      "n_clones": 90,
+      "per_flow": {
+        "L0_normal": {
+          "clones": 0
+        },
+        "L1_monitor": {
+          "clones": 0
+        },
+        "L2_clone": {
+          "clones": 30,
+          "hdr_fields_ok": true,
+          "pkt_count_seq": "2..31",
+          "pkt_count_consecutive": true,
+          "frames_equal_forwarded_original": true
+        },
+        "L3_drop": {
+          "clones": 30,
+          "hdr_fields_ok": true,
+          "pkt_count_seq": "2..31",
+          "pkt_count_consecutive": true,
+          "frames_equal_forwarded_original": true
+        },
+        "X2_clone_2hop": {
+          "clones": 30,
+          "hdr_fields_ok": true,
+          "pkt_count_seq": "2..31",
+          "pkt_count_consecutive": true,
+          "frames_equal_forwarded_original": true
+        }
+      },
+      "pass": true
+    },
+    "no_clones_s2_all_levels_normal": {
+      "pass": true,
+      "n_clones": 0
+    },
+    "dataplane_counters_exact": {
+      "pass": true,
+      "s1": {
+        "forwarded": 120,
+        "cloned": 90,
+        "dropped": 30
+      },
+      "s1_expected": {
+        "forwarded": 120,
+        "cloned": 90,
+        "dropped": 30
+      },
+      "s2": {
+        "forwarded": 30,
+        "cloned": 0,
+        "dropped": 0
+      },
+      "s2_expected": {
+        "forwarded": 30,
+        "cloned": 0,
+        "dropped": 0
+      }
+    },
+    "deescalation_removes_clone_and_drop": {
+      "pass": true,
+      "clones_after": 0,
+      "delivered_after": 20,
+      "drop_rules_left": 0
+    }
+  },
+  "capture_stats": {
+    "h1_out": {
+      "iface": "am_h1",
+      "dir": "out",
+      "captured": 150,
+      "kernel_drops": 0
+    },
+    "h2_in": {
+      "iface": "am_h2",
+      "dir": "in",
+      "captured": 90,
+      "kernel_drops": 0
+    },
+    "h3_in": {
+      "iface": "am_h3",
+      "dir": "in",
+      "captured": 30,
+      "kernel_drops": 0
+    },
+    "s1_cpu": {
+      "iface": "am_s1dpi",
+      "dir": "in",
+      "captured": 90,
+      "kernel_drops": 0
+    },
+    "s2_cpu": {
+      "iface": "am_s2dpi",
+      "dir": "in",
+      "captured": 0,
+      "kernel_drops": 0
+    }
+  },
+  "all_pass": true
+}

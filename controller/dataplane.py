@@ -2,260 +2,251 @@
 controller/dataplane.py
 Abstraction layer for BMv2 simple_switch_CLI interactions.
 Handles register reads, table entry installation, and switch management.
+
+Control channel: every command is a simple_switch_CLI command
+(register_read / register_write / table_add / table_delete / mirroring_add /
+counter_read) sent over bmv2's Thrift runtime API, NOT P4Runtime. By default
+the commands run through simple_switch_CLI's own command interpreter
+(sswitch_CLI.SimpleSwitchAPI) loaded in-process, which keeps one Thrift
+connection open per switch instead of spawning a CLI process per call.
+ADAPTMON_CLI=subprocess pipes them into a simple_switch_CLI process instead.
 """
 
-import subprocess
+import contextlib
+import io
+import os
 import re
+import subprocess
+import sys
+import threading
 import time
 import logging
-import threading
-import os
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
 MAX_FLOWS = 4096
+CPU_PORT = 255
+CLONE_SESSION = 100
 
 # Per-slot flow state written by the P4 ingress for every IPv4 packet
 FLOW_REGISTERS = [
     "pkt_counter", "byte_counter",
     "flow_src_ip", "flow_dst_ip", "flow_src_port", "flow_dst_port",
-    "flow_protocol", "flow_active",
+    "flow_protocol", "flow_first_ts", "flow_last_ts", "flow_level",
 ]
-# Cleared per slot on expiry. The 5-tuple registers are left alone: the
-# next packet hashing to the slot overwrites them, and each register_write
-# costs ~0.5 ms through simple_switch_CLI.
-SLOT_CLEAR_REGISTERS = ["pkt_counter", "byte_counter", "flow_active"]
+# Zeroed per slot on expiry. pkt_counter == 0 makes the next packet that
+# hashes to the slot restart flow_first_ts; the 5-tuple registers are
+# overwritten by that packet. flow_level is reset so a new flow does not
+# inherit the old one's level.
+SLOT_CLEAR_REGISTERS = ["pkt_counter", "byte_counter", "flow_active", "flow_level"]
+DP_COUNTERS = {
+    "forwarded": "AdaptMonEgress.fwd_counter",
+    "cloned"   : "AdaptMonEgress.clone_counter",
+    "dropped"  : "AdaptMonEgress.drop_counter",
+}
 THRIFT_BASE_PORT = 9090
+
+# simple_switch_CLI's Python modules (installed by bmv2 next to the wrapper)
+CLI_LIB_DIRS = [
+    os.environ.get("BMV2_CLI_LIB", ""),
+    "/usr/local/lib/python3.10/site-packages",
+    "/usr/lib/python3/dist-packages",
+]
+
+
+def _import_cli_modules():
+    for d in CLI_LIB_DIRS:
+        if d and os.path.isdir(d) and d not in sys.path:
+            sys.path.append(d)
+    import runtime_CLI   # noqa: E402
+    import sswitch_CLI   # noqa: E402
+    return runtime_CLI, sswitch_CLI
 
 
 class SwitchInterface:
     """
-    Interface to a single BMv2 simple_switch instance via simple_switch_CLI.
+    Interface to a single BMv2 simple_switch instance via simple_switch_CLI
+    commands (Thrift).
     """
 
-    def __init__(self, switch_id: int, thrift_port: int):
+    def __init__(self, switch_id: int, thrift_port: int,
+                 thrift_ip: str = "127.0.0.1"):
         self.switch_id   = switch_id
         self.thrift_port = thrift_port
+        self.thrift_ip   = thrift_ip
         self._lock       = threading.Lock()
-        self._cli_path   = self._find_cli()
+        self._mode       = os.environ.get("ADAPTMON_CLI", "inprocess")
+        self._api        = None
+        self._cli_path   = "simple_switch_CLI"
 
-    def _find_cli(self) -> str:
-        candidates = [
-            "simple_switch_CLI",
-            "/usr/local/bin/simple_switch_CLI",
-            "/usr/bin/simple_switch_CLI",
-        ]
-        for c in candidates:
-            try:
-                result = subprocess.run(
-                    [c, "--help"],
-                    capture_output=True, timeout=5
+    # ------------------------------------------------------------------
+    # Command transport
+    # ------------------------------------------------------------------
+    def _connect(self) -> bool:
+        runtime_CLI, sswitch_CLI = _import_cli_modules()
+        pre = runtime_CLI.PreType.SimplePreLAG
+        services = runtime_CLI.RuntimeAPI.get_thrift_services(pre)
+        services.extend(sswitch_CLI.SimpleSwitchAPI.get_thrift_services())
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+                std, mc, ss = runtime_CLI.thrift_connect(
+                    self.thrift_ip, self.thrift_port, services
                 )
-                return c
-            except (FileNotFoundError, subprocess.TimeoutExpired):
-                continue
-        return "simple_switch_CLI"
+                # Fetches the P4 JSON from the switch (both switches run the
+                # same program, so runtime_CLI's module-level tables agree)
+                runtime_CLI.load_json_config(std, None)
+        except (SystemExit, Exception) as e:
+            logger.debug(f"S{self.switch_id} thrift connect failed: {e!r} {buf.getvalue()[-200:]}")
+            return False
+        self._api = sswitch_CLI.SimpleSwitchAPI(pre, std, mc, ss)
+        return True
 
     def _cli(self, commands: str, timeout: int = 15) -> str:
-        """Send commands to simple_switch_CLI and return output."""
+        """Run newline-separated simple_switch_CLI commands; return output."""
         with self._lock:
-            try:
-                proc = subprocess.run(
-                    [self._cli_path,
-                     "--thrift-port", str(self.thrift_port)],
-                    input=commands,
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout
-                )
-                return proc.stdout + proc.stderr
-            except subprocess.TimeoutExpired:
-                logger.warning(
-                    f"CLI timeout on switch {self.switch_id} "
-                    f"port {self.thrift_port}"
-                )
-                return ""
-            except Exception as e:
-                logger.error(f"CLI error: {e}")
-                return ""
+            if self._mode == "subprocess":
+                return self._cli_subprocess(commands, timeout)
+            if self._api is None and not self._connect():
+                return "Could not connect to thrift client"
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                for line in commands.splitlines():
+                    if line.strip():
+                        try:
+                            self._api.onecmd(line)
+                        except Exception as e:
+                            # Connection lost (switch restarted): reconnect
+                            # on the next call
+                            print(f"Error: {e!r}")
+                            self._api = None
+                            break
+            return buf.getvalue()
 
+    def _cli_subprocess(self, commands: str, timeout: int) -> str:
+        try:
+            proc = subprocess.run(
+                [self._cli_path, "--thrift-port", str(self.thrift_port)],
+                input=commands, capture_output=True, text=True, timeout=timeout
+            )
+            return proc.stdout + proc.stderr
+        except subprocess.TimeoutExpired:
+            logger.warning(f"CLI timeout on switch {self.switch_id}")
+            return ""
+
+    # ------------------------------------------------------------------
+    # Registers
+    # ------------------------------------------------------------------
     def read_register(self, reg_name: str, index: int) -> Optional[int]:
         """Read a single register cell."""
-        cmd = f"register_read {reg_name} {index}\n"
-        out = self._cli(cmd)
-        # Parse: "AdaptMonIngress.pkt_counter[42]= 17"
-        pattern = rf"{reg_name}\[{index}\]\s*=\s*(\d+)"
-        m = re.search(pattern, out)
-        if m:
-            return int(m.group(1))
-        # Fallback: last number
-        nums = re.findall(r"\d+", out.split("=")[-1]) if "=" in out else []
-        if nums:
-            return int(nums[-1])
-        return None
+        out = self._cli(f"register_read {reg_name} {index}\n")
+        # Parse: "pkt_counter[42]= 17"
+        m = re.search(rf"{reg_name}\[{index}\]\s*=\s*(\d+)", out)
+        return int(m.group(1)) if m else None
 
-    def read_register_range(
-        self,
-        reg_name: str,
-        start: int,
-        end: int
-    ) -> Dict[int, int]:
-        """Read a range of register cells efficiently."""
-        return self.read_registers([reg_name], start, end)[reg_name]
-
-    def read_registers(
-        self,
-        reg_names: List[str],
-        start: int,
-        end: int
-    ) -> Dict[str, Dict[int, int]]:
+    def read_registers(self, reg_names: List[str]) -> Dict[str, List[int]]:
         """
-        Read several whole register arrays in a single CLI invocation.
-        `register_read <name>` without an index dumps the entire array
-        ("pkt_counter= 0, 3, ..."), which is far cheaper than one
-        subprocess per batch of indexed reads.
+        Read whole register arrays (`register_read <name>` without an index
+        dumps the array: "pkt_counter= 0, 3, ...").
+        Missing/unparsable arrays come back empty.
         """
         cmds = "".join(f"register_read {r}\n" for r in reg_names)
         out = self._cli(cmds, timeout=30)
         results = {}
         for reg_name in reg_names:
             m = re.search(rf"{reg_name}\s*=\s*([\d,\s]*\d)", out)
-            values = [int(v) for v in m.group(1).split(",")] if m else []
-            results[reg_name] = {
-                i: (values[i] if i < len(values) else 0)
-                for i in range(start, end)
-            }
+            results[reg_name] = [int(v) for v in m.group(1).split(",")] if m else []
         return results
 
-    def read_all_pkt_counters(self) -> Dict[int, int]:
-        return self.read_register_range("pkt_counter", 0, MAX_FLOWS)
+    def write_registers(self, writes: List[Tuple[str, int, int]]) -> str:
+        """Batch of (register, index, value) writes in one call."""
+        if not writes:
+            return ""
+        cmds = "".join(f"register_write {r} {i} {v}\n" for r, i, v in writes)
+        return self._cli(cmds, timeout=60)
 
-    def read_all_byte_counters(self) -> Dict[int, int]:
-        return self.read_register_range("byte_counter", 0, MAX_FLOWS)
-
-    def read_flow_active(self) -> Dict[int, int]:
-        return self.read_register_range("flow_active", 0, MAX_FLOWS)
-
-    def read_flow_src_ip(self, index: int) -> Optional[int]:
-        return self.read_register("flow_src_ip", index)
-
-    def read_flow_dst_ip(self, index: int) -> Optional[int]:
-        return self.read_register("flow_dst_ip", index)
-
-    def read_flow_protocol(self, index: int) -> Optional[int]:
-        return self.read_register("flow_protocol", index)
-
-    def reset_register(self, reg_name: str, index: int) -> None:
-        cmd = f"register_write {reg_name} {index} 0\n"
-        self._cli(cmd)
+    def write_flow_levels(self, levels: Dict[int, int]) -> None:
+        """flow_level[idx] = level for each slot (register_write, Thrift)."""
+        self.write_registers([("flow_level", i, v) for i, v in levels.items()])
 
     def clear_flow_entries(self, indices: List[int]) -> None:
-        """Zero the counters and active bit at the given slots
-        (one CLI call)."""
-        if not indices:
-            return
-        cmds = "".join(
-            f"register_write {reg} {i} 0\n"
-            for i in indices for reg in SLOT_CLEAR_REGISTERS
-        )
-        self._cli(cmds, timeout=60)
+        """Zero the counters, active bit and level at the given slots."""
+        self.write_registers([
+            (reg, i, 0) for i in indices for reg in SLOT_CLEAR_REGISTERS
+        ])
 
     def reset_flow_registers(self) -> None:
-        """Zero every slot of every flow register (one CLI call)."""
-        cmds = "".join(f"register_reset {reg}\n" for reg in FLOW_REGISTERS)
-        self._cli(cmds)
+        """Zero every slot of every flow register (one call)."""
+        self._cli("".join(f"register_reset {reg}\n" for reg in FLOW_REGISTERS))
 
-    def reset_all_counters(self) -> None:
-        for reg in ["pkt_counter", "byte_counter"]:
-            cmd = f"register_reset {reg}\n"
-            self._cli(cmd)
+    # ------------------------------------------------------------------
+    # Counters
+    # ------------------------------------------------------------------
+    def read_dp_counters(self) -> Dict[str, int]:
+        """Global forwarded / cloned / dropped packet counters."""
+        cmds = "".join(f"counter_read {c} 0\n" for c in DP_COUNTERS.values())
+        out = self._cli(cmds)
+        res = {}
+        for key, cname in DP_COUNTERS.items():
+            # "AdaptMonEgress.fwd_counter[0]= (1234 bytes, 17 packets)"
+            m = re.search(rf"{re.escape(cname)}\[0\]=\s*\(\d+ bytes, (\d+) packets\)", out)
+            res[key] = int(m.group(1)) if m else -1
+        return res
 
-    def add_drop_rule(
-        self,
-        src_ip: str,
-        dst_ip: str,
-        protocol: int
-    ) -> bool:
-        """Install a drop rule in the drop_table."""
-        cmd = (
-            f"table_add AdaptMonIngress.drop_table "
-            f"AdaptMonIngress.do_drop_flow "
-            f"{src_ip} {dst_ip} {protocol} => \n"
+    def reset_dp_counters(self) -> None:
+        self._cli("".join(f"counter_reset {c}\n" for c in DP_COUNTERS.values()))
+
+    # ------------------------------------------------------------------
+    # Tables
+    # ------------------------------------------------------------------
+    def add_drop_rule(self, src_ip: str, dst_ip: str, protocol: int,
+                      sport: int, dport: int) -> Optional[int]:
+        """Install a 5-tuple drop rule; return its entry handle."""
+        out = self._cli(
+            f"table_add AdaptMonIngress.drop_table AdaptMonIngress.do_drop_flow "
+            f"{src_ip} {dst_ip} {protocol} {sport} {dport} => \n"
         )
-        out = self._cli(cmd)
-        return "Entry has been added" in out or "handle" in out.lower()
+        m = re.search(r"added with handle (\d+)", out)
+        if not m:
+            logger.warning(f"S{self.switch_id} drop rule not added: {out.strip()[-200:]}")
+        return int(m.group(1)) if m else None
 
-    def delete_drop_rule(
-        self,
-        src_ip: str,
-        dst_ip: str,
-        protocol: int
-    ) -> bool:
-        """Delete a drop rule."""
-        # First find the handle
-        cmd = "table_dump AdaptMonIngress.drop_table\n"
-        out = self._cli(cmd)
-        # Look for handle matching this entry
-        pattern = (
-            rf"Dumping entry.*?handle\s+(\d+).*?"
-            rf"{re.escape(src_ip)}.*?"
-            rf"{re.escape(dst_ip)}"
-        )
-        m = re.search(pattern, out, re.DOTALL)
-        if m:
-            handle = m.group(1)
-            del_cmd = (
-                f"table_delete AdaptMonIngress.drop_table {handle}\n"
-            )
-            del_out = self._cli(del_cmd)
-            return "Deleted" in del_out or "deleted" in del_out
-        return False
+    def delete_drop_rule(self, handle: int) -> bool:
+        out = self._cli(f"table_delete AdaptMonIngress.drop_table {handle}\n")
+        return "Error" not in out and "Invalid" not in out
 
-    def add_clone_rule(self, src_ip: str, dst_ip: str) -> bool:
-        """Install a clone rule in clone_table."""
-        cmd = (
-            f"table_add AdaptMonIngress.clone_table "
-            f"AdaptMonIngress.do_clone_to_cpu "
-            f"{src_ip} {dst_ip} => \n"
-        )
-        out = self._cli(cmd)
-        return "Entry has been added" in out or "handle" in out.lower()
+    def count_drop_rules(self) -> int:
+        out = self._cli("table_num_entries AdaptMonIngress.drop_table\n")
+        m = re.search(r"(\d+)\s*$", out.strip())
+        return int(m.group(1)) if m else -1
 
     def add_forward_rule(self, dst_ip: str, port: int) -> bool:
         """Install an IPv4 LPM forwarding rule."""
-        cmd = (
-            f"table_add AdaptMonIngress.ipv4_forward "
-            f"AdaptMonIngress.forward_l2 "
+        out = self._cli(
+            f"table_add AdaptMonIngress.ipv4_forward AdaptMonIngress.forward_l2 "
             f"{dst_ip}/32 => {port}\n"
         )
-        out = self._cli(cmd)
-        return "Entry has been added" in out or "handle" in out.lower()
+        return "added with handle" in out
 
-    def add_default_forward(self, port: int) -> bool:
-        cmd = (
-            f"table_set_default AdaptMonIngress.ipv4_forward "
-            f"AdaptMonIngress.forward_l2 {port}\n"
-        )
-        out = self._cli(cmd)
-        return True
+    def run_commands(self, commands: List[str]) -> str:
+        return self._cli("\n".join(commands) + "\n")
 
-    def set_mirroring_session(
-        self,
-        session_id: int,
-        egress_port: int
-    ) -> bool:
-        cmd = (
-            f"mirroring_add {session_id} {egress_port}\n"
-        )
-        out = self._cli(cmd)
-        return True
+    # ------------------------------------------------------------------
+    # Mirroring
+    # ------------------------------------------------------------------
+    def set_mirroring_session(self, session_id: int, egress_port: int) -> bool:
+        """mirroring_add <session> <port>, then confirm with mirroring_get."""
+        self._cli(f"mirroring_delete {session_id}\n")
+        self._cli(f"mirroring_add {session_id} {egress_port}\n")
+        out = self._cli(f"mirroring_get {session_id}\n")
+        # Prints the thrift struct: MirroringSessionConfig(port=255, mgid=None)
+        return f"port={egress_port}," in out.replace(" ", "")
 
     def is_alive(self) -> bool:
         """Check if the switch is responding."""
         out = self._cli("show_tables\n", timeout=5)
-        # The CLI prints a multi-line error (exit code 0) when it cannot connect
-        return len(out) > 10 and "Could not connect" not in out
+        return "drop_table" in out
 
 
 class DataPlaneManager:
@@ -288,20 +279,14 @@ class DataPlaneManager:
         """Wait until all switches are alive."""
         deadline = time.time() + timeout
         while time.time() < deadline:
-            all_alive = all(
-                sw.is_alive() for sw in self.switches.values()
-            )
-            if all_alive:
+            if all(sw.is_alive() for sw in self.switches.values()):
                 logger.info("All switches are alive")
                 return True
-            time.sleep(2)
+            time.sleep(1)
         logger.error("Timed out waiting for switches")
         return False
 
-    def install_base_forwarding(
-        self,
-        forwarding_rules: List[Dict]
-    ) -> None:
+    def install_base_forwarding(self, forwarding_rules: List[Dict]) -> None:
         """
         Install base L3 forwarding rules.
         forwarding_rules: list of dicts:
@@ -311,51 +296,16 @@ class DataPlaneManager:
             sw = self.get_switch(rule["switch_id"])
             if sw:
                 sw.add_forward_rule(rule["dst_ip"], rule["port"])
-                logger.debug(
-                    f"S{rule['switch_id']}: forward "
-                    f"{rule['dst_ip']} -> port {rule['port']}"
-                )
 
     def install_mirroring(
         self,
-        switch_id: int,
-        session_id: int,
-        cpu_port: int
-    ) -> None:
-        sw = self.get_switch(switch_id)
-        if sw:
-            sw.set_mirroring_session(session_id, cpu_port)
-
-    def collect_all_counters(
-        self,
-        switch_id: int
-    ) -> Tuple[Dict[int, int], Dict[int, int]]:
-        """Return (pkt_counters, byte_counters) for a switch."""
-        sw = self.get_switch(switch_id)
-        if sw is None:
-            return {}, {}
-        regs = sw.read_registers(["pkt_counter", "byte_counter"], 0, MAX_FLOWS)
-        return regs["pkt_counter"], regs["byte_counter"]
-
-    def install_drop_rule(
-        self,
-        switch_id: int,
-        src_ip: str,
-        dst_ip: str,
-        protocol: int = 6
+        switch_id : int,
+        session_id: int = CLONE_SESSION,
+        cpu_port  : int = CPU_PORT,
     ) -> bool:
         sw = self.get_switch(switch_id)
-        if sw:
-            return sw.add_drop_rule(src_ip, dst_ip, protocol)
-        return False
+        return sw.set_mirroring_session(session_id, cpu_port) if sw else False
 
-    def install_clone_rule(
-        self,
-        switch_id: int,
-        src_ip: str,
-        dst_ip: str
-    ) -> bool:
-        sw = self.get_switch(switch_id)
-        if sw:
-            return sw.add_clone_rule(src_ip, dst_ip)
-        return False
+    def install_mirroring_all(self) -> Dict[int, bool]:
+        """Configure clone session 100 -> CPU port on every switch."""
+        return {sid: self.install_mirroring(sid) for sid in self.switches}

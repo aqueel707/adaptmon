@@ -2,7 +2,7 @@
 topo/namespace_topo.py
 Linux network namespace topology for AdaptMon.
 Fully self-contained — creates, wires, and tears down the topology.
-Must be run as root (sudo).
+Must be run as root: real root, or namespaced root via scripts/sandbox.sh.
 
 Topology:
   h1 (10.0.1.1) ─── s1 (BMv2, port 9090) ─── s2 (BMv2, port 9091) ─── h3 (10.0.2.1)
@@ -16,6 +16,8 @@ Interface naming (all in root namespace except host-side veths):
   s2 port1: am_s2p1   (root ns, bound to s2 port 1)
   s2 port2: am_s2p2   (root ns, bound to s2 port 2)
   s2 port3: am_s2p3   (root ns, inter-switch to s1)
+  sX CPU  : am_sXcpu  (port 255, clone session 100 target) <-> am_sXdpi
+            (sniffed by controller/dpi.py)
 """
 
 import os
@@ -130,17 +132,26 @@ INTER_SW = {
     "s2_port": 3,
 }
 
+CPU_PORT = 255
+# CPU port veth pairs: switch_id -> (switch side, DPI side)
+CPU_LINKS = {
+    1: ("am_s1cpu", "am_s1dpi"),
+    2: ("am_s2cpu", "am_s2dpi"),
+}
+
 # Switch interface map: switch_id -> [(iface_name, port_number), ...]
 SW_IFACES = {
     1: [
         ("am_s1p1", 1),
         ("am_s1p2", 2),
         ("am_s1p3", 3),
+        (CPU_LINKS[1][0], CPU_PORT),
     ],
     2: [
         ("am_s2p1", 1),
         ("am_s2p2", 2),
         ("am_s2p3", 3),
+        (CPU_LINKS[2][0], CPU_PORT),
     ],
 }
 
@@ -182,6 +193,11 @@ class NetworkNamespaceTopo:
         self._sw_procs : Dict[int, subprocess.Popen] = {}
         os.makedirs(log_dir, exist_ok=True)
 
+    @staticmethod
+    def _ipc_path(sid: int) -> str:
+        # Per-process path: /tmp is shared with the host and other sandboxes
+        return f"/tmp/adaptmon-{os.getpid()}-s{sid}-notifications.ipc"
+
     # ------------------------------------------------------------------
     # Teardown — always run first to get a clean slate
     # ------------------------------------------------------------------
@@ -210,13 +226,14 @@ class NetworkNamespaceTopo:
         all_ifaces = (
             [h["veth_sw"] for h in HOSTS]
             + [INTER_SW["veth_s1"]]
+            + [sw_side for sw_side, _ in CPU_LINKS.values()]
         )
         for iface in all_ifaces:
             _run(f"ip link del {iface} 2>/dev/null || true")
 
         # Remove BMv2 IPC socket files left behind
         for sw in SWITCHES:
-            ipc = f"/tmp/bmv2-{sw['id']}-notifications.ipc"
+            ipc = self._ipc_path(sw["id"])
             try:
                 os.remove(ipc)
                 logger.debug(f"Removed IPC socket: {ipc}")
@@ -261,6 +278,8 @@ class NetworkNamespaceTopo:
             _ns_run(ns, f"ip link set {hv} up")
             _ns_run(ns, f"ip addr add {ip}/{pfx} dev {hv}")
             _ns_run(ns, f"ip link set lo up")
+            # No IPv6: keeps kernel RS/ND/MLD packets out of the switch ports
+            _ns_run(ns, "sysctl -qw net.ipv6.conf.all.disable_ipv6=1 net.ipv6.conf.default.disable_ipv6=1")
             # Disable reverse path filtering so cross-subnet packets are accepted
             _ns_run(ns, f"sysctl -w net.ipv4.conf.all.rp_filter=0 2>/dev/null || true")
             _ns_run(ns, f"sysctl -w net.ipv4.conf.{hv}.rp_filter=0 2>/dev/null || true")
@@ -274,6 +293,14 @@ class NetworkNamespaceTopo:
         _run(f"ip link set {vs1} up", check=True)
         _run(f"ip link set {vs2} up", check=True)
         logger.info(f"  Inter-switch: {vs1} <--> {vs2}")
+
+        # 4. CPU port links (switch port 255 <-> DPI sniffer side)
+        for sid, (sw_side, dpi_side) in CPU_LINKS.items():
+            _run(f"ip link add {sw_side} type veth peer name {dpi_side}", check=True)
+            for iface in (sw_side, dpi_side):
+                _run(f"sysctl -qw net.ipv6.conf.{iface}.disable_ipv6=1")
+                _run(f"ip link set {iface} up", check=True)
+            logger.info(f"  s{sid} CPU port {CPU_PORT}: {sw_side} <--> {dpi_side}")
 
         # Install static ARP entries + host routes in every namespace
         # Do this in two passes: routes first, then ARP
@@ -345,7 +372,7 @@ class NetworkNamespaceTopo:
             # Actually load P4 directly:
             # Each switch needs a unique device-id and IPC socket path
             # to avoid "Address already in use" on bmv2-notifications.ipc
-            ipc_path = f"/tmp/bmv2-{sid}-notifications.ipc"
+            ipc_path = self._ipc_path(sid)
             # Remove stale socket file if present
             try:
                 import os as _os
@@ -516,6 +543,10 @@ class NetworkNamespaceTopo:
                 {"switch_id": sw["id"], "thrift_port": sw["thrift_port"]}
                 for sw in SWITCHES
             ],
+            "cpu_port": CPU_PORT,
+            "dpi_ifaces": {
+                str(sid): dpi_side for sid, (_, dpi_side) in CPU_LINKS.items()
+            },
             "host_namespaces": {
                 h["name"]: {
                     "ns" : h["ns"],
