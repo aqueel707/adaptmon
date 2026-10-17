@@ -1,0 +1,18 @@
+2026-10-17 12:04:29 [INFO] controller.utils: Logging to /home/adaptmon/Desktop/adaptmon_v12/adaptmon/results/smoke_stage2_20261017_120419/controller.log
+2026-10-17 12:04:29 [INFO] __main__: AdaptMon Controller starting (run_id=20261017_120428, out_dir=/home/adaptmon/Desktop/adaptmon_v12/adaptmon/results/smoke_stage2_20261017_120419)
+2026-10-17 12:04:29 [INFO] __main__: DPI started (pid=246) on 1:am_s1dpi,2:am_s2dpi
+2026-10-17 12:04:29 [INFO] controller.dataplane: DataPlaneManager initialized with 2 switches
+2026-10-17 12:04:29 [INFO] __main__: Waiting for switches to come up...
+2026-10-17 12:04:29 [INFO] controller.dataplane: All switches are alive
+2026-10-17 12:04:29 [INFO] __main__: S1: mirroring session 100 -> CPU port 255 configured
+2026-10-17 12:04:29 [INFO] __main__: S2: mirroring session 100 -> CPU port 255 configured
+2026-10-17 12:04:29 [INFO] controller.monitor: Decision A: score -> level thresholds are per-model warm-up percentiles (MONITOR < p5, CLONE < min); DROP is never set from a score -- only by a DPI-confirmed attack on a flow already at CLONE. The z-score trigger of the earlier switch-global design is removed.
+2026-10-17 12:04:29 [INFO] controller.monitor: Decision B: a second IsolationForest scores host-pair aggregates ['new_flows', 'distinct_dst_ports', 'syn_only_ratio', 'pkt_count']; a pair escalating to CLONE installs a src-IP clone rule (every packet from that source is cloned from then on).
+2026-10-17 12:04:29 [INFO] controller.monitor: Decision C: data-plane adaptive sampling (NORMAL 1-in-64, MONITOR 1-in-8, CLONE/DROP every packet); the entropy feature is payload byte entropy from sampled clones (payload_sampled) when available this window, else flow-distribution entropy (flow_distribution).
+2026-10-17 12:04:29 [INFO] controller.monitor: Flow features=['pkt_count', 'byte_count', 'duration_s', 'pkt_rate', 'mean_pkt_size', 'entropy'], hysteresis up=2 / down=3 windows, train_until=1792218896.1502576
+2026-10-17 12:04:29 [INFO] controller.monitor: Monitor started for switches [1, 2]
+2026-10-17 12:04:56 [INFO] controller.model: IsolationForest[pkt_count,byte_count,duration_s,pkt_rate,mean_pkt_size,entropy] trained once on 352 warm-up vectors (163 ms); frozen. Thresholds: NORMAL > -0.0000 (p5), MONITOR > -0.1325 (min), else CLONE; DROP only on DPI confirmation
+2026-10-17 12:04:56 [INFO] controller.model: IsolationForest[new_flows,distinct_dst_ports,syn_only_ratio,pkt_count] trained once on 142 warm-up vectors (116 ms); frozen. Thresholds: NORMAL > 0.0000 (p5), MONITOR > -0.1098 (min), else CLONE; DROP only on DPI confirmation
+2026-10-17 12:05:26 [INFO] __main__: Duration elapsed, stopping
+2026-10-17 12:05:27 [INFO] controller.monitor: Monitor stopped
+2026-10-17 12:05:28 [INFO] __main__: Controller terminated cleanly

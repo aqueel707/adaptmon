@@ -1,16 +1,25 @@
 """
 controller/policy.py
-Per-flow monitoring policy: NORMAL -> MONITOR -> CLONE -> DROP.
+Per-flow (and per-host-pair, Decision B) monitoring policy:
+NORMAL -> MONITOR -> CLONE -> DROP.
 
-The Isolation Forest score alone sets a flow's raw level each window
-(thresholds from controller.model.Thresholds). The z-score trigger of the
-earlier switch-global design is removed.
+The Isolation Forest score alone sets a raw level of at most CLONE
+(Decision A: thresholds are the warm-up 5th percentile for MONITOR and the
+warm-up minimum for CLONE; score-based DROP and the z-score trigger of the
+earlier switch-global design are both removed). DROP is reached only when
+controller/dpi.py confirms an attack on a flow that is already at CLONE
+(controller/monitor.py calls force_drop() for that); it bypasses the normal
+up-hysteresis below.
 
-Hysteresis per flow:
+Hysteresis (applies identically to flow keys and host-pair keys):
   * escalate only after K_UP = 2 consecutive windows whose raw level is above
     the current level; the new level is the lowest of those raw levels
   * de-escalate only after K_DOWN = 3 consecutive windows below the current
     level; the new level is the highest of those raw levels
+  * force_drop() clears the per-key window history, so leaving a
+    DPI-forced DROP still needs K_DOWN fresh windows below it, counted
+    from the moment it was forced (not windows from before the attack
+    was confirmed)
 """
 
 import logging
@@ -35,14 +44,15 @@ class MonitoringLevel(IntEnum):
 
 
 def score_to_level(score: float, th: Thresholds) -> MonitoringLevel:
-    """Lower score = more anomalous."""
-    if score > th.normal:
-        return MonitoringLevel.NORMAL
+    """
+    Lower score = more anomalous. Returns at most CLONE: DROP is never set
+    from a score alone (Decision A) -- see force_drop() below.
+    """
     if score > th.monitor:
-        return MonitoringLevel.MONITOR
+        return MonitoringLevel.NORMAL
     if score > th.clone:
-        return MonitoringLevel.CLONE
-    return MonitoringLevel.DROP
+        return MonitoringLevel.MONITOR
+    return MonitoringLevel.CLONE
 
 
 @dataclass
@@ -50,11 +60,19 @@ class FlowState:
     level  : MonitoringLevel = MonitoringLevel.NORMAL
     recent : Deque[MonitoringLevel] = field(
         default_factory=lambda: deque(maxlen=max(K_UP, K_DOWN)))
-    drop_handle: Optional[int] = None
+    # The installed data-plane rule's handle: a drop_table handle for a
+    # flow-key FlowState, or a host_clone_table handle for a pair-key one
+    rule_handle: Optional[int] = None
     max_level  : MonitoringLevel = MonitoringLevel.NORMAL
+    # Which detector/signal last moved this key, for logging only
+    escalated_by: Optional[str] = None
 
 
 class FlowPolicy:
+    """
+    Hysteresis state keyed by whatever the caller uses to identify a flow
+    or a host pair -- e.g. (switch_id, slot) or (switch_id, src_ip, dst_ip).
+    """
 
     def __init__(self, k_up: int = K_UP, k_down: int = K_DOWN):
         self.k_up = k_up
@@ -86,3 +104,18 @@ class FlowPolicy:
         if st.level > st.max_level:
             st.max_level = st.level
         return old, st.level
+
+    def force_drop(self, key: Hashable) -> MonitoringLevel:
+        """
+        Escalate directly to DROP (a DPI-confirmed attack on a flow already
+        at CLONE), bypassing the up-hysteresis. Clears the window history:
+        leaving DROP needs K_DOWN fresh sub-DROP windows counted from now,
+        not from before the confirmation.
+        """
+        st = self.state(key)
+        old = st.level
+        st.level = MonitoringLevel.DROP
+        st.recent.clear()
+        if st.level > st.max_level:
+            st.max_level = st.level
+        return old

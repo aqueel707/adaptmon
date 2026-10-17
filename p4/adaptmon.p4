@@ -91,7 +91,12 @@ struct metadata_t {
     @field_list(CLONE_FIELDS) bit<2>  flow_level;
     @field_list(CLONE_FIELDS) bit<32> pkt_count_val;
     @field_list(CLONE_FIELDS) bit<32> byte_count_val;
+    /* Why this packet was cloned (set in ingress, read back when the CLONE
+     * itself is processed in egress): 1 = full capture at CLONE/DROP level,
+     * 2 = per-flow sampling at NORMAL/MONITOR, 3 = host-pair forced clone */
+    @field_list(CLONE_FIELDS) bit<8>  clone_reason;
     bit<1>   do_drop;
+    bit<1>   do_clone;
     bit<16>  l4_sport;
     bit<16>  l4_dport;
 }
@@ -108,6 +113,7 @@ register<bit<1>>(MAX_FLOWS)  flow_active;
 register<bit<48>>(MAX_FLOWS) flow_first_ts;   /* ingress_global_timestamp, us */
 register<bit<48>>(MAX_FLOWS) flow_last_ts;
 register<bit<2>>(MAX_FLOWS)  flow_level;      /* controller-written (Thrift) */
+register<bit<32>>(MAX_FLOWS) flow_syn_pkts;   /* packets with TCP flags == SYN only */
 
 /* ========== PARSER ========== */
 parser AdaptMonParser(
@@ -200,6 +206,14 @@ control AdaptMonIngress(
         meta.do_drop = 1;
     }
 
+    /* Host-pair detector escalated: clone every packet from this source IP,
+     * regardless of its own per-flow level (catches later probes on new
+     * destination ports/flows before any one of them earns its own level) */
+    action do_force_clone() {
+        meta.do_clone     = 1;
+        meta.clone_reason = 3;
+    }
+
     action nop() {}
 
     /* ---- tables ---- */
@@ -234,10 +248,26 @@ control AdaptMonIngress(
         default_action = nop();
     }
 
+    /* Installed when the host-pair detector (controller-side second
+     * IsolationForest) escalates a (src IP, dst IP) aggregate to CLONE */
+    table host_clone_table {
+        key = {
+            hdr.ipv4.srcAddr: exact;
+        }
+        actions = {
+            do_force_clone;
+            nop;
+        }
+        size = 256;
+        default_action = nop();
+    }
+
     /* ---- apply ---- */
     apply {
-        meta.do_drop    = 0;
-        meta.flow_level = LEVEL_NORMAL;
+        meta.do_drop      = 0;
+        meta.do_clone     = 0;
+        meta.clone_reason = 0;
+        meta.flow_level   = LEVEL_NORMAL;
 
         if (std_meta.ingress_port == CPU_PORT) {
             /* Nothing is injected from the CPU port */
@@ -303,6 +333,15 @@ control AdaptMonIngress(
             meta.byte_count_val = byte_val;
             flow_last_ts.write(meta.flow_index, now);
 
+            /* SYN-only packets (ctrl == 0b000010, no other flag set): feeds
+             * the controller's host-pair SYN-only-ratio feature */
+            if (hdr.tcp.isValid() && hdr.tcp.ctrl == 2) {
+                bit<32> syn_val;
+                flow_syn_pkts.read(syn_val, meta.flow_index);
+                syn_val = syn_val + 1;
+                flow_syn_pkts.write(meta.flow_index, syn_val);
+            }
+
             /* Store flow 5-tuple info */
             flow_src_ip.write(meta.flow_index, hdr.ipv4.srcAddr);
             flow_dst_ip.write(meta.flow_index, hdr.ipv4.dstAddr);
@@ -313,6 +352,24 @@ control AdaptMonIngress(
 
             /* Monitoring level set by the controller for this flow */
             flow_level.read(meta.flow_level, meta.flow_index);
+
+            /* Adaptive sampling (Decision C): CLONE/DROP captures every
+             * packet; MONITOR samples 1-in-8; NORMAL samples 1-in-64.
+             * pkt_val is a power-of-two modulus check via bitwise AND. */
+            if (meta.flow_level >= LEVEL_CLONE) {
+                meta.do_clone     = 1;
+                meta.clone_reason = 1;
+            } else if (meta.flow_level == LEVEL_MONITOR && (pkt_val & 7) == 0) {
+                meta.do_clone     = 1;
+                meta.clone_reason = 2;
+            } else if (meta.flow_level == LEVEL_NORMAL && (pkt_val & 63) == 0) {
+                meta.do_clone     = 1;
+                meta.clone_reason = 2;
+            }
+
+            /* Host-pair escalation (Decision B): clone every packet from
+             * this source IP regardless of its own flow's level/sampling */
+            host_clone_table.apply();
 
             /* A DROP flow is still forwarded to egress, so its clone is made
              * there; egress then discards the original */
@@ -342,13 +399,13 @@ control AdaptMonEgress(
             hdr.cpu_hdr.flow_level  = (bit<8>)meta.flow_level;
             hdr.cpu_hdr.pkt_count   = meta.pkt_count_val;
             hdr.cpu_hdr.byte_count  = meta.byte_count_val;
-            hdr.cpu_hdr.reason      = 1;
+            hdr.cpu_hdr.reason      = meta.clone_reason;
             clone_counter.count(0);
         } else if (std_meta.instance_type == PKT_INSTANCE_TYPE_NORMAL
                    && hdr.ipv4.isValid()) {
-            /* The original: clone it if the flow is at CLONE or above,
+            /* The original: clone per ingress's sampling/host-pair decision,
              * then forward it unchanged (or drop it at DROP) */
-            if (meta.flow_level >= LEVEL_CLONE) {
+            if (meta.do_clone == 1) {
                 clone_preserving_field_list(
                     CloneType.E2E, (bit<32>)CLONE_SESSION, CLONE_FIELDS);
             }

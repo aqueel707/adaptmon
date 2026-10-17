@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-tests/smoke_dataplane.py — Stage-1 data-plane smoke test on real bmv2.
+tests/smoke_dataplane.py — Stage-1 data-plane smoke test on real bmv2,
+covering Decisions B (host-pair clone rule) and C (adaptive sampling).
 
 Run inside the sandbox (namespaced root):
     scripts/sandbox.sh python3 tests/smoke_dataplane.py
@@ -8,21 +9,32 @@ Run inside the sandbox (namespaced root):
 Builds the 2-switch namespace topology, configures clone session 100 via
 DataPlaneManager.install_mirroring_all() (mirroring_add 100 255), then sends
 crafted UDP flows h1 -> h2 (one switch) and h1 -> h3 (two switches) with
-per-flow levels written into flow_level via register_write. Checks:
+per-flow levels written into flow_level via register_write. `expected_samples()`
+below is an independent re-implementation of p4/adaptmon.p4's sampling rule
+(NORMAL 1-in-64, MONITOR 1-in-8, CLONE/DROP every packet), used as the
+oracle throughout, exactly like utils.flow_slot() independently
+re-implements the CRC32 hash. Checks:
 
   1. mirroring_get 100 reports port 255 on both switches
-  2. utils.flow_slot() predicts the register slot bmv2 uses for each 5-tuple
-  3. clones reach the CPU port only for flows with flow_level >= CLONE (2)
-  4. every clone is cpu_hdr (14 B: flow_index, level, pkt_count, byte_count,
-     reason) + the original frame, with flow_index/level from the field list
+  2. flow_slot() predicts the register slot bmv2 uses for each 5-tuple
+  3. clones match expected_samples() exactly per flow level, with the right
+     cpu_hdr.reason (1 = full capture at CLONE/DROP, 2 = per-flow sampling)
+     and flow_index/level from the field list
+  4. s2 (untouched flow_level register, so NORMAL by default) independently
+     samples the one flow crossing it at the same 1-in-64 rate -- clone
+     sampling is a per-switch decision, not a global one
   5. forwarded originals are byte-identical to what h1 sent (pcap diff):
        h1 -> h2: s1 rule switched to forward_l2 (no rewrite) -> strict equality
        h1 -> h3: forward_l3 on 2 switches -> equal after applying the
-                 documented rewrite (TTL - 2, IPv4 checksum recomputed);
-                 no extra bytes (no cpu_hdr)
+                 documented rewrite (TTL - 2, IPv4 checksum recomputed)
   6. a DROP flow (level 3 + 5-tuple drop rule) is not delivered but is still
-     cloned
+     fully cloned (reason 1)
   7. the data-plane fwd/clone/drop counters match the packets sent exactly
+  8. a host_clone_table rule (Decision B) forces full capture (reason 3) of
+     every packet from one source IP, regardless of that flow's own level,
+     and stops forcing it once removed
+  9. de-escalating a flow back to NORMAL (clearing its level, removing any
+     drop rule) resumes delivery and drops back to 1-in-64 sampling
 
 Writes pcaps + report.json under results/smoke_stage1_<timestamp>/ and exits
 non-zero if any check fails.
@@ -61,7 +73,7 @@ SINK = (
 
 SENDER = (
     "import sys,time\n"
-    "from scapy.all import rdpcap,sendp,conf\n"
+    "from scapy.all import rdpcap,conf\n"
     "sock=conf.L2socket(iface=sys.argv[2])\n"
     "for p in rdpcap(sys.argv[1]):\n"
     "    sock.send(p); time.sleep(0.004)\n"
@@ -87,7 +99,6 @@ class Capture:
         cmd = [sys.executable, CAPTURE, iface, path, "--dir", direction]
         if host:
             cmd = ["ip", "netns", "exec", H[host]["ns"]] + cmd
-        # argv list (no shell), so terminate() reaches the capture process
         self.proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL)
 
@@ -100,13 +111,27 @@ class Capture:
         return rdpcap(self.path) if os.path.getsize(self.path) > 24 else []
 
 
-def mk_flow(src, dst, sport, dport, n, rng):
+def expected_samples(level, start, n):
+    """
+    Independent re-implementation of p4/adaptmon.p4's sampling rule: the
+    pkt_counter VALUES (not positions) among the next n packets -- i.e.
+    start+1 .. start+n -- that the data plane clones at this flow level.
+    """
+    vals = range(start + 1, start + n + 1)
+    if level >= 2:
+        return list(vals)
+    mod = 8 if level == 1 else 64
+    return [v for v in vals if v % mod == 0]
+
+
+def mk_flow(src, dst, sport, dport, n, rng, src_ip_override=None):
     pkts = []
     for _ in range(n):
         payload = bytes(rng.getrandbits(8) for _ in range(rng.randint(18, 1000)))
         pkts.append(
             Ether(src=H[src]["mac"], dst=H[dst]["mac"])
-            / IP(src=H[src]["ip"], dst=H[dst]["ip"], ttl=64, id=rng.randint(0, 65535))
+            / IP(src=src_ip_override or H[src]["ip"], dst=H[dst]["ip"],
+                ttl=64, id=rng.randint(0, 65535))
             / UDP(sport=sport, dport=dport) / Raw(payload)
         )
     # Build once so checksums are fixed in the bytes we send and compare
@@ -128,6 +153,16 @@ def parse_cpu(raw):
     idx, lvl, pc, bc, reason = struct.unpack("!IBIIB", raw[:CPU_HDR_LEN])
     return {"flow_index": idx, "level": lvl, "pkt_count": pc,
             "byte_count": bc, "reason": reason}, raw[CPU_HDR_LEN:]
+
+
+def clones_by_tuple(cap, want_tuple):
+    out = []
+    for p in cap:
+        hdr, frame = parse_cpu(bytes(p))
+        e = Ether(frame)
+        if UDP in e and l4key(e) == want_tuple:
+            out.append((hdr, frame))
+    return out
 
 
 def main():
@@ -197,6 +232,10 @@ def main():
         "pass": all(found[n] == [slots[n]] for n in flows),
         "predicted": slots, "observed": found,
     }
+    # The sampling oracle below assumes each flow's pkt_counter is exactly 1
+    # after its single probe packet (a fresh switch, no prior traffic)
+    starts = {n: regs["pkt_counter"][slots[n]] for n in flows}
+    assert all(v == 1 for v in starts.values()), f"unexpected probe counts: {starts}"
 
     # Levels via register_write (Thrift); DROP also gets its 5-tuple rule
     s1.write_flow_levels({slots[n]: f[4] for n, f in flows.items()})
@@ -210,8 +249,9 @@ def main():
     s1.reset_dp_counters()
     s2.reset_dp_counters()
 
-    # Main traffic: 30 packets per flow, interleaved
-    N = 30
+    # Main traffic: 128 packets per flow, interleaved (128 so NORMAL's
+    # 1-in-64 sampling has two guaranteed hits: pkt_val 64 and 128)
+    N = 128
     per_flow = {n: mk_flow(s, d, sp, dp, N, rng) for n, (s, d, sp, dp, _) in flows.items()}
     sent = [p for i in range(N) for n in flows for p in [per_flow[n][i]]]
     caps = {
@@ -267,70 +307,117 @@ def main():
         "pass": len(h2_in["L3_drop"]) == 0, "delivered": len(h2_in["L3_drop"]),
     }
 
-    # 3 + 4. clones
-    def clone_check(cap, expect_flows, frames_expected):
-        res = {"n_clones": len(cap), "per_flow": {}}
-        ok = True
-        hdrs_by_flow = {n: [] for n in flows}
-        for p in cap:
-            hdr, frame = parse_cpu(bytes(p))
-            e = Ether(frame)
-            name = next((n for n, f in flows.items() if UDP in e and
-                         l4key(e) == (H[f[0]]["ip"], H[f[1]]["ip"], 17, f[2], f[3])), None)
-            if name is None:
-                ok = False
-                res.setdefault("unknown", 0)
-                res["unknown"] = res["unknown"] + 1
-                continue
-            hdrs_by_flow[name].append((hdr, frame))
-        for n in flows:
-            got_n = hdrs_by_flow[n]
-            want = n in expect_flows
-            entry = {"clones": len(got_n)}
-            if want:
-                hdr_ok = all(h["flow_index"] == slots[n] and h["level"] == flows[n][4]
-                             and h["reason"] == 1 for h, _ in got_n)
-                counts = [h["pkt_count"] for h, _ in got_n]
-                frames_ok = [fr for _, fr in got_n] == frames_expected[n]
-                entry.update(hdr_fields_ok=hdr_ok,
-                             pkt_count_seq=f"{counts[0]}..{counts[-1]}" if counts else "",
-                             pkt_count_consecutive=counts == list(range(2, 2 + N)),
-                             frames_equal_forwarded_original=frames_ok)
-                ok &= len(got_n) == N and hdr_ok and frames_ok and counts == list(range(2, 2 + N))
-            else:
-                ok &= len(got_n) == 0
-            res["per_flow"][n] = entry
-        res["pass"] = ok
-        return res
+    # 3. s1 clones: exact match against the sampling oracle, per flow
+    s1_result = {}
+    ok_s1 = True
+    for n, (s, d, sp, dp, level) in flows.items():
+        want_vals = expected_samples(level, starts[n], N)
+        want_reason = 1 if level >= 2 else 2
+        tup = (H[s]["ip"], H[d]["ip"], 17, sp, dp)
+        got_n = clones_by_tuple(got["s1_cpu"], tup)
+        got_counts = sorted(h["pkt_count"] for h, _ in got_n)
+        hdr_ok = all(h["flow_index"] == slots[n] and h["level"] == level
+                     and h["reason"] == want_reason for h, _ in got_n)
+        # Frame carried by the clone == the original as it left s1's egress
+        # (index i (0-based) of the main batch has pkt_count i+2)
+        rewrite = (lambda b: b) if n != "X2_clone_2hop" else (lambda b: _ttl_minus(b, 1))
+        frames_expected = [rewrite(sent_b[n][pc - 2]) for pc in got_counts]
+        frames_ok = [fr for _, fr in sorted(got_n, key=lambda x: x[0]["pkt_count"])] == frames_expected
+        entry = {"expected_pkt_counts": want_vals, "observed_pkt_counts": got_counts,
+                 "expected_reason": want_reason, "hdr_fields_ok": hdr_ok, "frames_ok": frames_ok}
+        ok_s1 &= got_counts == want_vals and hdr_ok and frames_ok
+        s1_result[n] = entry
+    checks["s1_clones_match_sampling_oracle"] = {"pass": ok_s1, "per_flow": s1_result}
 
-    # Frame inside a clone = the original as it left s1's egress
-    s1_frames = {n: sent_b[n] for n in ("L2_clone", "L3_drop")}
-    s1_frames["X2_clone_2hop"] = []
-    for b in sent_b["X2_clone_2hop"]:
-        e = Ether(b)
-        e[IP].ttl -= 1
-        del e[IP].chksum
-        s1_frames["X2_clone_2hop"].append(bytes(Ether(bytes(e))))
-    checks["clones_only_for_level_ge_clone_s1"] = clone_check(
-        got["s1_cpu"], {"L2_clone", "L3_drop", "X2_clone_2hop"}, s1_frames)
-    checks["no_clones_s2_all_levels_normal"] = {
-        "pass": len(got["s2_cpu"]) == 0, "n_clones": len(got["s2_cpu"]),
+    # 4. s2: independent sampling of the one flow crossing it (its own
+    # flow_level register for this 5-tuple was never written -> NORMAL)
+    regs2 = s2.read_registers(["pkt_counter"])
+    s2_tup = (H["h1"]["ip"], H["h3"]["ip"], 17,
+             flows["X2_clone_2hop"][2], flows["X2_clone_2hop"][3])
+    s2_slot = flow_slot(*s2_tup[:2], 17, s2_tup[3], s2_tup[4])
+    s2_start = regs2["pkt_counter"][s2_slot] - N   # before this batch
+    want_s2 = expected_samples(0, s2_start, N)
+    got_s2 = clones_by_tuple(got["s2_cpu"], s2_tup)
+    got_s2_counts = sorted(h["pkt_count"] for h, _ in got_s2)
+    checks["s2_samples_independently_at_normal_rate"] = {
+        "pass": got_s2_counts == want_s2 and all(h["reason"] == 2 for h, _ in got_s2),
+        "s2_slot": s2_slot, "expected": want_s2, "observed": got_s2_counts,
     }
 
     # 7. counters (reset after the probes)
+    n_s1_clones = sum(len(expected_samples(f[4], starts[n], N)) for n, f in flows.items())
     c1, c2 = s1.read_dp_counters(), s2.read_dp_counters()
-    exp1 = {"forwarded": 4 * N, "cloned": 3 * N, "dropped": N}
-    exp2 = {"forwarded": N, "cloned": 0, "dropped": 0}
+    exp1 = {"forwarded": 4 * N, "cloned": n_s1_clones, "dropped": N}
+    exp2 = {"forwarded": N, "cloned": len(want_s2), "dropped": 0}
     checks["dataplane_counters_exact"] = {
         "pass": c1 == exp1 and c2 == exp2,
         "s1": c1, "s1_expected": exp1, "s2": c2, "s2_expected": exp2,
     }
 
-    # De-escalation: drop rule removed, level reset -> clones stop, delivery resumes
+    # 8. host_clone_table (Decision B): forces full capture of one source
+    # IP regardless of its own flow's level
+    host_src = "10.0.1.55"
+    host_tup = (host_src, H["h3"]["ip"], 17, 42000, 7200)
+    host_slot = flow_slot(host_src, H["h3"]["ip"], 17, 42000, 7200)
+    assert host_slot not in slots.values() and host_slot != s2_slot, \
+        f"test 5-tuple collides with an earlier one at slot {host_slot}"
+    s1.reset_dp_counters()
+    pre = mk_flow("h1", "h3", 42000, 7200, 20, rng, src_ip_override=host_src)
+    send("h1", pre, os.path.join(out, "host_pre.pcap"))
+    cap_pre = Capture("in", "am_s1dpi", os.path.join(out, "host_pre_cpu.pcap"))
+    time.sleep(0.3)
+    before = cap_pre.stop()
+    start_before = s1.read_registers(["pkt_counter"])["pkt_counter"][
+        flow_slot(host_src, H["h3"]["ip"], 17, 42000, 7200)] - 20
+
+    clone_handle = s1.add_host_clone_rule(host_src)
+    cap_mid = Capture("in", "am_s1dpi", os.path.join(out, "host_mid_cpu.pcap"))
+    mid = mk_flow("h1", "h3", 42000, 7200, 20, rng, src_ip_override=host_src)
+    send("h1", mid, os.path.join(out, "host_mid.pcap"))
+    time.sleep(0.3)
+    during = cap_mid.stop()
+
+    s1.delete_host_clone_rule(clone_handle)
+    cap_post = Capture("in", "am_s1dpi", os.path.join(out, "host_post_cpu.pcap"))
+    # 30, not 20: start_after=40 (0+20+20), so this run of pkt_val 41..70
+    # crosses 64 and gives a genuine positive expectation, not just "zero
+    # clones" (which an incompletely-removed rule would also produce, by
+    # coincidence, if checked only against a too-short run)
+    post = mk_flow("h1", "h3", 42000, 7200, 30, rng, src_ip_override=host_src)
+    send("h1", post, os.path.join(out, "host_post.pcap"))
+    time.sleep(0.3)
+    after = cap_post.stop()
+
+    before_c = clones_by_tuple(before, host_tup)
+    during_c = clones_by_tuple(during, host_tup)
+    after_c = clones_by_tuple(after, host_tup)
+    want_before = expected_samples(0, start_before, 20)
+    want_after_start = start_before + 20 + 20
+    want_after = expected_samples(0, want_after_start, 30)
+    checks["host_clone_rule_forces_full_capture"] = {
+        "pass": (sorted(h["pkt_count"] for h, _ in before_c) == want_before
+                 and len(during_c) == 20
+                 and all(h["reason"] == 3 and h["level"] == 0 for h, _ in during_c)
+                 and sorted(h["pkt_count"] for h, _ in after_c) == want_after
+                 and s1.count_host_clone_rules() == 0),
+        "before_sampled": sorted(h["pkt_count"] for h, _ in before_c),
+        "before_expected": want_before,
+        "during_count": len(during_c), "during_reasons": [h["reason"] for h, _ in during_c],
+        "after_sampled": sorted(h["pkt_count"] for h, _ in after_c),
+        "after_expected": want_after,
+    }
+
+    # 9. de-escalation: drop rule removed, level reset -> delivery resumes,
+    # sampling returns to the per-level rate (not to zero: NORMAL still
+    # samples 1-in-64)
+    pre_counts = s1.read_registers(["pkt_counter"])["pkt_counter"]
+    start_clone = pre_counts[slots["L2_clone"]]
+    start_drop = pre_counts[slots["L3_drop"]]
     s1.delete_drop_rule(drop_handle)
     s1.write_flow_levels({slots["L3_drop"]: 0, slots["L2_clone"]: 0})
     s1.reset_dp_counters()
-    again = {n: mk_flow(*flows[n][:4], 10, rng) for n in ("L2_clone", "L3_drop")}
+    N2 = 10
+    again = {n: mk_flow(*flows[n][:4], N2, rng) for n in ("L2_clone", "L3_drop")}
     caps2 = {"h2_in": Capture("in", H["h2"]["veth_host"], os.path.join(out, "h2_in_deesc.pcap"), "h2"),
              "s1_cpu": Capture("in", "am_s1dpi", os.path.join(out, "s1_cpu_deesc.pcap"))}
     sinks = [subprocess.Popen(ns_exec("h2", f"python3 -c \"{SINK.format(ports=[7002, 7003])}\""),
@@ -340,11 +427,18 @@ def main():
     got2 = {k: c.stop() for k, c in caps2.items()}
     for p in sinks:
         p.kill()
-    checks["deescalation_removes_clone_and_drop"] = {
-        "pass": len(got2["s1_cpu"]) == 0 and len(got2["h2_in"]) == 20
-                and s1.count_drop_rules() == 0,
-        "clones_after": len(got2["s1_cpu"]), "delivered_after": len(got2["h2_in"]),
-        "drop_rules_left": s1.count_drop_rules(),
+    want_clone2 = expected_samples(0, start_clone, N2)
+    want_drop2 = expected_samples(0, start_drop, N2)
+    clone2_tup = (H["h1"]["ip"], H["h2"]["ip"], 17, flows["L2_clone"][2], flows["L2_clone"][3])
+    drop2_tup = (H["h1"]["ip"], H["h2"]["ip"], 17, flows["L3_drop"][2], flows["L3_drop"][3])
+    got_clone2 = sorted(h["pkt_count"] for h, _ in clones_by_tuple(got2["s1_cpu"], clone2_tup))
+    got_drop2 = sorted(h["pkt_count"] for h, _ in clones_by_tuple(got2["s1_cpu"], drop2_tup))
+    checks["deescalation_resumes_delivery_and_returns_to_normal_sampling"] = {
+        "pass": (len(got2["h2_in"]) == 2 * N2 and s1.count_drop_rules() == 0
+                 and got_clone2 == want_clone2 and got_drop2 == want_drop2),
+        "delivered_after": len(got2["h2_in"]), "drop_rules_left": s1.count_drop_rules(),
+        "clone_flow_sampled": got_clone2, "clone_flow_expected": want_clone2,
+        "drop_flow_sampled": got_drop2, "drop_flow_expected": want_drop2,
     }
 
     topo.stop_switches()
@@ -356,6 +450,13 @@ def main():
         print(f"{'PASS' if c['pass'] else 'FAIL'}  {k}")
     print(f"report: {os.path.join(out, 'report.json')}")
     sys.exit(0 if report["all_pass"] else 1)
+
+
+def _ttl_minus(frame_bytes, n):
+    e = Ether(frame_bytes)
+    e[IP].ttl -= n
+    del e[IP].chksum
+    return bytes(Ether(bytes(e)))
 
 
 if __name__ == "__main__":

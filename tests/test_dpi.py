@@ -141,3 +141,33 @@ def test_each_flow_class_confirmed_once():
     e = DPIEngine()
     p = IP(src=ATK, dst=TGT) / TCP(sport=1, dport=80, flags=0)
     assert len(feed(e, [p, p, p])) == 1
+
+
+def test_confirmed_alert_tags_dpi_detector():
+    e = DPIEngine()
+    a = feed(e, [IP(src=ATK, dst=TGT) / TCP(sport=1, dport=2, flags=0)])
+    assert a[0]["detector"] == "dpi"
+
+
+def test_entropy_snapshot_keyed_for_monitor_lookup():
+    """Decision C: controller/features.py.entropy_snapshot_key() must match
+    the keys entropy_snapshot() produces."""
+    from controller.dpi import byte_entropy
+    from controller.features import entropy_snapshot_key
+
+    e = DPIEngine()
+    feed(e, [IP(src=ATK, dst=TGT) / UDP(sport=1, dport=2) / Raw(bytes(range(256)))])
+    snap = e.entropy_snapshot()
+    key = entropy_snapshot_key(1, (ATK, TGT, 17, 1, 2))
+    assert key in snap
+    assert snap[key]["n"] == 256 and snap[key]["clones"] == 1
+    assert abs(snap[key]["entropy"] - 8.0) < 1e-3
+
+
+def test_entropy_snapshot_n_zero_before_any_payload():
+    e = DPIEngine()
+    feed(e, [IP(src=ATK, dst=TGT) / TCP(sport=1, dport=2, flags="S")])
+    snap = e.entropy_snapshot()
+    from controller.features import entropy_snapshot_key
+    key = entropy_snapshot_key(1, (ATK, TGT, 6, 1, 2))
+    assert snap[key]["n"] == 0 and snap[key]["entropy"] == 0.0

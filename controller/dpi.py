@@ -22,10 +22,21 @@ the frame is parsed with Scapy, and these rules run:
             case-insensitive regexes: OR 1=1, UNION SELECT, "--", "/*".
 
 Each (switch, 5-tuple, class) is confirmed at most once; the confirmed alert
-is a JSON line {"type": "confirmed", ...} appended to alerts.jsonl.
-Payload byte entropy (bits/byte, over all cloned payload bytes of the flow)
-is reported per flow in dpi_flows.csv and in the alerts; it is not used by
-the Isolation Forest (see controller/features.py).
+is a JSON line {"type": "confirmed", "detector": "dpi", ...} appended to
+alerts.jsonl. controller/monitor.py tails that file: a confirmed attack on a
+flow already at CLONE is escalated to DROP (Decision A).
+
+Payload byte entropy (bits/byte, over all cloned payload bytes seen so far
+for the flow) is reported per flow in dpi_flows.csv and in the alerts.
+Decision C also makes it the flow-level Isolation Forest's entropy feature:
+every poll_interval seconds (--snapshot-interval) this process atomically
+writes out_dir/dpi_entropy_live.json, a flat
+{"<switch>|<src>|<dst>|<proto>|<sport>|<dport>": {"entropy", "n", "clones"}}
+map of every flow it has seen a clone of so far. controller/monitor.py reads
+it each poll and uses "entropy" for any flow with n > 0, since adaptive
+sampling (p4/adaptmon.p4) means every flow is sampled sooner or later, even
+at NORMAL; it falls back to the flow-distribution entropy otherwise
+(controller/features.py ENTROPY_FALLBACK_SOURCE).
 """
 
 import argparse
@@ -110,7 +121,7 @@ class DPIEngine:
         rec.classes.add(cls)
         self.stats["confirmed"] += 1
         return {
-            "type": "confirmed", "ts": ts, "switch": rec.switch,
+            "type": "confirmed", "detector": "dpi", "ts": ts, "switch": rec.switch,
             "flow_idx": cpu["flow_index"],
             "five_tuple": dict(zip(("src", "dst", "proto", "sport", "dport"), rec.tuple)),
             "attack_class": cls, "level": cpu["level"],
@@ -199,6 +210,19 @@ class DPIEngine:
                             alerts.append(a)
         return alerts
 
+    def entropy_snapshot(self) -> Dict[str, dict]:
+        """
+        Live {"<switch>|<src>|<dst>|<proto>|<sport>|<dport>": {...}} map for
+        controller/monitor.py (Decision C). `n` is payload bytes sampled so
+        far for the flow: the monitor only trusts `entropy` once n > 0.
+        """
+        out = {}
+        for (switch, tup), rec in self.flows.items():
+            key = f"{switch}|{tup[0]}|{tup[1]}|{tup[2]}|{tup[3]}|{tup[4]}"
+            out[key] = {"entropy": round(byte_entropy(rec.hist), 4),
+                        "n": rec.payload_bytes, "clones": rec.n}
+        return out
+
     def write_flows_csv(self, path: str) -> None:
         with open(path, "w", newline="") as f:
             w = csv.writer(f)
@@ -212,8 +236,20 @@ class DPIEngine:
                             "|".join(sorted(rec.classes))])
 
 
+def _write_entropy_snapshot(engine: DPIEngine, lock: threading.Lock, path: str) -> None:
+    """Atomic write (tmp file + os.replace) so a concurrent reader never
+    sees a partially-written file."""
+    with lock:
+        data = engine.entropy_snapshot()
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(data, f)
+    os.replace(tmp, path)
+
+
 def sniff_loop(ifaces: Dict[str, int], engine: DPIEngine, alerts: AlertLog,
-               stop: threading.Event) -> Dict[str, dict]:
+               stop: threading.Event, entropy_path: Optional[str] = None,
+               snapshot_interval: float = 1.0) -> Dict[str, dict]:
     """Scapy sniffer on the CPU-port interfaces until stop is set."""
     from scapy.all import AsyncSniffer, conf
 
@@ -235,9 +271,24 @@ def sniff_loop(ifaces: Dict[str, int], engine: DPIEngine, alerts: AlertLog,
 
     sniffer = AsyncSniffer(opened_socket=socks, prn=on_pkt, store=False)
     sniffer.start()
+
+    snap_thread = None
+    if entropy_path:
+        def _snapshot_loop():
+            while not stop.is_set():
+                _write_entropy_snapshot(engine, lock, entropy_path)
+                stop.wait(snapshot_interval)
+            _write_entropy_snapshot(engine, lock, entropy_path)   # final snapshot
+
+        snap_thread = threading.Thread(target=_snapshot_loop, name="dpi-entropy",
+                                       daemon=True)
+        snap_thread.start()
+
     stop.wait()
     time.sleep(0.5)
     sniffer.stop()
+    if snap_thread:
+        snap_thread.join(timeout=5)
     kstats = {}
     for s, name in socks.items():
         try:
@@ -254,6 +305,9 @@ def main():
     ap.add_argument("--ifaces", required=True, help="1:am_s1dpi,2:am_s2dpi")
     ap.add_argument("--alerts", required=True)
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--snapshot-interval", type=float, default=1.0,
+                    help="Seconds between dpi_entropy_live.json writes "
+                         "(match the controller's --poll-interval)")
     args = ap.parse_args()
     ifaces = {}
     for item in args.ifaces.split(","):
@@ -267,7 +321,10 @@ def main():
     signal.signal(signal.SIGINT, lambda *_: stop.set())
     print(f"DPI sniffing on {ifaces}", flush=True)
     t0 = time.time()
-    kstats = sniff_loop(ifaces, engine, alerts, stop)
+    entropy_path = os.path.join(args.out_dir, "dpi_entropy_live.json")
+    kstats = sniff_loop(ifaces, engine, alerts, stop,
+                        entropy_path=entropy_path,
+                        snapshot_interval=args.snapshot_interval)
     engine.write_flows_csv(os.path.join(args.out_dir, "dpi_flows.csv"))
     with open(os.path.join(args.out_dir, "dpi_stats.json"), "w") as f:
         json.dump({"engine": engine.stats, "sockets": kstats,

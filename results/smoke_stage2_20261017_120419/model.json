@@ -1,0 +1,111 @@
+{
+  "trained": true,
+  "train_until": 1792218896.1502576,
+  "entropy_primary_source": "payload_sampled",
+  "entropy_fallback_source": "flow_distribution",
+  "flow_model": {
+    "trained": true,
+    "sklearn_version": "1.7.2",
+    "params": {
+      "n_estimators": 100,
+      "max_samples": 256,
+      "contamination": 0.05,
+      "random_state": 42
+    },
+    "features": [
+      "pkt_count",
+      "byte_count",
+      "duration_s",
+      "pkt_rate",
+      "mean_pkt_size",
+      "entropy"
+    ],
+    "log1p_features": [
+      "pkt_count",
+      "byte_count",
+      "duration_s",
+      "pkt_rate"
+    ],
+    "n_train": 352,
+    "max_samples_effective": 256,
+    "fit_seconds": 0.16274408899971604,
+    "warmup_score_min": -0.13250040617104408,
+    "warmup_score_p5": -7.806255641895632e-18,
+    "warmup_score_mean": 0.12042949709420757,
+    "warmup_score_std": 0.06245436459759663,
+    "thresholds": {
+      "monitor": -7.806255641895632e-18,
+      "clone": -0.13250040617104408,
+      "warmup_min": -0.13250040617104408,
+      "warmup_p5": -7.806255641895632e-18,
+      "warmup_mean": 0.12042949709420757,
+      "warmup_std": 0.06245436459759663,
+      "n_warmup": 352
+    },
+    "train_feature_min": [
+      1.0,
+      74.0,
+      0.0,
+      0.0,
+      74.0,
+      1.0
+    ],
+    "train_feature_max": [
+      4.0,
+      296.0,
+      2.200733,
+      2.002068272071573,
+      148.0,
+      2.321928094887362
+    ]
+  },
+  "host_pair_model": {
+    "trained": true,
+    "sklearn_version": "1.7.2",
+    "params": {
+      "n_estimators": 100,
+      "max_samples": 256,
+      "contamination": 0.05,
+      "random_state": 42
+    },
+    "features": [
+      "new_flows",
+      "distinct_dst_ports",
+      "syn_only_ratio",
+      "pkt_count"
+    ],
+    "log1p_features": [
+      "new_flows",
+      "distinct_dst_ports",
+      "pkt_count"
+    ],
+    "n_train": 142,
+    "max_samples_effective": 142,
+    "fit_seconds": 0.11591545000010228,
+    "warmup_score_min": -0.10979721549213073,
+    "warmup_score_p5": 0.0,
+    "warmup_score_mean": 0.23403370537896306,
+    "warmup_score_std": 0.0812066798650937,
+    "thresholds": {
+      "monitor": 0.0,
+      "clone": -0.10979721549213073,
+      "warmup_min": -0.10979721549213073,
+      "warmup_p5": 0.0,
+      "warmup_mean": 0.23403370537896306,
+      "warmup_std": 0.0812066798650937,
+      "n_warmup": 142
+    },
+    "train_feature_min": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "train_feature_max": [
+      1.0,
+      1.0,
+      2.0,
+      3.0
+    ]
+  }
+}
