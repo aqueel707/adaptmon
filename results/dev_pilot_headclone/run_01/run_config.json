@@ -1,0 +1,102 @@
+{
+  "seed": 962881838,
+  "n_cycles": 3,
+  "head_clone_n": 3,
+  "rate_spike_pps": 1000,
+  "rate_spike_s": 5,
+  "warmup_s": 30,
+  "phase_gap_s": 1.5,
+  "sqli_gap_s": 0.1,
+  "nmap_max_rate": 500,
+  "schedule": {
+    "seed": 962881838,
+    "warmup": {
+      "iperf_mbps": 2.9,
+      "http_interval": 1.5,
+      "http_seed": 6028790
+    },
+    "cycles": [
+      {
+        "scan_ports": [
+          128,
+          158,
+          231,
+          276,
+          409,
+          486,
+          542,
+          592
+        ],
+        "order": [
+          "spike",
+          "syn",
+          "sqli",
+          "null"
+        ],
+        "benign_s": 6.22,
+        "iperf_mbps": 1.23,
+        "http_seed": 1129913811,
+        "sqli_order": [
+          0,
+          3,
+          1,
+          2
+        ]
+      },
+      {
+        "scan_ports": [
+          113,
+          145,
+          246,
+          334,
+          477,
+          577,
+          869,
+          917
+        ],
+        "order": [
+          "sqli",
+          "null",
+          "syn",
+          "spike"
+        ],
+        "benign_s": 6.81,
+        "iperf_mbps": 2.1,
+        "http_seed": 607400333,
+        "sqli_order": [
+          3,
+          2,
+          0,
+          1
+        ]
+      },
+      {
+        "scan_ports": [
+          131,
+          270,
+          694,
+          753,
+          787,
+          919,
+          946,
+          1002
+        ],
+        "order": [
+          "null",
+          "sqli",
+          "spike",
+          "syn"
+        ],
+        "benign_s": 6.07,
+        "iperf_mbps": 1.81,
+        "http_seed": 1261554639,
+        "sqli_order": [
+          0,
+          3,
+          2,
+          1
+        ]
+      }
+    ]
+  }
+}

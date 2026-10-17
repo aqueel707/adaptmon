@@ -54,8 +54,18 @@ class FakeSwitch:
     def read_dp_counters(self):
         return {"forwarded": 0, "cloned": 0, "dropped": 0}
 
+    def read_dp_counters_full(self):
+        return {k: 0 for k in ("forwarded", "forwarded_bytes", "cloned", "cloned_bytes",
+                               "dropped", "dropped_bytes")} | {
+            f"clone_{r}{suf}": 0 for r in ("level", "sample", "hostpair", "head")
+            for suf in ("", "_bytes")}
+
     def reset_dp_counters(self):
         pass
+
+    def set_head_clone_n(self, n):
+        self.head_clone_n = n
+        return n
 
     def write_flow_levels(self, levels):
         for i, v in levels.items():
@@ -213,44 +223,182 @@ def test_flow_escalates_to_clone_via_score_not_drop(ctl):
     assert max(sw.r["flow_level"][s] for s in slots) < 2   # benign flows stay below
 
 
-def test_dpi_confirmation_forces_drop_only_at_clone(ctl):
+def test_dpi_confirmation_force_clones_then_force_drops(ctl):
+    """
+    A DPI confirmation on a flow below CLONE jumps it straight to CLONE
+    (force_clone, bypassing the up-hysteresis -- waiting for K_UP
+    anomalous score windows would just leave a confirmed attack's packets
+    uninspected in the meantime). A second confirmation on a flow already
+    at CLONE forces DROP, unchanged from before.
+    """
     c, sw, out = ctl
     rng = np.random.default_rng(0)
     slots = list(range(100, 160))
     t = train(c, sw, rng, 0.0, slots)
-    th = c.model.thresholds
-    c.model.score = lambda X: np.where(X[:, 3] > 10_000, th.clone - 1.0, th.monitor + 1.0)
     atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 9999)
+    atk_ft = {"src": atk[0], "dst": atk[1], "proto": atk[2],
+             "sport": atk[3], "dport": atk[4]}
 
-    # A confirmation that arrives while the flow is still NORMAL/MONITOR
-    # must NOT force DROP
-    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=7,
-                          five_tuple={"src": atk[0], "dst": atk[1], "proto": atk[2],
-                                     "sport": atk[3], "dport": atk[4]},
-                          level=2)
+    # Confirmation while the flow is still NORMAL: force_clone, immediately
+    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=7, five_tuple=atk_ft, level=2)
     t += 1
     benign_step(sw, rng, t, slots)
-    sw.set_flow(7, atk, 50000, 50000 * 60, 50_000_000, 50_000_000 + int(1e6))
+    sw.set_flow(7, atk, 1, 60, 50_000_000, 50_000_000 + int(1e6))
     c._poll(T0 + t)
-    assert sw.r["flow_level"][7] == 0       # one score window: not CLONE yet
+    assert sw.r["flow_level"][7] == 2        # CLONE on the very first poll, no waiting
     assert sw.drop_rules == {}
-    assert len(c._pending_confirmations) == 1
+    assert c._pending_confirmations == []
+    assert c.policy.state((1, 7)).escalated_by == "DPI-sample"
+    forced_clone = [json.loads(l) for l in open(out / "alerts.jsonl")
+                   if json.loads(l)["type"] == "forced_clone"]
+    assert len(forced_clone) == 1 and forced_clone[0]["attack_class"] == "syn_scan"
 
-    # Second anomalous window: escalates to CLONE; the pending confirmation
-    # is retried this same poll and now forces DROP
+    # A second confirmation now that the flow is at CLONE forces DROP
+    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=7, five_tuple=atk_ft, level=2)
     t += 1
     benign_step(sw, rng, t, slots)
-    sw.set_flow(7, atk, 100000, 100000 * 60, 50_000_000, 50_000_000 + int(2e6))
+    sw.set_flow(7, atk, 2, 120, 50_000_000, 50_000_000 + int(2e6))
     c._poll(T0 + t)
     assert sw.r["flow_level"][7] == 3
     assert list(sw.drop_rules.values()) == [atk]
     assert c._pending_confirmations == []
-    forced = [json.loads(l) for l in open(out / "alerts.jsonl")
-             if json.loads(l)["type"] == "forced_drop"]
-    assert len(forced) == 1
-    assert forced[0]["attack_class"] == "syn_scan"
-    assert forced[0]["detector"] == "dpi_confirmation"
+    forced_drop = [json.loads(l) for l in open(out / "alerts.jsonl")
+                  if json.loads(l)["type"] == "forced_drop"]
+    assert len(forced_drop) == 1
+    assert forced_drop[0]["attack_class"] == "syn_scan"
+    assert forced_drop[0]["detector"] == "dpi_confirmation"
     assert c.policy.state((1, 7)).escalated_by == "dpi_confirmed:syn_scan"
+
+
+def test_dpi_confirmation_on_scan_class_also_force_clones_the_host_pair(ctl):
+    """A confirmed syn_scan/null_scan also force-clones the whole host
+    pair (installs host_clone_table), since each probe is its own
+    short-lived flow -- escalating just that one 5-tuple would miss the
+    scan's other probes. A non-scan class (sqli) does not."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 9999)
+    atk_ft = {"src": atk[0], "dst": atk[1], "proto": atk[2],
+             "sport": atk[3], "dport": atk[4]}
+
+    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=7, five_tuple=atk_ft, level=2)
+    t += 1
+    benign_step(sw, rng, t, slots)
+    sw.set_flow(7, atk, 1, 60, 50_000_000, 50_000_000 + int(1e6))
+    c._poll(T0 + t)
+    assert list(sw.host_clone_rules.values()) == [atk[0]]
+    pair_key = (1, atk[0], atk[1])
+    assert c.pair_policy.state(pair_key).level == 2
+    assert c.pair_policy.state(pair_key).escalated_by == "DPI-sample"
+    pe = [json.loads(l) for l in open(out / "alerts.jsonl") if json.loads(l)["type"] == "pair_escalation"]
+    assert len(pe) == 1 and pe[0]["detector"] == "dpi_confirmation"
+
+
+def _confirm_once(c, sw, out, rng, t, slots, atk, cls, clone_reason, slot=7):
+    ft = {"src": atk[0], "dst": atk[1], "proto": atk[2], "sport": atk[3], "dport": atk[4]}
+    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=slot, five_tuple=ft,
+                          level=0, attack_class=cls, clone_reason=clone_reason)
+    t += 1
+    benign_step(sw, rng, t, slots)
+    sw.set_flow(slot, atk, 1, 60, 50_000_000, 50_000_000 + int(1e6))
+    c._poll(T0 + t)
+    return t
+
+
+def test_dpi_head_confirmation_tags_flow_and_scan_pair_dpi_head(ctl):
+    """A confirmation made on a flow-head clone (clone_reason 4) is credited
+    to DPI-head -- on the flow, on the host pair a scan class force-clones,
+    and on both forced_clone/pair_escalation alerts."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 9999)
+    _confirm_once(c, sw, out, rng, t, slots, atk, "null_scan", clone_reason=4)
+    assert sw.r["flow_level"][7] == 2
+    assert c.policy.state((1, 7)).escalated_by == "DPI-head"
+    assert c.pair_policy.state((1, atk[0], atk[1])).escalated_by == "DPI-head"
+    alerts = [json.loads(l) for l in open(out / "alerts.jsonl")]
+    fc = [a for a in alerts if a["type"] == "forced_clone"]
+    pe = [a for a in alerts if a["type"] == "pair_escalation"]
+    assert fc[0]["trigger"] == "DPI-head" and fc[0]["clone_reason"] == 4
+    assert pe[0]["trigger"] == "DPI-head"
+    # The same window's flow_windows.csv row already carries it (rows are
+    # written after section 6, not before)
+    c._flow_f.flush()
+    rows = [r for r in csv.DictReader(open(out / "flow_windows.csv")) if r["slot"] == "7"]
+    assert rows[-1]["escalated_by"] == "DPI-head" and rows[-1]["level"] == "2"
+
+
+def test_dpi_sample_confirmation_on_non_scan_class_tags_dpi_sample_only(ctl):
+    """clone_reason 2 (adaptive sampling) -> DPI-sample; sqli is not a scan
+    class, so no host pair is force-cloned."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 8000)
+    _confirm_once(c, sw, out, rng, t, slots, atk, "sqli", clone_reason=2)
+    assert sw.r["flow_level"][7] == 2
+    assert c.policy.state((1, 7)).escalated_by == "DPI-sample"
+    assert sw.host_clone_rules == {}
+
+
+@pytest.mark.parametrize("pair_trigger", ["IF-pair", "DPI-head"])
+def test_hostpair_clone_reason_credits_what_escalated_the_pair(ctl, pair_trigger):
+    """clone_reason 3 means DPI only had the packet because a host-pair clone
+    rule was in place; the flow's escalation is credited to whatever
+    escalated that pair."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 8000)
+    pst = c.pair_policy.state((1, atk[0], "10.0.2.9"))   # another dst, same src
+    pst.rule_handle, pst.escalated_by = 99, pair_trigger
+    _confirm_once(c, sw, out, rng, t, slots, atk, "sqli", clone_reason=3)
+    assert c.policy.state((1, 7)).escalated_by == pair_trigger
+
+
+def test_alert_without_clone_reason_still_counts_as_dpi_sample(ctl):
+    """Backward compatibility: confirmed alerts from before clone_reason
+    existed came from the only non-level path there was, sampling."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 8000)
+    _confirm_once(c, sw, out, rng, t, slots, atk, "sqli", clone_reason=None)
+    assert c.policy.state((1, 7)).escalated_by == "DPI-sample"
+
+
+def test_start_writes_head_clone_n_to_every_switch_and_logs_it(tmp_path, monkeypatch, caplog):
+    sw = FakeSwitch()
+    monkeypatch.setattr(mon, "DataPlaneManager", lambda cfg: FakeDPM(sw))
+    c = mon.AdaptMonController([{"switch_id": 1, "thrift_port": 0}],
+                               out_dir=str(tmp_path), train_until=10**12,
+                               head_clone_n=3)
+    with caplog.at_level("INFO"):
+        c.start()
+        c.stop()
+    assert sw.head_clone_n == 3
+    assert c.head_clone_n_readback == {1: 3}
+    assert any("first N=3 packets of every new flow" in r.message for r in caplog.records)
+    assert c.summary()["head_clone_n"] == 3
+
+
+def test_windows_csv_has_byte_and_per_reason_clone_counters(ctl):
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    train(c, sw, rng, 0.0, slots, n_warmup=2)
+    c._win_f.flush()
+    hdr = open(out / "windows.csv").readline().strip().split(",")
+    for k in ("s1_fwd_bytes", "s1_cloned_bytes", "s1_clone_head", "s1_clone_head_bytes",
+              "s1_clone_sample", "s1_clone_level", "s1_clone_hostpair"):
+        assert k in hdr
 
 
 def test_confirmation_on_inactive_flow_expires_after_retry_window(ctl):

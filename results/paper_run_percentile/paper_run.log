@@ -1,0 +1,582 @@
+2026-10-17 15:01:46 [INFO] controller.utils: Logging to results/paper_run_percentile/paper_run.log
+2026-10-17 15:01:46 [INFO] __main__: Series: results/paper_run_percentile (5 run(s) x 8 cycles)
+2026-10-17 15:01:46 [INFO] __main__: === run 1/5 -> results/paper_run_percentile/run_01 ===
+2026-10-17 15:01:46 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:01:47 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:01:47 [INFO] topo.namespace_topo: Building topology...
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   s1 CPU port 255: am_s1cpu <--> am_s1dpi
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   s2 CPU port 255: am_s2cpu <--> am_s2dpi
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+2026-10-17 15:01:47 [INFO] topo.namespace_topo: Topology built successfully
+2026-10-17 15:01:47 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-10-17 15:01:47 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/adaptmon-1-s1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 -i 255@am_s1cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:01:49 [INFO] topo.namespace_topo:   s1: running (pid=231, thrift=9090)
+2026-10-17 15:01:49 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/adaptmon-1-s2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 -i 255@am_s2cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:01:51 [INFO] topo.namespace_topo:   s2: running (pid=244, thrift=9091)
+2026-10-17 15:01:52 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-10-17 15:01:52 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-10-17 15:01:52 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-10-17 15:01:56 [INFO] __main__: Warm-up: 30s benign-only (train_until=1792229547, now=1792229517)
+2026-10-17 15:02:32 [INFO] __main__: Attack phase: 8 cycles
+2026-10-17 15:02:32 [INFO] __main__: -- cycle 0: benign --
+2026-10-17 15:02:48 [INFO] __main__: -- cycle 0: nmap syn --
+2026-10-17 15:02:50 [INFO] __main__: -- cycle 0: nmap null --
+2026-10-17 15:02:51 [INFO] __main__: -- cycle 0: sqli burst --
+2026-10-17 15:02:51 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56000
+2026-10-17 15:02:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56001
+2026-10-17 15:02:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56002
+2026-10-17 15:02:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56003
+2026-10-17 15:02:53 [INFO] __main__: -- cycle 0: rate spike --
+2026-10-17 15:02:58 [INFO] __main__: -- cycle 1: benign --
+2026-10-17 15:03:14 [INFO] __main__: -- cycle 1: nmap syn --
+2026-10-17 15:03:15 [INFO] __main__: -- cycle 1: nmap null --
+2026-10-17 15:03:17 [INFO] __main__: -- cycle 1: sqli burst --
+2026-10-17 15:03:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56020
+2026-10-17 15:03:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56021
+2026-10-17 15:03:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56022
+2026-10-17 15:03:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56023
+2026-10-17 15:03:19 [INFO] __main__: -- cycle 1: rate spike --
+2026-10-17 15:03:24 [INFO] __main__: -- cycle 2: benign --
+2026-10-17 15:03:39 [INFO] __main__: -- cycle 2: nmap syn --
+2026-10-17 15:03:41 [INFO] __main__: -- cycle 2: nmap null --
+2026-10-17 15:03:42 [INFO] __main__: -- cycle 2: sqli burst --
+2026-10-17 15:03:42 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56040
+2026-10-17 15:03:42 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56041
+2026-10-17 15:03:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56042
+2026-10-17 15:03:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56043
+2026-10-17 15:03:44 [INFO] __main__: -- cycle 2: rate spike --
+2026-10-17 15:03:49 [INFO] __main__: -- cycle 3: benign --
+2026-10-17 15:04:05 [INFO] __main__: -- cycle 3: nmap syn --
+2026-10-17 15:04:07 [INFO] __main__: -- cycle 3: nmap null --
+2026-10-17 15:04:08 [INFO] __main__: -- cycle 3: sqli burst --
+2026-10-17 15:04:08 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56060
+2026-10-17 15:04:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56061
+2026-10-17 15:04:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56062
+2026-10-17 15:04:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56063
+2026-10-17 15:04:10 [INFO] __main__: -- cycle 3: rate spike --
+2026-10-17 15:04:15 [INFO] __main__: -- cycle 4: benign --
+2026-10-17 15:04:31 [INFO] __main__: -- cycle 4: nmap syn --
+2026-10-17 15:04:33 [INFO] __main__: -- cycle 4: nmap null --
+2026-10-17 15:04:34 [INFO] __main__: -- cycle 4: sqli burst --
+2026-10-17 15:04:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56080
+2026-10-17 15:04:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56081
+2026-10-17 15:04:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56082
+2026-10-17 15:04:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56083
+2026-10-17 15:04:36 [INFO] __main__: -- cycle 4: rate spike --
+2026-10-17 15:04:42 [INFO] __main__: -- cycle 5: benign --
+2026-10-17 15:04:57 [INFO] __main__: -- cycle 5: nmap syn --
+2026-10-17 15:04:58 [INFO] __main__: -- cycle 5: nmap null --
+2026-10-17 15:05:00 [INFO] __main__: -- cycle 5: sqli burst --
+2026-10-17 15:05:00 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56100
+2026-10-17 15:05:00 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56101
+2026-10-17 15:05:00 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56102
+2026-10-17 15:05:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56103
+2026-10-17 15:05:02 [INFO] __main__: -- cycle 5: rate spike --
+2026-10-17 15:05:07 [INFO] __main__: -- cycle 6: benign --
+2026-10-17 15:05:22 [INFO] __main__: -- cycle 6: nmap syn --
+2026-10-17 15:05:24 [INFO] __main__: -- cycle 6: nmap null --
+2026-10-17 15:05:26 [INFO] __main__: -- cycle 6: sqli burst --
+2026-10-17 15:05:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56120
+2026-10-17 15:05:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56121
+2026-10-17 15:05:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56122
+2026-10-17 15:05:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56123
+2026-10-17 15:05:28 [INFO] __main__: -- cycle 6: rate spike --
+2026-10-17 15:05:33 [INFO] __main__: -- cycle 7: benign --
+2026-10-17 15:05:48 [INFO] __main__: -- cycle 7: nmap syn --
+2026-10-17 15:05:50 [INFO] __main__: -- cycle 7: nmap null --
+2026-10-17 15:05:51 [INFO] __main__: -- cycle 7: sqli burst --
+2026-10-17 15:05:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56140
+2026-10-17 15:05:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56141
+2026-10-17 15:05:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56142
+2026-10-17 15:05:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56143
+2026-10-17 15:05:54 [INFO] __main__: -- cycle 7: rate spike --
+2026-10-17 15:05:59 [INFO] __main__: Settling 6s for the last confirmations/forced drops...
+2026-10-17 15:06:12 [INFO] topo.namespace_topo:   s1 stopped
+2026-10-17 15:06:15 [INFO] topo.namespace_topo:   s2 stopped
+2026-10-17 15:06:15 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:06:16 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:06:16 [INFO] __main__: Run complete: {'n_flows': 261, 'by_class': {'benign': 93, 'syn_scan': 64, 'null_scan': 64, 'sqli': 32, 'rate_spike': 8}}
+2026-10-17 15:06:21 [INFO] __main__: === run 2/5 -> results/paper_run_percentile/run_02 ===
+2026-10-17 15:06:21 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:06:21 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:06:21 [INFO] topo.namespace_topo: Building topology...
+2026-10-17 15:06:21 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-10-17 15:06:21 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-10-17 15:06:21 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-10-17 15:06:21 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-10-17 15:06:21 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   s1 CPU port 255: am_s1cpu <--> am_s1dpi
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   s2 CPU port 255: am_s2cpu <--> am_s2dpi
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+2026-10-17 15:06:22 [INFO] topo.namespace_topo: Topology built successfully
+2026-10-17 15:06:22 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-10-17 15:06:22 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/adaptmon-1-s1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 -i 255@am_s1cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:06:24 [INFO] topo.namespace_topo:   s1: running (pid=853, thrift=9090)
+2026-10-17 15:06:24 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/adaptmon-1-s2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 -i 255@am_s2cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:06:26 [INFO] topo.namespace_topo:   s2: running (pid=866, thrift=9091)
+2026-10-17 15:06:27 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-10-17 15:06:27 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-10-17 15:06:27 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-10-17 15:06:31 [INFO] __main__: Warm-up: 30s benign-only (train_until=1792229822, now=1792229792)
+2026-10-17 15:07:07 [INFO] __main__: Attack phase: 8 cycles
+2026-10-17 15:07:07 [INFO] __main__: -- cycle 0: benign --
+2026-10-17 15:07:22 [INFO] __main__: -- cycle 0: nmap syn --
+2026-10-17 15:07:24 [INFO] __main__: -- cycle 0: nmap null --
+2026-10-17 15:07:25 [INFO] __main__: -- cycle 0: sqli burst --
+2026-10-17 15:07:25 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56000
+2026-10-17 15:07:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56001
+2026-10-17 15:07:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56002
+2026-10-17 15:07:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56003
+2026-10-17 15:07:28 [INFO] __main__: -- cycle 0: rate spike --
+2026-10-17 15:07:33 [INFO] __main__: -- cycle 1: benign --
+2026-10-17 15:07:48 [INFO] __main__: -- cycle 1: nmap syn --
+2026-10-17 15:07:50 [INFO] __main__: -- cycle 1: nmap null --
+2026-10-17 15:07:51 [INFO] __main__: -- cycle 1: sqli burst --
+2026-10-17 15:07:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56020
+2026-10-17 15:07:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56021
+2026-10-17 15:07:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56022
+2026-10-17 15:07:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56023
+2026-10-17 15:07:54 [INFO] __main__: -- cycle 1: rate spike --
+2026-10-17 15:07:59 [INFO] __main__: -- cycle 2: benign --
+2026-10-17 15:08:14 [INFO] __main__: -- cycle 2: nmap syn --
+2026-10-17 15:08:15 [INFO] __main__: -- cycle 2: nmap null --
+2026-10-17 15:08:17 [INFO] __main__: -- cycle 2: sqli burst --
+2026-10-17 15:08:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56040
+2026-10-17 15:08:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56041
+2026-10-17 15:08:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56042
+2026-10-17 15:08:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56043
+2026-10-17 15:08:19 [INFO] __main__: -- cycle 2: rate spike --
+2026-10-17 15:08:24 [INFO] __main__: -- cycle 3: benign --
+2026-10-17 15:08:39 [INFO] __main__: -- cycle 3: nmap syn --
+2026-10-17 15:08:41 [INFO] __main__: -- cycle 3: nmap null --
+2026-10-17 15:08:43 [INFO] __main__: -- cycle 3: sqli burst --
+2026-10-17 15:08:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56060
+2026-10-17 15:08:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56061
+2026-10-17 15:08:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56062
+2026-10-17 15:08:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56063
+2026-10-17 15:08:45 [INFO] __main__: -- cycle 3: rate spike --
+2026-10-17 15:08:50 [INFO] __main__: -- cycle 4: benign --
+2026-10-17 15:09:05 [INFO] __main__: -- cycle 4: nmap syn --
+2026-10-17 15:09:07 [INFO] __main__: -- cycle 4: nmap null --
+2026-10-17 15:09:08 [INFO] __main__: -- cycle 4: sqli burst --
+2026-10-17 15:09:08 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56080
+2026-10-17 15:09:08 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56081
+2026-10-17 15:09:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56082
+2026-10-17 15:09:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56083
+2026-10-17 15:09:10 [INFO] __main__: -- cycle 4: rate spike --
+2026-10-17 15:09:15 [INFO] __main__: -- cycle 5: benign --
+2026-10-17 15:09:31 [INFO] __main__: -- cycle 5: nmap syn --
+2026-10-17 15:09:33 [INFO] __main__: -- cycle 5: nmap null --
+2026-10-17 15:09:35 [INFO] __main__: -- cycle 5: sqli burst --
+2026-10-17 15:09:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56100
+2026-10-17 15:09:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56101
+2026-10-17 15:09:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56102
+2026-10-17 15:09:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56103
+2026-10-17 15:09:37 [INFO] __main__: -- cycle 5: rate spike --
+2026-10-17 15:09:42 [INFO] __main__: -- cycle 6: benign --
+2026-10-17 15:09:57 [INFO] __main__: -- cycle 6: nmap syn --
+2026-10-17 15:09:59 [INFO] __main__: -- cycle 6: nmap null --
+2026-10-17 15:10:00 [INFO] __main__: -- cycle 6: sqli burst --
+2026-10-17 15:10:00 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56120
+2026-10-17 15:10:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56121
+2026-10-17 15:10:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56122
+2026-10-17 15:10:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56123
+2026-10-17 15:10:02 [INFO] __main__: -- cycle 6: rate spike --
+2026-10-17 15:10:08 [INFO] __main__: -- cycle 7: benign --
+2026-10-17 15:10:23 [INFO] __main__: -- cycle 7: nmap syn --
+2026-10-17 15:10:25 [INFO] __main__: -- cycle 7: nmap null --
+2026-10-17 15:10:27 [INFO] __main__: -- cycle 7: sqli burst --
+2026-10-17 15:10:27 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56140
+2026-10-17 15:10:27 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56141
+2026-10-17 15:10:27 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56142
+2026-10-17 15:10:27 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56143
+2026-10-17 15:10:29 [INFO] __main__: -- cycle 7: rate spike --
+2026-10-17 15:10:34 [INFO] __main__: Settling 6s for the last confirmations/forced drops...
+2026-10-17 15:10:48 [INFO] topo.namespace_topo:   s1 stopped
+2026-10-17 15:10:51 [INFO] topo.namespace_topo:   s2 stopped
+2026-10-17 15:10:51 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:10:51 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:10:51 [INFO] __main__: Run complete: {'n_flows': 261, 'by_class': {'benign': 93, 'syn_scan': 64, 'null_scan': 64, 'sqli': 32, 'rate_spike': 8}}
+2026-10-17 15:10:57 [INFO] __main__: === run 3/5 -> results/paper_run_percentile/run_03 ===
+2026-10-17 15:10:57 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:10:57 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:10:57 [INFO] topo.namespace_topo: Building topology...
+2026-10-17 15:10:57 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-10-17 15:10:57 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-10-17 15:10:57 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-10-17 15:10:57 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-10-17 15:10:57 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-10-17 15:10:57 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-10-17 15:10:57 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-10-17 15:10:57 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-10-17 15:10:58 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-10-17 15:10:58 [INFO] topo.namespace_topo:   s1 CPU port 255: am_s1cpu <--> am_s1dpi
+2026-10-17 15:10:58 [INFO] topo.namespace_topo:   s2 CPU port 255: am_s2cpu <--> am_s2dpi
+2026-10-17 15:10:58 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+2026-10-17 15:10:58 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+2026-10-17 15:10:58 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+2026-10-17 15:10:58 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+2026-10-17 15:10:58 [INFO] topo.namespace_topo: Topology built successfully
+2026-10-17 15:10:58 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-10-17 15:10:58 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/adaptmon-1-s1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 -i 255@am_s1cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:11:00 [INFO] topo.namespace_topo:   s1: running (pid=1475, thrift=9090)
+2026-10-17 15:11:00 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/adaptmon-1-s2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 -i 255@am_s2cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:11:02 [INFO] topo.namespace_topo:   s2: running (pid=1488, thrift=9091)
+2026-10-17 15:11:03 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-10-17 15:11:03 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-10-17 15:11:03 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-10-17 15:11:07 [INFO] __main__: Warm-up: 30s benign-only (train_until=1792230097, now=1792230067)
+2026-10-17 15:11:43 [INFO] __main__: Attack phase: 8 cycles
+2026-10-17 15:11:43 [INFO] __main__: -- cycle 0: benign --
+2026-10-17 15:11:58 [INFO] __main__: -- cycle 0: nmap syn --
+2026-10-17 15:12:00 [INFO] __main__: -- cycle 0: nmap null --
+2026-10-17 15:12:02 [INFO] __main__: -- cycle 0: sqli burst --
+2026-10-17 15:12:02 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56000
+2026-10-17 15:12:02 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56001
+2026-10-17 15:12:02 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56002
+2026-10-17 15:12:02 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56003
+2026-10-17 15:12:04 [INFO] __main__: -- cycle 0: rate spike --
+2026-10-17 15:12:09 [INFO] __main__: -- cycle 1: benign --
+2026-10-17 15:12:24 [INFO] __main__: -- cycle 1: nmap syn --
+2026-10-17 15:12:26 [INFO] __main__: -- cycle 1: nmap null --
+2026-10-17 15:12:28 [INFO] __main__: -- cycle 1: sqli burst --
+2026-10-17 15:12:28 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56020
+2026-10-17 15:12:28 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56021
+2026-10-17 15:12:28 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56022
+2026-10-17 15:12:28 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56023
+2026-10-17 15:12:30 [INFO] __main__: -- cycle 1: rate spike --
+2026-10-17 15:12:35 [INFO] __main__: -- cycle 2: benign --
+2026-10-17 15:12:50 [INFO] __main__: -- cycle 2: nmap syn --
+2026-10-17 15:12:52 [INFO] __main__: -- cycle 2: nmap null --
+2026-10-17 15:12:54 [INFO] __main__: -- cycle 2: sqli burst --
+2026-10-17 15:12:54 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56040
+2026-10-17 15:12:54 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56041
+2026-10-17 15:12:54 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56042
+2026-10-17 15:12:54 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56043
+2026-10-17 15:12:56 [INFO] __main__: -- cycle 2: rate spike --
+2026-10-17 15:13:01 [INFO] __main__: -- cycle 3: benign --
+2026-10-17 15:13:16 [INFO] __main__: -- cycle 3: nmap syn --
+2026-10-17 15:13:17 [INFO] __main__: -- cycle 3: nmap null --
+2026-10-17 15:13:19 [INFO] __main__: -- cycle 3: sqli burst --
+2026-10-17 15:13:19 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56060
+2026-10-17 15:13:19 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56061
+2026-10-17 15:13:19 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56062
+2026-10-17 15:13:19 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56063
+2026-10-17 15:13:21 [INFO] __main__: -- cycle 3: rate spike --
+2026-10-17 15:13:26 [INFO] __main__: -- cycle 4: benign --
+2026-10-17 15:13:41 [INFO] __main__: -- cycle 4: nmap syn --
+2026-10-17 15:13:43 [INFO] __main__: -- cycle 4: nmap null --
+2026-10-17 15:13:44 [INFO] __main__: -- cycle 4: sqli burst --
+2026-10-17 15:13:45 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56080
+2026-10-17 15:13:45 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56081
+2026-10-17 15:13:45 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56082
+2026-10-17 15:13:45 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56083
+2026-10-17 15:13:47 [INFO] __main__: -- cycle 4: rate spike --
+2026-10-17 15:13:52 [INFO] __main__: -- cycle 5: benign --
+2026-10-17 15:14:07 [INFO] __main__: -- cycle 5: nmap syn --
+2026-10-17 15:14:08 [INFO] __main__: -- cycle 5: nmap null --
+2026-10-17 15:14:10 [INFO] __main__: -- cycle 5: sqli burst --
+2026-10-17 15:14:10 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56100
+2026-10-17 15:14:10 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56101
+2026-10-17 15:14:10 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56102
+2026-10-17 15:14:10 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56103
+2026-10-17 15:14:12 [INFO] __main__: -- cycle 5: rate spike --
+2026-10-17 15:14:17 [INFO] __main__: -- cycle 6: benign --
+2026-10-17 15:14:32 [INFO] __main__: -- cycle 6: nmap syn --
+2026-10-17 15:14:34 [INFO] __main__: -- cycle 6: nmap null --
+2026-10-17 15:14:36 [INFO] __main__: -- cycle 6: sqli burst --
+2026-10-17 15:14:36 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56120
+2026-10-17 15:14:36 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56121
+2026-10-17 15:14:36 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56122
+2026-10-17 15:14:36 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56123
+2026-10-17 15:14:38 [INFO] __main__: -- cycle 6: rate spike --
+2026-10-17 15:14:43 [INFO] __main__: -- cycle 7: benign --
+2026-10-17 15:14:58 [INFO] __main__: -- cycle 7: nmap syn --
+2026-10-17 15:14:59 [INFO] __main__: -- cycle 7: nmap null --
+2026-10-17 15:15:01 [INFO] __main__: -- cycle 7: sqli burst --
+2026-10-17 15:15:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56140
+2026-10-17 15:15:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56141
+2026-10-17 15:15:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56142
+2026-10-17 15:15:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56143
+2026-10-17 15:15:03 [INFO] __main__: -- cycle 7: rate spike --
+2026-10-17 15:15:08 [INFO] __main__: Settling 6s for the last confirmations/forced drops...
+2026-10-17 15:15:22 [INFO] topo.namespace_topo:   s1 stopped
+2026-10-17 15:15:25 [INFO] topo.namespace_topo:   s2 stopped
+2026-10-17 15:15:25 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:15:25 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:15:25 [INFO] __main__: Run complete: {'n_flows': 261, 'by_class': {'benign': 93, 'syn_scan': 64, 'null_scan': 64, 'sqli': 32, 'rate_spike': 8}}
+2026-10-17 15:15:30 [INFO] __main__: === run 4/5 -> results/paper_run_percentile/run_04 ===
+2026-10-17 15:15:30 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:15:31 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:15:31 [INFO] topo.namespace_topo: Building topology...
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   s1 CPU port 255: am_s1cpu <--> am_s1dpi
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   s2 CPU port 255: am_s2cpu <--> am_s2dpi
+2026-10-17 15:15:31 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+2026-10-17 15:15:32 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+2026-10-17 15:15:32 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+2026-10-17 15:15:32 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+2026-10-17 15:15:32 [INFO] topo.namespace_topo: Topology built successfully
+2026-10-17 15:15:32 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-10-17 15:15:32 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/adaptmon-1-s1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 -i 255@am_s1cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:15:34 [INFO] topo.namespace_topo:   s1: running (pid=2097, thrift=9090)
+2026-10-17 15:15:34 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/adaptmon-1-s2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 -i 255@am_s2cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:15:36 [INFO] topo.namespace_topo:   s2: running (pid=2110, thrift=9091)
+2026-10-17 15:15:37 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-10-17 15:15:37 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-10-17 15:15:37 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-10-17 15:15:41 [INFO] __main__: Warm-up: 30s benign-only (train_until=1792230371, now=1792230341)
+2026-10-17 15:16:17 [INFO] __main__: Attack phase: 8 cycles
+2026-10-17 15:16:17 [INFO] __main__: -- cycle 0: benign --
+2026-10-17 15:16:32 [INFO] __main__: -- cycle 0: nmap syn --
+2026-10-17 15:16:33 [INFO] __main__: -- cycle 0: nmap null --
+2026-10-17 15:16:35 [INFO] __main__: -- cycle 0: sqli burst --
+2026-10-17 15:16:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56000
+2026-10-17 15:16:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56001
+2026-10-17 15:16:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56002
+2026-10-17 15:16:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56003
+2026-10-17 15:16:37 [INFO] __main__: -- cycle 0: rate spike --
+2026-10-17 15:16:42 [INFO] __main__: -- cycle 1: benign --
+2026-10-17 15:16:57 [INFO] __main__: -- cycle 1: nmap syn --
+2026-10-17 15:16:59 [INFO] __main__: -- cycle 1: nmap null --
+2026-10-17 15:17:00 [INFO] __main__: -- cycle 1: sqli burst --
+2026-10-17 15:17:00 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56020
+2026-10-17 15:17:00 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56021
+2026-10-17 15:17:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56022
+2026-10-17 15:17:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56023
+2026-10-17 15:17:02 [INFO] __main__: -- cycle 1: rate spike --
+2026-10-17 15:17:07 [INFO] __main__: -- cycle 2: benign --
+2026-10-17 15:17:22 [INFO] __main__: -- cycle 2: nmap syn --
+2026-10-17 15:17:24 [INFO] __main__: -- cycle 2: nmap null --
+2026-10-17 15:17:26 [INFO] __main__: -- cycle 2: sqli burst --
+2026-10-17 15:17:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56040
+2026-10-17 15:17:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56041
+2026-10-17 15:17:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56042
+2026-10-17 15:17:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56043
+2026-10-17 15:17:28 [INFO] __main__: -- cycle 2: rate spike --
+2026-10-17 15:17:33 [INFO] __main__: -- cycle 3: benign --
+2026-10-17 15:17:48 [INFO] __main__: -- cycle 3: nmap syn --
+2026-10-17 15:17:50 [INFO] __main__: -- cycle 3: nmap null --
+2026-10-17 15:17:51 [INFO] __main__: -- cycle 3: sqli burst --
+2026-10-17 15:17:51 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56060
+2026-10-17 15:17:51 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56061
+2026-10-17 15:17:51 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56062
+2026-10-17 15:17:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56063
+2026-10-17 15:17:53 [INFO] __main__: -- cycle 3: rate spike --
+2026-10-17 15:17:58 [INFO] __main__: -- cycle 4: benign --
+2026-10-17 15:18:13 [INFO] __main__: -- cycle 4: nmap syn --
+2026-10-17 15:18:15 [INFO] __main__: -- cycle 4: nmap null --
+2026-10-17 15:18:17 [INFO] __main__: -- cycle 4: sqli burst --
+2026-10-17 15:18:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56080
+2026-10-17 15:18:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56081
+2026-10-17 15:18:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56082
+2026-10-17 15:18:17 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56083
+2026-10-17 15:18:19 [INFO] __main__: -- cycle 4: rate spike --
+2026-10-17 15:18:24 [INFO] __main__: -- cycle 5: benign --
+2026-10-17 15:18:39 [INFO] __main__: -- cycle 5: nmap syn --
+2026-10-17 15:18:41 [INFO] __main__: -- cycle 5: nmap null --
+2026-10-17 15:18:43 [INFO] __main__: -- cycle 5: sqli burst --
+2026-10-17 15:18:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56100
+2026-10-17 15:18:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56101
+2026-10-17 15:18:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56102
+2026-10-17 15:18:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56103
+2026-10-17 15:18:45 [INFO] __main__: -- cycle 5: rate spike --
+2026-10-17 15:18:50 [INFO] __main__: -- cycle 6: benign --
+2026-10-17 15:19:05 [INFO] __main__: -- cycle 6: nmap syn --
+2026-10-17 15:19:07 [INFO] __main__: -- cycle 6: nmap null --
+2026-10-17 15:19:09 [INFO] __main__: -- cycle 6: sqli burst --
+2026-10-17 15:19:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56120
+2026-10-17 15:19:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56121
+2026-10-17 15:19:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56122
+2026-10-17 15:19:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56123
+2026-10-17 15:19:11 [INFO] __main__: -- cycle 6: rate spike --
+2026-10-17 15:19:16 [INFO] __main__: -- cycle 7: benign --
+2026-10-17 15:19:31 [INFO] __main__: -- cycle 7: nmap syn --
+2026-10-17 15:19:33 [INFO] __main__: -- cycle 7: nmap null --
+2026-10-17 15:19:35 [INFO] __main__: -- cycle 7: sqli burst --
+2026-10-17 15:19:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56140
+2026-10-17 15:19:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56141
+2026-10-17 15:19:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56142
+2026-10-17 15:19:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56143
+2026-10-17 15:19:37 [INFO] __main__: -- cycle 7: rate spike --
+2026-10-17 15:19:42 [INFO] __main__: Settling 6s for the last confirmations/forced drops...
+2026-10-17 15:19:56 [INFO] topo.namespace_topo:   s1 stopped
+2026-10-17 15:19:59 [INFO] topo.namespace_topo:   s2 stopped
+2026-10-17 15:19:59 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:19:59 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:19:59 [INFO] __main__: Run complete: {'n_flows': 261, 'by_class': {'benign': 93, 'syn_scan': 64, 'null_scan': 64, 'sqli': 32, 'rate_spike': 8}}
+2026-10-17 15:20:04 [INFO] __main__: === run 5/5 -> results/paper_run_percentile/run_05 ===
+2026-10-17 15:20:04 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:20:05 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:20:05 [INFO] topo.namespace_topo: Building topology...
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   s1 CPU port 255: am_s1cpu <--> am_s1dpi
+2026-10-17 15:20:05 [INFO] topo.namespace_topo:   s2 CPU port 255: am_s2cpu <--> am_s2dpi
+2026-10-17 15:20:06 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+2026-10-17 15:20:06 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+2026-10-17 15:20:06 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+2026-10-17 15:20:06 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+2026-10-17 15:20:06 [INFO] topo.namespace_topo: Topology built successfully
+2026-10-17 15:20:06 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-10-17 15:20:06 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/adaptmon-1-s1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 -i 255@am_s1cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:20:08 [INFO] topo.namespace_topo:   s1: running (pid=2719, thrift=9090)
+2026-10-17 15:20:08 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/adaptmon-1-s2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 -i 255@am_s2cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 15:20:10 [INFO] topo.namespace_topo:   s2: running (pid=2732, thrift=9091)
+2026-10-17 15:20:11 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-10-17 15:20:11 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-10-17 15:20:11 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-10-17 15:20:15 [INFO] __main__: Warm-up: 30s benign-only (train_until=1792230645, now=1792230615)
+2026-10-17 15:20:51 [INFO] __main__: Attack phase: 8 cycles
+2026-10-17 15:20:51 [INFO] __main__: -- cycle 0: benign --
+2026-10-17 15:21:06 [INFO] __main__: -- cycle 0: nmap syn --
+2026-10-17 15:21:07 [INFO] __main__: -- cycle 0: nmap null --
+2026-10-17 15:21:09 [INFO] __main__: -- cycle 0: sqli burst --
+2026-10-17 15:21:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56000
+2026-10-17 15:21:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56001
+2026-10-17 15:21:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56002
+2026-10-17 15:21:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56003
+2026-10-17 15:21:11 [INFO] __main__: -- cycle 0: rate spike --
+2026-10-17 15:21:16 [INFO] __main__: -- cycle 1: benign --
+2026-10-17 15:21:31 [INFO] __main__: -- cycle 1: nmap syn --
+2026-10-17 15:21:33 [INFO] __main__: -- cycle 1: nmap null --
+2026-10-17 15:21:35 [INFO] __main__: -- cycle 1: sqli burst --
+2026-10-17 15:21:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56020
+2026-10-17 15:21:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56021
+2026-10-17 15:21:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56022
+2026-10-17 15:21:35 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56023
+2026-10-17 15:21:37 [INFO] __main__: -- cycle 1: rate spike --
+2026-10-17 15:21:42 [INFO] __main__: -- cycle 2: benign --
+2026-10-17 15:21:57 [INFO] __main__: -- cycle 2: nmap syn --
+2026-10-17 15:21:59 [INFO] __main__: -- cycle 2: nmap null --
+2026-10-17 15:22:00 [INFO] __main__: -- cycle 2: sqli burst --
+2026-10-17 15:22:00 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56040
+2026-10-17 15:22:00 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56041
+2026-10-17 15:22:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56042
+2026-10-17 15:22:01 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56043
+2026-10-17 15:22:02 [INFO] __main__: -- cycle 2: rate spike --
+2026-10-17 15:22:07 [INFO] __main__: -- cycle 3: benign --
+2026-10-17 15:22:22 [INFO] __main__: -- cycle 3: nmap syn --
+2026-10-17 15:22:24 [INFO] __main__: -- cycle 3: nmap null --
+2026-10-17 15:22:26 [INFO] __main__: -- cycle 3: sqli burst --
+2026-10-17 15:22:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56060
+2026-10-17 15:22:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56061
+2026-10-17 15:22:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56062
+2026-10-17 15:22:26 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56063
+2026-10-17 15:22:28 [INFO] __main__: -- cycle 3: rate spike --
+2026-10-17 15:22:33 [INFO] __main__: -- cycle 4: benign --
+2026-10-17 15:22:48 [INFO] __main__: -- cycle 4: nmap syn --
+2026-10-17 15:22:50 [INFO] __main__: -- cycle 4: nmap null --
+2026-10-17 15:22:51 [INFO] __main__: -- cycle 4: sqli burst --
+2026-10-17 15:22:51 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56080
+2026-10-17 15:22:51 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56081
+2026-10-17 15:22:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56082
+2026-10-17 15:22:52 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56083
+2026-10-17 15:22:53 [INFO] __main__: -- cycle 4: rate spike --
+2026-10-17 15:22:58 [INFO] __main__: -- cycle 5: benign --
+2026-10-17 15:23:14 [INFO] __main__: -- cycle 5: nmap syn --
+2026-10-17 15:23:16 [INFO] __main__: -- cycle 5: nmap null --
+2026-10-17 15:23:18 [INFO] __main__: -- cycle 5: sqli burst --
+2026-10-17 15:23:18 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56100
+2026-10-17 15:23:18 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56101
+2026-10-17 15:23:18 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56102
+2026-10-17 15:23:18 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56103
+2026-10-17 15:23:20 [INFO] __main__: -- cycle 5: rate spike --
+2026-10-17 15:23:25 [INFO] __main__: -- cycle 6: benign --
+2026-10-17 15:23:40 [INFO] __main__: -- cycle 6: nmap syn --
+2026-10-17 15:23:41 [INFO] __main__: -- cycle 6: nmap null --
+2026-10-17 15:23:43 [INFO] __main__: -- cycle 6: sqli burst --
+2026-10-17 15:23:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56120
+2026-10-17 15:23:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56121
+2026-10-17 15:23:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56122
+2026-10-17 15:23:43 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56123
+2026-10-17 15:23:45 [INFO] __main__: -- cycle 6: rate spike --
+2026-10-17 15:23:50 [INFO] __main__: -- cycle 7: benign --
+2026-10-17 15:24:05 [INFO] __main__: -- cycle 7: nmap syn --
+2026-10-17 15:24:07 [INFO] __main__: -- cycle 7: nmap null --
+2026-10-17 15:24:08 [INFO] __main__: -- cycle 7: sqli burst --
+2026-10-17 15:24:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56140
+2026-10-17 15:24:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56141
+2026-10-17 15:24:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56142
+2026-10-17 15:24:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56143
+2026-10-17 15:24:11 [INFO] __main__: -- cycle 7: rate spike --
+2026-10-17 15:24:16 [INFO] __main__: Settling 6s for the last confirmations/forced drops...
+2026-10-17 15:24:29 [INFO] topo.namespace_topo:   s1 stopped
+2026-10-17 15:24:32 [INFO] topo.namespace_topo:   s2 stopped
+2026-10-17 15:24:32 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 15:24:32 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 15:24:32 [INFO] __main__: Run complete: {'n_flows': 261, 'by_class': {'benign': 93, 'syn_scan': 64, 'null_scan': 64, 'sqli': 32, 'rate_spike': 8}}

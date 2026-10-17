@@ -1,0 +1,214 @@
+{
+  "n_flows": 261,
+  "overall": {
+    "tp": 0,
+    "fn": 168,
+    "fp": 1,
+    "tn": 92,
+    "tpr": 0.0,
+    "tpr_ci95": [
+      0.0,
+      0.021718302138675937
+    ],
+    "fpr": 0.010752688172043012,
+    "fpr_ci95": [
+      0.00027219744200713874,
+      0.058458164514380385
+    ]
+  },
+  "benign": {
+    "n": 93,
+    "n_escalated_clone_or_above": 1,
+    "false_positives_by_trigger": {
+      "IF-flow": {
+        "k": 1,
+        "n": 93,
+        "rate": 0.010752688172043012,
+        "ci95": [
+          0.00027219744200713874,
+          0.058458164514380385
+        ]
+      }
+    },
+    "n_dropped": 0,
+    "drop_rate": 0.0
+  },
+  "per_attack_class": {
+    "null_scan": {
+      "n": 64,
+      "n_observed": 64,
+      "detected_clone_or_above": 0,
+      "detected_recall": 0.0,
+      "detected_recall_ci95": [
+        0.0,
+        0.05600908938663656
+      ],
+      "recall_by_trigger": {},
+      "detect_latency_s": {
+        "n": 0
+      },
+      "dpi_confirmed": 0,
+      "dpi_confirmed_recall": 0.0,
+      "dpi_confirmed_recall_ci95": [
+        0.0,
+        0.05600908938663656
+      ],
+      "dpi_latency_s": {
+        "n": 0
+      },
+      "dropped": 0
+    },
+    "rate_spike": {
+      "n": 8,
+      "n_observed": 8,
+      "detected_clone_or_above": 0,
+      "detected_recall": 0.0,
+      "detected_recall_ci95": [
+        0.0,
+        0.3694166475528192
+      ],
+      "recall_by_trigger": {},
+      "detect_latency_s": {
+        "n": 0
+      },
+      "dpi_confirmed": 0,
+      "dpi_confirmed_recall": 0.0,
+      "dpi_confirmed_recall_ci95": [
+        0.0,
+        0.3694166475528192
+      ],
+      "dpi_latency_s": {
+        "n": 0
+      },
+      "dropped": 0
+    },
+    "sqli": {
+      "n": 32,
+      "n_observed": 32,
+      "detected_clone_or_above": 0,
+      "detected_recall": 0.0,
+      "detected_recall_ci95": [
+        0.0,
+        0.10888116067935288
+      ],
+      "recall_by_trigger": {},
+      "detect_latency_s": {
+        "n": 0
+      },
+      "dpi_confirmed": 0,
+      "dpi_confirmed_recall": 0.0,
+      "dpi_confirmed_recall_ci95": [
+        0.0,
+        0.10888116067935288
+      ],
+      "dpi_latency_s": {
+        "n": 0
+      },
+      "dropped": 0
+    },
+    "syn_scan": {
+      "n": 64,
+      "n_observed": 64,
+      "detected_clone_or_above": 0,
+      "detected_recall": 0.0,
+      "detected_recall_ci95": [
+        0.0,
+        0.05600908938663656
+      ],
+      "recall_by_trigger": {},
+      "detect_latency_s": {
+        "n": 0
+      },
+      "dpi_confirmed": 0,
+      "dpi_confirmed_recall": 0.0,
+      "dpi_confirmed_recall_ci95": [
+        0.0,
+        0.05600908938663656
+      ],
+      "dpi_latency_s": {
+        "n": 0
+      },
+      "dropped": 0
+    }
+  },
+  "detect_latency_s_by_trigger": {},
+  "inspection": {
+    "forwarded_packets": 165296,
+    "cloned_packets": 13470,
+    "cloned_per_forwarded": 0.0814901752008518,
+    "inspection_reduction_packets": 0.9185098247991482,
+    "forwarded_bytes": null,
+    "cloned_bytes": null,
+    "inspection_reduction_bytes": null,
+    "per_run_reduction_packets": [
+      0.9185098247991482
+    ],
+    "clones_by_reason": null
+  },
+  "capacity": {
+    "budget_pps": 2500,
+    "per_switch": {
+      "1": {
+        "max_pps": 1768.8136006327916,
+        "p99_pps": 1715.2608855639628,
+        "windows_over_budget": 0,
+        "n_windows": 250
+      },
+      "2": {
+        "max_pps": 1783.2145073598733,
+        "p99_pps": 1746.1498025769588,
+        "windows_over_budget": 0,
+        "n_windows": 250
+      }
+    },
+    "max_pps": 1783.2145073598733,
+    "windows_over_budget": 0,
+    "dpi_kernel_received": 11551,
+    "dpi_kernel_drops": 0
+  },
+  "resources": {
+    "poll_total_ms": {
+      "n": 217,
+      "mean": 107.75377413363852,
+      "median": 102.1605250000448,
+      "p95": 151.1141850000513,
+      "max": 315.40885600020374
+    },
+    "poll_read_ms": {
+      "n": 217,
+      "mean": 83.89998470967068,
+      "median": 81.37151100004303,
+      "p95": 112.75217659999721,
+      "max": 166.68836400003784
+    },
+    "controller_cpu_pct": {
+      "n": 217,
+      "mean": 9.54700460829493,
+      "median": 8.2,
+      "p95": 12.52,
+      "max": 86.3
+    },
+    "controller_rss_mb": {
+      "n": 217,
+      "mean": 145.51854118663596,
+      "median": 145.58984375,
+      "p95": 145.671875,
+      "max": 145.671875
+    },
+    "dpi_cpu_pct": {
+      "n": 217,
+      "mean": 2.8728110599078347,
+      "median": 0.0,
+      "p95": 19.24,
+      "max": 22.2
+    },
+    "dpi_rss_mb": {
+      "n": 217,
+      "mean": 170.9378420218894,
+      "median": 170.9296875,
+      "p95": 171.82890625,
+      "max": 171.9296875
+    }
+  },
+  "run_dir": "results/paper_run_full/run_01"
+}

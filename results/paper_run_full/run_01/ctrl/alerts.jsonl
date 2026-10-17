@@ -1,0 +1,2 @@
+{"type":"anomaly","detector":"flow","ts":1792227946.107727,"window":37,"switch":1,"flow_idx":2955,"five_tuple":{"src":"10.0.1.1","dst":"10.0.2.1","proto":6,"sport":49000,"dport":5201},"score":-0.12799503141017665,"raw_level":"CLONE","level":2,"level_name":"CLONE","prev_level":"NORMAL"}
+{"type":"anomaly","detector":"flow","ts":1792227947.1049588,"window":38,"switch":2,"flow_idx":2955,"five_tuple":{"src":"10.0.1.1","dst":"10.0.2.1","proto":6,"sport":49000,"dport":5201},"score":-0.12799503141017665,"raw_level":"CLONE","level":2,"level_name":"CLONE","prev_level":"MONITOR"}

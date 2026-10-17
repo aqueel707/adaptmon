@@ -5,19 +5,27 @@ NORMAL -> MONITOR -> CLONE -> DROP.
 
 The Isolation Forest score alone sets a raw level of at most CLONE
 (Decision A: thresholds are the warm-up 5th percentile for MONITOR and the
-warm-up minimum for CLONE; score-based DROP and the z-score trigger of the
-earlier switch-global design are both removed). DROP is reached only when
-controller/dpi.py confirms an attack on a flow that is already at CLONE
-(controller/monitor.py calls force_drop() for that); it bypasses the normal
-up-hysteresis below.
+warm-up 1st percentile for CLONE; score-based DROP and the z-score trigger
+of the earlier switch-global design are both removed).
+
+DPI confirmations bypass the up-hysteresis below, on the reasoning that a
+content/pattern match is already strong evidence on its own -- waiting for
+K_UP consecutive anomalous score windows would just let packets already in
+hand go uninspected in the meantime (this matters most for a scan, where
+each probe is its own short-lived flow that may never survive two poll
+windows for per-flow hysteresis to act on):
+  * a confirmation on a flow/pair below CLONE escalates it straight to
+    CLONE (controller/monitor.py calls force_clone() for that)
+  * a confirmation on a flow already at CLONE escalates it to DROP
+    (force_drop())
 
 Hysteresis (applies identically to flow keys and host-pair keys):
   * escalate only after K_UP = 2 consecutive windows whose raw level is above
     the current level; the new level is the lowest of those raw levels
   * de-escalate only after K_DOWN = 3 consecutive windows below the current
     level; the new level is the highest of those raw levels
-  * force_drop() clears the per-key window history, so leaving a
-    DPI-forced DROP still needs K_DOWN fresh windows below it, counted
+  * force_clone()/force_drop() clear the per-key window history, so leaving
+    a DPI-forced level still needs K_DOWN fresh windows below it, counted
     from the moment it was forced (not windows from before the attack
     was confirmed)
 """
@@ -105,6 +113,15 @@ class FlowPolicy:
             st.max_level = st.level
         return old, st.level
 
+    def _force(self, key: Hashable, level: MonitoringLevel) -> MonitoringLevel:
+        st = self.state(key)
+        old = st.level
+        st.level = level
+        st.recent.clear()
+        if st.level > st.max_level:
+            st.max_level = st.level
+        return old
+
     def force_drop(self, key: Hashable) -> MonitoringLevel:
         """
         Escalate directly to DROP (a DPI-confirmed attack on a flow already
@@ -112,10 +129,15 @@ class FlowPolicy:
         leaving DROP needs K_DOWN fresh sub-DROP windows counted from now,
         not from before the confirmation.
         """
-        st = self.state(key)
-        old = st.level
-        st.level = MonitoringLevel.DROP
-        st.recent.clear()
-        if st.level > st.max_level:
-            st.max_level = st.level
-        return old
+        return self._force(key, MonitoringLevel.DROP)
+
+    def force_clone(self, key: Hashable) -> MonitoringLevel:
+        """
+        Escalate directly to CLONE, bypassing the up-hysteresis: a DPI
+        confirmation on a flow/pair below CLONE is itself strong enough
+        evidence (a content/pattern match, not a score) that waiting for
+        K_UP consecutive anomalous windows would just let the attack's
+        own packets -- already in hand -- go uninspected in the meantime.
+        Clears the window history like force_drop(), for the same reason.
+        """
+        return self._force(key, MonitoringLevel.CLONE)

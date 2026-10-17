@@ -15,14 +15,17 @@ from controller.dpi import DPIEngine, CPU_HDR
 ATK, TGT = "10.0.1.11", "10.0.2.1"
 
 
-def clone(pkt, idx=7, level=2):
-    return CPU_HDR.pack(idx, level, 1, len(pkt), 1) + bytes(Ether() / pkt)
+def clone(pkt, idx=7, level=2, reason=1):
+    return CPU_HDR.pack(idx, level, 1, len(pkt), reason) + bytes(Ether() / pkt)
 
 
-def feed(engine, pkts, switch=1):
+def feed(engine, pkts, switch=1, reasons=None):
     out = []
     for i, p in enumerate(pkts):
-        out += engine.process(clone(p), switch, 1000.0 + i)
+        # 10ms apart: fast enough that a multi-port scan's own packets stay
+        # inside controller.dpi.SYN_PAIR_WINDOW_SECS, same as a real nmap run
+        r = reasons[i] if reasons else 1
+        out += engine.process(clone(p, reason=r), switch, 1000.0 + i * 0.01)
     return out
 
 
@@ -171,3 +174,32 @@ def test_entropy_snapshot_n_zero_before_any_payload():
     from controller.features import entropy_snapshot_key
     key = entropy_snapshot_key(1, (ATK, TGT, 6, 1, 2))
     assert snap[key]["n"] == 0 and snap[key]["entropy"] == 0.0
+
+
+# --- clone_reason on confirmed alerts (flow-head cloning attribution) -------
+
+def test_confirmed_alert_carries_the_triggering_clone_reason():
+    """A NULL probe seen on a flow-head clone (reason 4) is confirmed with
+    clone_reason 4 -- the controller credits that escalation to DPI-head."""
+    e = DPIEngine()
+    a = feed(e, [IP(src=ATK, dst=TGT) / TCP(sport=1, dport=22, flags=0)], reasons=[4])
+    assert len(a) == 1 and a[0]["clone_reason"] == 4
+    assert a[0]["clone_reasons_seen"] == [4]
+
+
+def test_syn_scan_aggregate_alerts_use_each_flows_own_clone_reason():
+    """The aggregate rule confirms flows other than the one whose packet
+    completed the match; each alert carries *that* flow's clone reason."""
+    e = DPIEngine()
+    ports = (21, 22, 23, 25, 80)
+    pkts = [IP(src=ATK, dst=TGT) / TCP(sport=40000, dport=p, flags="S") for p in ports]
+    a = feed(e, pkts, reasons=[2, 4, 4, 4, 4])     # first probe sampled, rest heads
+    by_port = {x["five_tuple"]["dport"]: x["clone_reason"] for x in a}
+    assert by_port == {21: 2, 22: 4, 23: 4, 25: 4, 80: 4}
+
+
+def test_clones_counted_by_reason():
+    e = DPIEngine()
+    feed(e, [IP(src=ATK, dst=TGT) / UDP(sport=1, dport=2) / Raw(b"x")] * 5,
+         reasons=[4, 4, 4, 2, 1])
+    assert e.stats["clones_by_reason"] == {"4": 3, "2": 1, "1": 1}

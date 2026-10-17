@@ -47,6 +47,9 @@ DP_COUNTERS = {
     "cloned"   : "AdaptMonEgress.clone_counter",
     "dropped"  : "AdaptMonEgress.drop_counter",
 }
+CLONE_REASON_COUNTER = "AdaptMonEgress.clone_reason_counter"
+# p4/adaptmon.p4 clone_reason values
+CLONE_REASONS = {1: "level", 2: "sample", 3: "hostpair", 4: "head"}
 THRIFT_BASE_PORT = 9090
 
 # simple_switch_CLI's Python modules (installed by bmv2 next to the wrapper)
@@ -196,8 +199,38 @@ class SwitchInterface:
             res[key] = int(m.group(1)) if m else -1
         return res
 
+    def read_dp_counters_full(self) -> Dict[str, int]:
+        """
+        Cumulative (since the last reset) packets AND bytes of every
+        data-plane counter, plus clones per clone_reason:
+        forwarded/_bytes, cloned/_bytes, dropped/_bytes,
+        clone_<level|sample|hostpair|head>/_bytes. -1 = unreadable.
+        """
+        cmds = "".join(f"counter_read {c} 0\n" for c in DP_COUNTERS.values())
+        cmds += "".join(f"counter_read {CLONE_REASON_COUNTER} {i}\n" for i in CLONE_REASONS)
+        out = self._cli(cmds)
+        res = {}
+        for key, cname in DP_COUNTERS.items():
+            m = re.search(re.escape(cname) + r"\[0\]=\s*\((\d+) bytes, (\d+) packets\)", out)
+            res[key], res[f"{key}_bytes"] = (int(m.group(2)), int(m.group(1))) if m else (-1, -1)
+        for i, name in CLONE_REASONS.items():
+            m = re.search(re.escape(CLONE_REASON_COUNTER) + rf"\[{i}\]=\s*\((\d+) bytes, (\d+) packets\)", out)
+            res[f"clone_{name}"], res[f"clone_{name}_bytes"] = \
+                (int(m.group(2)), int(m.group(1))) if m else (-1, -1)
+        return res
+
     def reset_dp_counters(self) -> None:
-        self._cli("".join(f"counter_reset {c}\n" for c in DP_COUNTERS.values()))
+        self._cli("".join(f"counter_reset {c}\n"
+                          for c in list(DP_COUNTERS.values()) + [CLONE_REASON_COUNTER]))
+
+    # ------------------------------------------------------------------
+    # Flow-head cloning
+    # ------------------------------------------------------------------
+    def set_head_clone_n(self, n: int) -> Optional[int]:
+        """Clone the first n packets of every new flow (0 = off); returns
+        the value read back from the switch, None if unreadable."""
+        self._cli(f"register_write head_clone_n 0 {int(n)}\n")
+        return self.read_register("head_clone_n", 0)
 
     # ------------------------------------------------------------------
     # Tables

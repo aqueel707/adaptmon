@@ -1,0 +1,65 @@
+{
+  "run_dir": "results/paper_run_full/run_01",
+  "warmup_percentiles": {
+    "flow": {
+      "trained": true,
+      "n_warmup": 424,
+      "min": -0.1190002316099803,
+      "p5": -4.4885969940899884e-17,
+      "p1": null,
+      "p10": null
+    },
+    "host-pair": {
+      "trained": true,
+      "n_warmup": 232,
+      "min": -0.1108223923349898,
+      "p5": 2.949029909160572e-17,
+      "p1": null,
+      "p10": null
+    }
+  },
+  "flow_score_distribution": {
+    "benign": {
+      "n_rows": 793,
+      "min": -0.14173,
+      "median": 0.114044,
+      "max": 0.225346
+    },
+    "null_scan": {
+      "n_rows": 512,
+      "min": -0.000928,
+      "median": 0.054054,
+      "max": 0.120798
+    },
+    "rate_spike": {
+      "n_rows": 144,
+      "min": -0.114116,
+      "median": -0.08048949999999999,
+      "max": -0.054406
+    },
+    "sqli": {
+      "n_rows": 257,
+      "min": -0.03118,
+      "median": 0.065568,
+      "max": 0.215896
+    },
+    "syn_scan": {
+      "n_rows": 512,
+      "min": -0.000928,
+      "median": 0.054399,
+      "max": 0.118907
+    }
+  },
+  "flow_level_auc": {
+    "null_scan": 0.6921894703656999,
+    "rate_spike": 0.9698227546588203,
+    "sqli": 0.6389615360081649,
+    "syn_scan": 0.6924259142496847
+  },
+  "pair_level_auc": {
+    "null_scan": 0.7237237237237237,
+    "rate_spike": 0.4401575307377049,
+    "sqli": 0.7669577205882353,
+    "syn_scan": 0.7303903903903904
+  }
+}

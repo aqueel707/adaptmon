@@ -1,0 +1,76 @@
+{
+  "note": "Every seed experiments/paper_run.py has been launched with; paper_run refuses a seed already listed here. Runs A (results/paper_run_full) and B (results/paper_run_percentile) predate seeding: they used the fixed schedule paper_run reproduces when --seeds is omitted, so they consumed no seed.",
+  "seeds": {
+    "962881838": {
+      "purpose": "dev",
+      "series": "results/dev_pilot_headclone",
+      "run": "run_01",
+      "registered": "2026-10-17T15:53:20"
+    },
+    "1675701711": {
+      "purpose": "final",
+      "series": "results/paper_run_C",
+      "run": "run_01",
+      "registered": "2026-10-17T15:56:25"
+    },
+    "1847364810": {
+      "purpose": "final",
+      "series": "results/paper_run_C",
+      "run": "run_02",
+      "registered": "2026-10-17T15:56:25"
+    },
+    "1250895948": {
+      "purpose": "final",
+      "series": "results/paper_run_C",
+      "run": "run_03",
+      "registered": "2026-10-17T15:56:25"
+    },
+    "1945352977": {
+      "purpose": "final",
+      "series": "results/paper_run_C",
+      "run": "run_04",
+      "registered": "2026-10-17T15:56:25"
+    },
+    "764817343": {
+      "purpose": "final",
+      "series": "results/paper_run_C",
+      "run": "run_05",
+      "registered": "2026-10-17T15:56:25"
+    },
+    "164279358": {
+      "purpose": "latency-bench",
+      "series": "results/latency_bench_runC_overbudget",
+      "run": "run_01",
+      "registered": "2026-10-17T16:26:02",
+      "note": "superseded: one packet per flow every 1.5 s with all new flows joining at once ran the 4096-flow tier at ~2,717 pkt/s (over the 2,500 budget in 30 of 32 measured polls); head-clone bursts reached 5,555 pkt/s with 797 DPI capture drops"
+    },
+    "207358257": {
+      "purpose": "latency-bench",
+      "series": "results/latency_bench_runC_escalated",
+      "run": "run_01",
+      "registered": "2026-10-17T16:39:43",
+      "note": "superseded: 30 s warm-up only covered young flows; the IF escalated the long-running benchmark flows, CLONE cloning put the switch over budget"
+    },
+    "1989197155": {
+      "purpose": "latency-bench",
+      "series": "results/latency_bench_runC_hoststall",
+      "run": "run_01",
+      "registered": "2026-10-17T16:46:06",
+      "note": "aborted, not a result: the host stalled ~1,000 s at t = 30 s (poll gap 1,047 s; sender and controller frozen together), so no tier was measured"
+    },
+    "1852784187": {
+      "purpose": "latency-bench",
+      "series": "results/latency_bench_runC_youngflows",
+      "run": "run_01",
+      "registered": "2026-10-17T19:25:26",
+      "note": "superseded: all warm-up flows started together, so training held almost no young flows; each tier's newly joined flows scored anomalous (up to 954 at CLONE at 4096) and the escalations' cloning saturated the host (51,950 DPI drops, ~3.5 s polls)"
+    },
+    "1171962074": {
+      "purpose": "latency-bench",
+      "series": "results/latency_bench_runC",
+      "run": "run_01",
+      "registered": "2026-10-17T19:39:20",
+      "superseded_reason": "measured in-session on a 3-vCPU desktop VM shared with the GUI and the IDE (~3x slower per poll than an earlier attempt at the same 100-flow load); its 4096-flow tier was not steady state (polls overran 1 s, the switch handled 58% of offered traffic)"
+    }
+  }
+}

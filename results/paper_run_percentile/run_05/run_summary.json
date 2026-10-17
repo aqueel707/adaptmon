@@ -1,0 +1,13 @@
+{
+  "n_cycles": 8,
+  "ground_truth": {
+    "n_flows": 261,
+    "by_class": {
+      "benign": 93,
+      "syn_scan": 64,
+      "null_scan": 64,
+      "sqli": 32,
+      "rate_spike": 8
+    }
+  }
+}

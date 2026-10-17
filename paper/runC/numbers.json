@@ -1,0 +1,1189 @@
+{
+ "replay_agreement_flows": 0.9988583341606274,
+ "replay_agreement_pairs": 1.0,
+ "replay_agreement_rows": {
+  "flows": 20146,
+  "pairs": 5924
+ },
+ "latency_bench_superseded": {
+  "164279358": {
+   "purpose": "latency-bench",
+   "series": "results/latency_bench_runC_overbudget",
+   "run": "run_01",
+   "registered": "2026-10-17T16:26:02",
+   "note": "superseded: one packet per flow every 1.5 s with all new flows joining at once ran the 4096-flow tier at ~2,717 pkt/s (over the 2,500 budget in 30 of 32 measured polls); head-clone bursts reached 5,555 pkt/s with 797 DPI capture drops"
+  },
+  "207358257": {
+   "purpose": "latency-bench",
+   "series": "results/latency_bench_runC_escalated",
+   "run": "run_01",
+   "registered": "2026-10-17T16:39:43",
+   "note": "superseded: 30 s warm-up only covered young flows; the IF escalated the long-running benchmark flows, CLONE cloning put the switch over budget"
+  },
+  "1989197155": {
+   "purpose": "latency-bench",
+   "series": "results/latency_bench_runC_hoststall",
+   "run": "run_01",
+   "registered": "2026-10-17T16:46:06",
+   "note": "aborted, not a result: the host stalled ~1,000 s at t = 30 s (poll gap 1,047 s; sender and controller frozen together), so no tier was measured"
+  },
+  "1852784187": {
+   "purpose": "latency-bench",
+   "series": "results/latency_bench_runC_youngflows",
+   "run": "run_01",
+   "registered": "2026-10-17T19:25:26",
+   "note": "superseded: all warm-up flows started together, so training held almost no young flows; each tier's newly joined flows scored anomalous (up to 954 at CLONE at 4096) and the escalations' cloning saturated the host (51,950 DPI drops, ~3.5 s polls)"
+  }
+ },
+ "latency_bench": {
+  "seed": 1171962074,
+  "tiers": [
+   {
+    "tier": 100,
+    "n_flows_median": 98.0,
+    "polls": 38,
+    "read_median": 305.3642465019948,
+    "read_slow_polls": 38,
+    "feat_infer_median": 29.92169249955623,
+    "total_median": 349.6306995002669,
+    "pps_median": 50.49384724534441,
+    "pps_max": 62.04474767726033,
+    "over_budget": 0,
+    "overruns": 0,
+    "n_flows_min": 94,
+    "n_flows_max": 100,
+    "max_poll_gap_s": 1.0404844284057617,
+    "offered_pps": 46.421052631578945,
+    "processed_share": 1.087735938391773,
+    "steady_state": true,
+    "t_read_ms": {
+     "mean": 304.6134769212681,
+     "p95": 389.5942263507095
+    },
+    "t_feat_ms": {
+     "mean": 8.397667737019793,
+     "p95": 13.337904699619685
+    },
+    "t_infer_ms": {
+     "mean": 26.27479734196401,
+     "p95": 50.36273904879636
+    },
+    "t_policy_ms": {
+     "mean": 5.919407973698598,
+     "p95": 11.463030602135404
+    },
+    "t_write_ms": {
+     "mean": 6.588021631614538,
+     "p95": 15.428204548152275
+    },
+    "t_total_ms": {
+     "mean": 351.7933716055651,
+     "p95": 471.66477730042965
+    }
+   },
+   {
+    "tier": 500,
+    "n_flows_median": 492.0,
+    "polls": 38,
+    "read_median": 306.57235799844784,
+    "read_slow_polls": 37,
+    "feat_infer_median": 46.221761498600245,
+    "total_median": 400.99729649955407,
+    "pps_median": 253.86339456037211,
+    "pps_max": 290.9476276734129,
+    "over_budget": 0,
+    "overruns": 0,
+    "n_flows_min": 482,
+    "n_flows_max": 497,
+    "max_poll_gap_s": 1.0066189765930176,
+    "offered_pps": 233.05263157894734,
+    "processed_share": 1.0892964084568815,
+    "steady_state": true,
+    "t_read_ms": {
+     "mean": 306.04398681555864,
+     "p95": 417.33036564783106
+    },
+    "t_feat_ms": {
+     "mean": 13.012458894847537,
+     "p95": 21.47544989875314
+    },
+    "t_infer_ms": {
+     "mean": 39.27147002612305,
+     "p95": 75.90830315020865
+    },
+    "t_policy_ms": {
+     "mean": 33.83934300022941,
+     "p95": 58.4162223492967
+    },
+    "t_write_ms": {
+     "mean": 14.080104973369377,
+     "p95": 38.4906185006912
+    },
+    "t_total_ms": {
+     "mean": 406.247363710128,
+     "p95": 551.2996313003896
+    }
+   },
+   {
+    "tier": 1000,
+    "n_flows_median": 984.0,
+    "polls": 38,
+    "read_median": 290.34329899877775,
+    "read_slow_polls": 37,
+    "feat_infer_median": 71.71482299963827,
+    "total_median": 445.53178650130576,
+    "pps_median": 502.3141133221085,
+    "pps_max": 613.553240383895,
+    "over_budget": 0,
+    "overruns": 0,
+    "n_flows_min": 971,
+    "n_flows_max": 993,
+    "max_poll_gap_s": 1.0211992263793945,
+    "offered_pps": 466.1052631578947,
+    "processed_share": 1.077683847461615,
+    "steady_state": true,
+    "t_read_ms": {
+     "mean": 289.7976744211758,
+     "p95": 415.6396349000714
+    },
+    "t_feat_ms": {
+     "mean": 21.918687289431354,
+     "p95": 42.793888651976886
+    },
+    "t_infer_ms": {
+     "mean": 54.6252862628822,
+     "p95": 91.77497500131722
+    },
+    "t_policy_ms": {
+     "mean": 60.7515177893411,
+     "p95": 104.79985369966016
+    },
+    "t_write_ms": {
+     "mean": 28.3156273683409,
+     "p95": 71.90552479933103
+    },
+    "t_total_ms": {
+     "mean": 455.40879313117136,
+     "p95": 664.2667577507382
+    }
+   },
+   {
+    "tier": 2000,
+    "n_flows_median": 1965.0,
+    "polls": 38,
+    "read_median": 343.2363220017578,
+    "read_slow_polls": 38,
+    "feat_infer_median": 134.9367374987196,
+    "total_median": 687.2481105001498,
+    "pps_median": 1010.8218113267613,
+    "pps_max": 1212.4175383234688,
+    "over_budget": 0,
+    "overruns": 0,
+    "n_flows_min": 1948,
+    "n_flows_max": 1977,
+    "max_poll_gap_s": 1.0285170078277588,
+    "offered_pps": 930.7894736842105,
+    "processed_share": 1.085983286129967,
+    "steady_state": true,
+    "t_read_ms": {
+     "mean": 347.2983717633485,
+     "p95": 446.8030528518284
+    },
+    "t_feat_ms": {
+     "mean": 41.91066844721622,
+     "p95": 64.5238478005922
+    },
+    "t_infer_ms": {
+     "mean": 86.91085778972544,
+     "p95": 129.83469369901286
+    },
+    "t_policy_ms": {
+     "mean": 147.39689526294043,
+     "p95": 211.06048180281505
+    },
+    "t_write_ms": {
+     "mean": 53.41061742097066,
+     "p95": 147.46960239826873
+    },
+    "t_total_ms": {
+     "mean": 676.9274106842013,
+     "p95": 928.82572680046
+    }
+   },
+   {
+    "tier": 4096,
+    "n_flows_median": 4096.0,
+    "polls": 13,
+    "read_median": 1082.1124800022517,
+    "read_slow_polls": 13,
+    "feat_infer_median": 621.6621820021828,
+    "total_median": 2344.47417499905,
+    "pps_median": 1129.3055476321294,
+    "pps_max": 2186.84394693589,
+    "over_budget": 0,
+    "overruns": 12,
+    "n_flows_min": 4094,
+    "n_flows_max": 4096,
+    "max_poll_gap_s": 5.402792453765869,
+    "offered_pps": 1940.2105263157894,
+    "processed_share": 0.5820530980091814,
+    "steady_state": false,
+    "t_read_ms": {
+     "mean": 1314.1719725384833,
+     "p95": 2378.1696935999194
+    },
+    "t_feat_ms": {
+     "mean": 213.4479916155844,
+     "p95": 381.04401300151943
+    },
+    "t_infer_ms": {
+     "mean": 332.0595804613661,
+     "p95": 614.7868476000438
+    },
+    "t_policy_ms": {
+     "mean": 677.8476890769805,
+     "p95": 1251.6153896001924
+    },
+    "t_write_ms": {
+     "mean": 293.5701706155669,
+     "p95": 973.3334260017712
+    },
+    "t_total_ms": {
+     "mean": 2831.0974043079814,
+     "p95": 4872.570832398923
+    }
+   }
+  ],
+  "capacity": {
+   "budget_pps": 2500,
+   "per_switch": {
+    "1": {
+     "max_pps": 2186.84394693589,
+     "p99_pps": 1543.3671231419219,
+     "windows_over_budget": 0,
+     "n_windows": 463
+    },
+    "2": {
+     "max_pps": 0.0,
+     "p99_pps": 0.0,
+     "windows_over_budget": 0,
+     "n_windows": 463
+    }
+   },
+   "max_pps": 2186.84394693589,
+   "windows_over_budget": 0,
+   "dpi_kernel_received": 16940,
+   "dpi_kernel_drops": 384
+  }
+ },
+ "latency_runC": {
+  "t_read_ms": {
+   "mean": 85.23331044748595,
+   "p95": 106.87865759955457
+  },
+  "t_feat_ms": {
+   "mean": 3.2053284087101903,
+   "p95": 4.5823217998986365
+  },
+  "t_infer_ms": {
+   "mean": 14.016982815508255,
+   "p95": 20.446742399872164
+  },
+  "t_policy_ms": {
+   "mean": 0.6360396821145701,
+   "p95": 1.7456144003517693
+  },
+  "t_write_ms": {
+   "mean": 4.3798686452145725,
+   "p95": 17.81004960030257
+  },
+  "t_total_ms": {
+   "mean": 107.47152999903352,
+   "p95": 143.80687920001947
+  }
+ },
+ "level_share": {
+  "flow_polls": {
+   "NORMAL": {
+    "n": 16839,
+    "share": 0.7026790185277917
+   },
+   "MONITOR": {
+    "n": 2733,
+    "share": 0.11404606910365549
+   },
+   "CLONE": {
+    "n": 4392,
+    "share": 0.18327491236855284
+   },
+   "DROP": {
+    "n": 0,
+    "share": 0.0
+   }
+  },
+  "n_flow_polls": 23964,
+  "by_gt_label": {
+   "attack": {
+    "NORMAL": {
+     "n": 2386,
+     "share": 0.33558368495077356
+    },
+    "MONITOR": {
+     "n": 634,
+     "share": 0.08917018284106892
+    },
+    "CLONE": {
+     "n": 4090,
+     "share": 0.5752461322081576
+    },
+    "DROP": {
+     "n": 0,
+     "share": 0.0
+    }
+   },
+   "benign": {
+    "NORMAL": {
+     "n": 3193,
+     "share": 0.8108176739461656
+    },
+    "MONITOR": {
+     "n": 542,
+     "share": 0.13763331640426613
+    },
+    "CLONE": {
+     "n": 203,
+     "share": 0.05154900964956831
+    },
+    "DROP": {
+     "n": 0,
+     "share": 0.0
+    }
+   },
+   "not in ground truth": {
+    "NORMAL": {
+     "n": 11260,
+     "share": 0.871786930938371
+    },
+    "MONITOR": {
+     "n": 1557,
+     "share": 0.12054815732424899
+    },
+    "CLONE": {
+     "n": 99,
+     "share": 0.007664911737379994
+    },
+    "DROP": {
+     "n": 0,
+     "share": 0.0
+    }
+   }
+  },
+  "by_switch": {
+   "s1": {
+    "NORMAL": {
+     "n": 8426,
+     "share": 0.7029281721865354
+    },
+    "MONITOR": {
+     "n": 1370,
+     "share": 0.11429048135480104
+    },
+    "CLONE": {
+     "n": 2191,
+     "share": 0.18278134645866356
+    },
+    "DROP": {
+     "n": 0,
+     "share": 0.0
+    }
+   },
+   "s2": {
+    "NORMAL": {
+     "n": 8413,
+     "share": 0.7024296568422811
+    },
+    "MONITOR": {
+     "n": 1363,
+     "share": 0.11380145278450363
+    },
+    "CLONE": {
+     "n": 2201,
+     "share": 0.18376889037321534
+    },
+    "DROP": {
+     "n": 0,
+     "share": 0.0
+    }
+   }
+  },
+  "pair_polls": {
+   "NORMAL": {
+    "n": 5097,
+    "share": 0.7707545743233026
+   },
+   "MONITOR": {
+    "n": 1044,
+    "share": 0.15787086042643278
+   },
+   "CLONE": {
+    "n": 472,
+    "share": 0.07137456525026463
+   },
+   "DROP": {
+    "n": 0,
+    "share": 0.0
+   }
+  },
+  "n_pair_polls": 6613
+ },
+ "window_confusion": {
+  "tp": 573,
+  "fp": 398,
+  "fn": 235,
+  "tn": 908,
+  "tpr": {
+   "k": 573,
+   "n": 808,
+   "rate": 0.7091584158415841,
+   "ci95": [
+    0.6765018195464959,
+    0.7402804697737644
+   ]
+  },
+  "fpr": {
+   "k": 398,
+   "n": 1306,
+   "rate": 0.30474732006125577,
+   "ci95": [
+    0.27986296087786294,
+    0.33051358929531427
+   ]
+  },
+  "precision": 0.5901132852729145,
+  "fp_within_3_windows_after_attack": 294,
+  "fn_followed_by_detection_next_window": 65,
+  "tn_within_3_windows_after_attack": 62,
+  "fpr_excluding_deescalation": {
+   "k": 104,
+   "n": 950,
+   "rate": 0.10947368421052632,
+   "ci95": [
+    0.09032744948651243,
+    0.1310781350360137
+   ]
+  },
+  "per_switch": {
+   "s1_tn": 456,
+   "s1_fp": 197,
+   "s1_tp": 285,
+   "s1_fn": 119,
+   "s2_tn": 452,
+   "s2_fp": 201,
+   "s2_tp": 288,
+   "s2_fn": 116
+  }
+ },
+ "score_distribution": {
+  "stats": {
+   "flow": {
+    "warm-up": {
+     "n": 2150,
+     "median": 0.17508582715250667,
+     "p1": -0.050095449347686234,
+     "p5": -0.0003030052008883387
+    },
+    "benign eval": {
+     "n": 3938,
+     "median": 0.128748,
+     "p1": -0.07037668,
+     "p5": -0.04050225
+    },
+    "attack eval": {
+     "n": 7110,
+     "median": 0.043438,
+     "p1": -0.062202,
+     "p5": -0.044393
+    }
+   },
+   "host pair": {
+    "warm-up": {
+     "n": 1160,
+     "median": 0.1556915464097043,
+     "p1": -0.08710100535507309,
+     "p5": 0.0
+    },
+    "benign eval": {
+     "n": 5531,
+     "median": 0.093867,
+     "p1": -0.141328,
+     "p5": -0.064177
+    },
+    "attack eval": {
+     "n": 1082,
+     "median": 0.034692,
+     "p1": -0.185412,
+     "p5": -0.117162
+    }
+   }
+  },
+  "thresholds_p5_p1_per_run": {
+   "flow": [
+    [
+     0.0,
+     -0.046929930141953104
+    ],
+    [
+     -3.8611149867640027e-17,
+     -0.04787735315541448
+    ],
+    [
+     1.973247953923618e-17,
+     -0.03677159321473786
+    ],
+    [
+     2.3744027577432547e-17,
+     -0.05963289738568732
+    ],
+    [
+     -2.7755575615628914e-17,
+     -0.04420027587951892
+    ]
+   ],
+   "host pair": [
+    [
+     0.0,
+     -0.08141655953138582
+    ],
+    [
+     -3.209238430557093e-17,
+     -0.08092321627578769
+    ],
+    [
+     0.0,
+     -0.05739227546737174
+    ],
+    [
+     0.0,
+     -0.14132812504872705
+    ],
+    [
+     0.0,
+     -0.06372635286937156
+    ]
+   ]
+  }
+ },
+ "timeline_run": {
+  "run": "run_01",
+  "seed": 1675701711,
+  "distance_to_median": {
+   "run_01": 0.083,
+   "run_02": 0.761,
+   "run_03": 1.905,
+   "run_04": 0.912,
+   "run_05": 0.608
+  }
+ },
+ "ablation": {
+  "IF only": {
+   "tpr": {
+    "k": 91,
+    "n": 840,
+    "rate": 0.10833333333333334,
+    "ci95": [
+     0.08812370714751891,
+     0.131336896448318
+    ]
+   },
+   "fpr": {
+    "k": 31,
+    "n": 470,
+    "rate": 0.06595744680851064,
+    "ci95": [
+     0.04525132377913452,
+     0.09231764497617577
+    ]
+   },
+   "inspection_reduction": 0.6285310565507342,
+   "per_run": [
+    {
+     "tpr": 0.08928571428571429,
+     "fpr": 0.07368421052631578,
+     "insp": 0.5857550525780852
+    },
+    {
+     "tpr": 0.23809523809523808,
+     "fpr": 0.07216494845360824,
+     "insp": 0.8581400782756002
+    },
+    {
+     "tpr": 0.047619047619047616,
+     "fpr": 0.08888888888888889,
+     "insp": 0.45429195137632516
+    },
+    {
+     "tpr": 0.14285714285714285,
+     "fpr": 0.05434782608695652,
+     "insp": 0.5356709812361696
+    },
+    {
+     "tpr": 0.023809523809523808,
+     "fpr": 0.041666666666666664,
+     "insp": 0.6978908143699576
+    }
+   ],
+   "counts": {
+    "tp": 91,
+    "fn": 749,
+    "fp": 31,
+    "tn": 439
+   },
+   "inspection_reduction_estimated": 0.6285310565507342,
+   "per_class": {
+    "benign": {
+     "detected": 31,
+     "n": 470
+    },
+    "sqli": {
+     "detected": 0,
+     "n": 160
+    },
+    "rate_spike": {
+     "detected": 27,
+     "n": 40
+    },
+    "syn_scan": {
+     "detected": 40,
+     "n": 320
+    },
+    "null_scan": {
+     "detected": 24,
+     "n": 320
+    }
+   }
+  },
+  "DPI-head only": {
+   "tpr": {
+    "k": 720,
+    "n": 840,
+    "rate": 0.8571428571428571,
+    "ci95": [
+     0.831632020255332,
+     0.8801159965636345
+    ]
+   },
+   "fpr": {
+    "k": 27,
+    "n": 470,
+    "rate": 0.0574468085106383,
+    "ci95": [
+     0.0381954114311766,
+     0.08248430378667572
+    ]
+   },
+   "inspection_reduction": 0.9477152426807022,
+   "per_run": [
+    {
+     "tpr": 0.8571428571428571,
+     "fpr": 0.042105263157894736,
+     "insp": 0.9618545013877488
+    },
+    {
+     "tpr": 0.9047619047619048,
+     "fpr": 0.05154639175257732,
+     "insp": 0.9493253110578889
+    },
+    {
+     "tpr": 0.8095238095238095,
+     "fpr": 0.07777777777777778,
+     "insp": 0.9337480001794232
+    },
+    {
+     "tpr": 0.8095238095238095,
+     "fpr": 0.05434782608695652,
+     "insp": 0.9620555336627361
+    },
+    {
+     "tpr": 0.9047619047619048,
+     "fpr": 0.0625,
+     "insp": 0.9328606056220832
+    }
+   ],
+   "counts": {
+    "tp": 720,
+    "fn": 120,
+    "fp": 27,
+    "tn": 443
+   },
+   "inspection_reduction_estimated": 0.9477152426807022,
+   "per_class": {
+    "benign": {
+     "detected": 27,
+     "n": 470
+    },
+    "sqli": {
+     "detected": 160,
+     "n": 160
+    },
+    "rate_spike": {
+     "detected": 0,
+     "n": 40
+    },
+    "syn_scan": {
+     "detected": 248,
+     "n": 320
+    },
+    "null_scan": {
+     "detected": 312,
+     "n": 320
+    }
+   }
+  },
+  "full system": {
+   "tpr": {
+    "k": 755,
+    "n": 840,
+    "rate": 0.8988095238095238,
+    "ci95": [
+     0.8763998275860261,
+     0.9183712966054766
+    ]
+   },
+   "fpr": {
+    "k": 37,
+    "n": 470,
+    "rate": 0.07872340425531915,
+    "ci95": [
+     0.056031989905237806,
+     0.10687877316028689
+    ]
+   },
+   "inspection_reduction": 0.596368426876572,
+   "per_run": [
+    {
+     "tpr": 0.8988095238095238,
+     "fpr": 0.07368421052631578,
+     "insp": 0.5575551941960097
+    },
+    {
+     "tpr": 0.9047619047619048,
+     "fpr": 0.07216494845360824,
+     "insp": 0.8302705387402127
+    },
+    {
+     "tpr": 0.8571428571428571,
+     "fpr": 0.08888888888888889,
+     "insp": 0.423618067911664
+    },
+    {
+     "tpr": 0.9047619047619048,
+     "fpr": 0.08695652173913043,
+     "insp": 0.5094880111552336
+    },
+    {
+     "tpr": 0.9285714285714286,
+     "fpr": 0.07291666666666667,
+     "insp": 0.6507264623310469
+    }
+   ],
+   "counts": {
+    "tp": 755,
+    "fn": 85,
+    "fp": 37,
+    "tn": 433
+   },
+   "inspection_reduction_estimated": 0.5904662220760191,
+   "per_class": {
+    "benign": {
+     "detected": 37,
+     "n": 470
+    },
+    "sqli": {
+     "detected": 160,
+     "n": 160
+    },
+    "rate_spike": {
+     "detected": 27,
+     "n": 40
+    },
+    "syn_scan": {
+     "detected": 248,
+     "n": 320
+    },
+    "null_scan": {
+     "detected": 320,
+     "n": 320
+    }
+   }
+  }
+ },
+ "ablation_consistency": {
+  "dpi_fp": 27,
+  "dpi_fp_also_full": 27,
+  "dpi_new_tp": 0
+ },
+ "ablation_estimator_validation": [
+  {
+   "run": "run_01",
+   "est": {
+    "forwarded": 127905,
+    "clone_level": 47172,
+    "clone_hostpair": 3700,
+    "clone_head": 2342,
+    "clone_sample": 3675,
+    "cloned": 56889
+   },
+   "actual": {
+    "forwarded": 127912,
+    "cloned": 56594,
+    "forwarded_bytes": 58262618,
+    "cloned_bytes": 19986391,
+    "clone_head": 2344,
+    "clone_head_bytes": 221371,
+    "clone_sample": 3497,
+    "clone_sample_bytes": 2001138,
+    "clone_level": 46857,
+    "clone_level_bytes": 12085426,
+    "clone_hostpair": 3896,
+    "clone_hostpair_bytes": 5678456
+   }
+  },
+  {
+   "run": "run_02",
+   "est": {
+    "forwarded": 136952,
+    "clone_level": 4547,
+    "clone_hostpair": 6447,
+    "clone_head": 2295,
+    "clone_sample": 9782,
+    "cloned": 23071
+   },
+   "actual": {
+    "forwarded": 136912,
+    "cloned": 23238,
+    "forwarded_bytes": 66720896,
+    "cloned_bytes": 19721586,
+    "clone_head": 2301,
+    "clone_head_bytes": 219468,
+    "clone_sample": 9528,
+    "clone_sample_bytes": 3256172,
+    "clone_level": 4962,
+    "clone_level_bytes": 6854352,
+    "clone_hostpair": 6447,
+    "clone_hostpair_bytes": 9391594
+   }
+  },
+  {
+   "run": "run_03",
+   "est": {
+    "forwarded": 133762,
+    "clone_level": 66781,
+    "clone_hostpair": 7836,
+    "clone_head": 2322,
+    "clone_sample": 1792,
+    "cloned": 78731
+   },
+   "actual": {
+    "forwarded": 133762,
+    "cloned": 77098,
+    "forwarded_bytes": 62576420,
+    "cloned_bytes": 29129130,
+    "clone_head": 2322,
+    "clone_head_bytes": 216538,
+    "clone_sample": 1839,
+    "clone_sample_bytes": 1264326,
+    "clone_level": 64838,
+    "clone_level_bytes": 15615196,
+    "clone_hostpair": 8099,
+    "clone_hostpair_bytes": 12033070
+   }
+  },
+  {
+   "run": "run_04",
+   "est": {
+    "forwarded": 131956,
+    "clone_level": 54282,
+    "clone_hostpair": 6375,
+    "clone_head": 2010,
+    "clone_sample": 3531,
+    "cloned": 66198
+   },
+   "actual": {
+    "forwarded": 131956,
+    "cloned": 64726,
+    "forwarded_bytes": 60710536,
+    "cloned_bytes": 19735520,
+    "clone_head": 2008,
+    "clone_head_bytes": 193800,
+    "clone_sample": 3538,
+    "clone_sample_bytes": 3085000,
+    "clone_level": 52721,
+    "clone_level_bytes": 7372370,
+    "clone_hostpair": 6459,
+    "clone_hostpair_bytes": 9084350
+   }
+  },
+  {
+   "run": "run_05",
+   "est": {
+    "forwarded": 138205,
+    "clone_level": 34739,
+    "clone_hostpair": 6154,
+    "clone_head": 2405,
+    "clone_sample": 5701,
+    "cloned": 48999
+   },
+   "actual": {
+    "forwarded": 138204,
+    "cloned": 48271,
+    "forwarded_bytes": 67067190,
+    "cloned_bytes": 21976806,
+    "clone_head": 2408,
+    "clone_head_bytes": 225538,
+    "clone_sample": 5617,
+    "clone_sample_bytes": 2613994,
+    "clone_level": 34017,
+    "clone_level_bytes": 9882962,
+    "clone_hostpair": 6229,
+    "clone_hostpair_bytes": 9254312
+   }
+  }
+ ],
+ "spread": {
+  "per_run": [
+   {
+    "run": "run_01",
+    "seed": 1675701711,
+    "tpr": 0.8988095238095238,
+    "fpr": 0.07368421052631578,
+    "insp_pkts": 0.5575551941960097,
+    "insp_bytes": 0.6569602999988775
+   },
+   {
+    "run": "run_02",
+    "seed": 1847364810,
+    "tpr": 0.9047619047619048,
+    "fpr": 0.07216494845360824,
+    "insp_pkts": 0.8302705387402127,
+    "insp_bytes": 0.7044166493207765
+   },
+   {
+    "run": "run_03",
+    "seed": 1250895948,
+    "tpr": 0.8571428571428571,
+    "fpr": 0.08888888888888889,
+    "insp_pkts": 0.423618067911664,
+    "insp_bytes": 0.5345030923788865
+   },
+   {
+    "run": "run_04",
+    "seed": 1945352977,
+    "tpr": 0.9047619047619048,
+    "fpr": 0.08695652173913043,
+    "insp_pkts": 0.5094880111552336,
+    "insp_bytes": 0.6749242997953435
+   },
+   {
+    "run": "run_05",
+    "seed": 764817343,
+    "tpr": 0.9285714285714286,
+    "fpr": 0.07291666666666667,
+    "insp_pkts": 0.6507264623310469,
+    "insp_bytes": 0.6723165828179174
+   }
+  ],
+  "summary": {
+   "tpr": {
+    "mean": 0.8988095238095237,
+    "std": 0.02594582704488499,
+    "min": 0.8571428571428571,
+    "max": 0.9285714285714286
+   },
+   "fpr": {
+    "mean": 0.078922247254922,
+    "std": 0.008262091533171522,
+    "min": 0.07216494845360824,
+    "max": 0.08888888888888889
+   },
+   "insp_pkts": {
+    "mean": 0.5943316548668334,
+    "std": 0.15535573045528078,
+    "min": 0.423618067911664,
+    "max": 0.8302705387402127
+   },
+   "insp_bytes": {
+    "mean": 0.6486241848623602,
+    "std": 0.06606614000739544,
+    "min": 0.5345030923788865,
+    "max": 0.7044166493207765
+   }
+  },
+  "pooled_insp_pkts": 0.596368426876572
+ },
+ "thresholds": [
+  {
+   "run": "run_01",
+   "flow": {
+    "monitor": 0.0,
+    "clone": -0.046929930141953104,
+    "warmup_min": -0.07925062724753829,
+    "warmup_p1": -0.046929930141953104,
+    "warmup_p5": 0.0,
+    "warmup_p10": 0.028055553043623074,
+    "warmup_mean": 0.15587597368136738,
+    "warmup_std": 0.08968599324840833,
+    "n_warmup": 430
+   },
+   "pair": {
+    "monitor": 0.0,
+    "clone": -0.08141655953138582,
+    "warmup_min": -0.12043647087837017,
+    "warmup_p1": -0.08141655953138582,
+    "warmup_p5": 0.0,
+    "warmup_p10": 0.015185517003025268,
+    "warmup_mean": 0.14502861438144887,
+    "warmup_std": 0.07805693431753279,
+    "n_warmup": 232
+   },
+   "head_readback": {
+    "1": 3,
+    "2": 3
+   }
+  },
+  {
+   "run": "run_02",
+   "flow": {
+    "monitor": -3.8611149867640027e-17,
+    "clone": -0.04787735315541448,
+    "warmup_min": -0.07210520776305607,
+    "warmup_p1": -0.04787735315541448,
+    "warmup_p5": -3.8611149867640027e-17,
+    "warmup_p10": 0.026514702138212054,
+    "warmup_mean": 0.1588998491839826,
+    "warmup_std": 0.09182603540102556,
+    "n_warmup": 448
+   },
+   "pair": {
+    "monitor": -3.209238430557093e-17,
+    "clone": -0.08092321627578769,
+    "warmup_min": -0.1933680594234658,
+    "warmup_p1": -0.08092321627578769,
+    "warmup_p5": -3.209238430557093e-17,
+    "warmup_p10": 0.03253137851358877,
+    "warmup_mean": 0.16275797001052328,
+    "warmup_std": 0.07828869565103348,
+    "n_warmup": 232
+   },
+   "head_readback": {
+    "1": 3,
+    "2": 3
+   }
+  },
+  {
+   "run": "run_03",
+   "flow": {
+    "monitor": 1.973247953923618e-17,
+    "clone": -0.03677159321473786,
+    "warmup_min": -0.08744573056546989,
+    "warmup_p1": -0.03677159321473786,
+    "warmup_p5": 1.973247953923618e-17,
+    "warmup_p10": 0.04040212281669531,
+    "warmup_mean": 0.1519793156223201,
+    "warmup_std": 0.08561344324745584,
+    "n_warmup": 432
+   },
+   "pair": {
+    "monitor": 0.0,
+    "clone": -0.05739227546737174,
+    "warmup_min": -0.08563876734507547,
+    "warmup_p1": -0.05739227546737174,
+    "warmup_p5": 0.0,
+    "warmup_p10": 0.0833267106789447,
+    "warmup_mean": 0.16674826472762067,
+    "warmup_std": 0.07441101273299928,
+    "n_warmup": 232
+   },
+   "head_readback": {
+    "1": 3,
+    "2": 3
+   }
+  },
+  {
+   "run": "run_04",
+   "flow": {
+    "monitor": 2.3744027577432547e-17,
+    "clone": -0.05963289738568732,
+    "warmup_min": -0.07020224396388808,
+    "warmup_p1": -0.05963289738568732,
+    "warmup_p5": 2.3744027577432547e-17,
+    "warmup_p10": 0.04850628350527589,
+    "warmup_mean": 0.1498335142443473,
+    "warmup_std": 0.07917824444318076,
+    "n_warmup": 404
+   },
+   "pair": {
+    "monitor": 0.0,
+    "clone": -0.14132812504872705,
+    "warmup_min": -0.15286849829862925,
+    "warmup_p1": -0.14132812504872705,
+    "warmup_p5": 0.0,
+    "warmup_p10": 0.01685969975167123,
+    "warmup_mean": 0.09705936672735696,
+    "warmup_std": 0.0833474574658024,
+    "n_warmup": 232
+   },
+   "head_readback": {
+    "1": 3,
+    "2": 3
+   }
+  },
+  {
+   "run": "run_05",
+   "flow": {
+    "monitor": -2.7755575615628914e-17,
+    "clone": -0.04420027587951892,
+    "warmup_min": -0.06159190620889221,
+    "warmup_p1": -0.04420027587951892,
+    "warmup_p5": -2.7755575615628914e-17,
+    "warmup_p10": 0.034083947758741906,
+    "warmup_mean": 0.15659470865218295,
+    "warmup_std": 0.08514269958264818,
+    "n_warmup": 436
+   },
+   "pair": {
+    "monitor": 0.0,
+    "clone": -0.06372635286937156,
+    "warmup_min": -0.09092734226652521,
+    "warmup_p1": -0.06372635286937156,
+    "warmup_p5": 0.0,
+    "warmup_p10": 0.06288237530582563,
+    "warmup_mean": 0.14997907158287,
+    "warmup_std": 0.07697680297331162,
+    "n_warmup": 232
+   },
+   "head_readback": {
+    "1": 3,
+    "2": 3
+   }
+  }
+ ],
+ "params": {
+  "Flow-head clone N": "3 packets per new flow; read back {1: 3, 2: 3} in every run (table above)",
+  "Adaptive sampling": "NORMAL 1-in-64, MONITOR 1-in-8 (of the slot's packet counter), CLONE/DROP every packet",
+  "Hysteresis": "escalate after K_UP = 2 consecutive windows above the current level; de-escalate after K_DOWN = 3 below; DPI confirmations bypass it",
+  "DPI syn-scan rule": "SYN-only share > 0.9 AND >= 5 distinct dst ports over the host pair's cloned TCP packets of the last 3.0 s",
+  "DPI other rules": "null_scan: TCP flags == 0; sqli: 4 regexes on HTTP payload (OR 1=1, UNION SELECT, --, /*)",
+  "DPI confirmation retry": "a confirmation for a flow not active this poll is retried for 10 polls",
+  "IsolationForest": "n_estimators = 100, max_samples = 256, contamination = 0.05, random_state = 42; log1p on flow pkt_count, byte_count, duration_s, pkt_rate and on pair new_flows, distinct_dst_ports, pkt_count; >= 50 warm-up samples to train",
+  "IF features": "flow: pkt_count, byte_count, duration_s, pkt_rate, mean_pkt_size, entropy (payload byte entropy of the flow's DPI clones when any, else flow-distribution entropy -- Decision C); host pair: new_flows, distinct_dst_ports, syn_only_ratio, pkt_count (per poll window)",
+  "Poll interval": "1.0 s configured; measured mean 1.005 s, P95 1.059 s over scored polls",
+  "Slot aging": "a slot unchanged for 3 polls is cleared",
+  "Warm-up": "30 s benign-only before the one-time training (controller start-up 4 s before that); 34 warm-up polls in every run",
+  "Cycles / phase gap": "8 cycles per run; 1.5 s between phases",
+  "Benign: iperf3 TCP h1\u2192h3": "seeded per cycle, 1.11\u20132.98 Mbit/s (warm-up 2.22\u20132.73); measured 109 pkt/s median per flow on s1; benign phase 6.01\u20139.95 s",
+  "Benign: HTTP POST h2\u2192h4:8000": "one request per new TCP connection, every 1.0 s \u00b1 30% (warm-up every 1.5 s \u00b1 30%), random benign body",
+  "Attack: nmap -sS / -sN h1\u2192h3": "8 ports per scan (seeded, 1\u20131023), --max-rate 500 pkt/s, 1 probe per port per flow (median 1 / 1 packets per flow)",
+  "Attack: SQLi POST h2\u2192h4:8000": "4 requests, 0.1 s apart, one per SQLi pattern, seeded order (median 5 packets per flow)",
+  "Attack: UDP rate spike h2\u2192h4:9999": "1000 pkt/s for 5 s, 64-byte payload; measured 988 pkt/s median on s1"
+ }
+}

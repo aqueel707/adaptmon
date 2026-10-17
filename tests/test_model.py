@@ -52,17 +52,20 @@ def test_fit_once_returns_none_below_min_samples():
     assert th is None and not m.trained
 
 
-def test_thresholds_are_warmup_p5_and_min_decision_a():
+def test_thresholds_are_warmup_p5_and_p1_decision_a():
     rng = np.random.default_rng(1)
     m = FlowIsolationForest()
     X = _benign_flow_matrix(300, rng)
     th = m.fit_once(X)
     scores = m.model.decision_function(m._preprocess(X))
     assert th.warmup_min == pytest.approx(scores.min())
+    assert th.warmup_p1 == pytest.approx(np.percentile(scores, 1))
     assert th.warmup_p5 == pytest.approx(np.percentile(scores, 5))
+    assert th.warmup_p10 == pytest.approx(np.percentile(scores, 10))
     assert th.monitor == th.warmup_p5
-    assert th.clone == th.warmup_min
-    assert th.clone <= th.monitor     # min is at or below the 5th percentile
+    assert th.clone == th.warmup_p1
+    assert th.clone <= th.monitor     # p1 is at or below the 5th percentile
+    assert th.warmup_min <= th.clone  # the single worst sample is at or below p1
     assert th.n_warmup == 300
 
 

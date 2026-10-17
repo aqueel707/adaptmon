@@ -15,15 +15,21 @@ Every poll window, for every switch:
   5. a host pair escalating to CLONE installs a src-IP clone rule (every
      packet from that source is cloned from then on: Decision B)
   6. tail alerts.jsonl for DPI-confirmed attacks; a confirmed attack on a
-     flow already at CLONE is forced to DROP (Decision A); write back
-     changed flow_level entries, (de)install drop/host-clone rules
+     flow below CLONE is forced to CLONE (and its host pair, for a scan
+     class), one already at CLONE to DROP (Decision A); write back changed
+     flow_level entries, (de)install drop/host-clone rules
   7. age out slots idle for flow_idle_polls polls
+
+At start() the controller writes head_clone_n (flow-head cloning: the
+first N packets of every new flow go to DPI) to every switch and logs the
+value read back.
 
 Outputs in out_dir:
   flow_windows.csv  one row per (window, switch, flow slot)
   pair_windows.csv  one row per (window, switch, src, dst) host pair
-  windows.csv       one row per window: timings, counts, CPU/RSS
-  alerts.jsonl       anomaly / pair_escalation / forced_drop alerts
+  windows.csv       one row per window: timings, counts, CPU/RSS, and the
+                    data-plane counters (cumulative since start)
+  alerts.jsonl       anomaly / pair_escalation / forced_clone / forced_drop alerts
                      (DPI appends "confirmed" alerts to the same file)
   model.json        training summary + thresholds for both models
 """
@@ -59,6 +65,32 @@ LEVEL_NAMES = [lv.name for lv in MonitoringLevel]
 # that never reaches/returns to CLONE (or goes inactive) gives up on it
 CONFIRMATION_RETRY_WINDOWS = 10
 
+# escalated_by trigger taxonomy: "IF-flow" (the flow's own Isolation Forest
+# score), "IF-pair" (Decision B's host-pair aggregate score), "DPI-head" /
+# "DPI-sample" (a DPI confirmation on a flow/pair below CLONE, force_clone()'d
+# straight there, on a flow-head clone / an adaptive-sampling clone -- see
+# section 6 of _poll() and _dpi_trigger()). force_drop() keeps its own
+# "dpi_confirmed:<class>" tag, since that is a second, distinct event on a
+# flow already at CLONE, not an escalation trigger by itself.
+SCAN_ATTACK_CLASSES = {"syn_scan", "null_scan"}
+
+# Extra per-switch windows.csv columns from read_dp_counters_full(), next to
+# s<sid>_fwd/_cloned/_dropped (packets). ALL data-plane counter columns are
+# cumulative since start() reset them -- a run's totals are its last row,
+# not a sum over rows.
+DP_COUNTER_FIELDS = [
+    "fwd_bytes", "cloned_bytes", "dropped_bytes",
+    "clone_level", "clone_level_bytes", "clone_sample", "clone_sample_bytes",
+    "clone_hostpair", "clone_hostpair_bytes", "clone_head", "clone_head_bytes",
+]
+
+# cpu_hdr.reason (p4/adaptmon.p4) of the clone that let DPI see a flow ->
+# escalated_by for a DPI confirmation below CLONE. Reason 3 (host-pair rule)
+# is resolved at runtime to whatever escalated that pair -- see
+# _dpi_trigger(). Reason 1 means the data plane already had the flow at
+# CLONE when the controller did not (a race); tagged distinctly so it shows.
+DPI_TRIGGER_BY_REASON = {2: "DPI-sample", 4: "DPI-head", 1: "DPI-level"}
+
 
 class AdaptMonController:
     """
@@ -73,6 +105,7 @@ class AdaptMonController:
         train_until    : Optional[float] = None,
         flow_idle_polls: int   = 3,
         dpi_pid        : Optional[int] = None,
+        head_clone_n   : int   = 0,
     ):
         self.switch_configs  = switch_configs
         self.poll_interval   = poll_interval
@@ -80,6 +113,8 @@ class AdaptMonController:
         self.train_until     = train_until
         self.flow_idle_polls = flow_idle_polls
         self.dpi_pid         = dpi_pid
+        self.head_clone_n    = head_clone_n
+        self.head_clone_n_readback: Dict[int, Optional[int]] = {}
         os.makedirs(out_dir, exist_ok=True)
 
         self.dpm        = DataPlaneManager(switch_configs)
@@ -147,6 +182,7 @@ class AdaptMonController:
                  "n_drop_rules", "entropy",
                  "n_pairs", "n_host_clone_rules",
                  "n_entropy_payload", "n_entropy_fallback"]
+                + DP_COUNTER_FIELDS
             ]
         self._win_w = csv.DictWriter(self._win_f, fieldnames=self._win_fields)
         self._win_w.writeheader()
@@ -161,10 +197,11 @@ class AdaptMonController:
     def start(self) -> None:
         logger.info(
             "Decision A: score -> level thresholds are per-model warm-up "
-            "percentiles (MONITOR < p5, CLONE < min); DROP is never set from "
+            "percentiles (MONITOR < p5, CLONE < p1); DROP is never set from "
             "a score -- only by a DPI-confirmed attack on a flow already at "
-            "CLONE. The z-score trigger of the earlier switch-global design "
-            "is removed."
+            "CLONE. A DPI confirmation on a flow below CLONE force-clones it "
+            "(and its host pair, for a scan class). The z-score trigger of "
+            "the earlier switch-global design is removed."
         )
         logger.info(
             f"Decision B: a second IsolationForest scores host-pair "
@@ -182,6 +219,14 @@ class AdaptMonController:
         logger.info(
             f"Flow features={FEATURE_NAMES}, hysteresis up={K_UP} / down={K_DOWN} "
             f"windows, train_until={self.train_until}"
+        )
+        for sid, sw in self.dpm.switches.items():
+            self.head_clone_n_readback[sid] = sw.set_head_clone_n(self.head_clone_n)
+        ok = all(v == self.head_clone_n for v in self.head_clone_n_readback.values())
+        (logger.info if ok else logger.error)(
+            f"Flow-head cloning: the first N={self.head_clone_n} packets of every "
+            f"new flow are cloned to the CPU port (clone_reason 4; N=0 disables). "
+            f"head_clone_n read back per switch: {self.head_clone_n_readback}"
         )
         for sw in self.dpm.all_switches():
             sw.reset_dp_counters()
@@ -224,7 +269,7 @@ class AdaptMonController:
         regs, dp = {}, {}
         for sid, sw in self.dpm.switches.items():
             regs[sid] = sw.read_registers(FLOW_REGISTERS)
-            dp[sid] = sw.read_dp_counters()
+            dp[sid] = sw.read_dp_counters_full()
         t1 = time.perf_counter()
 
         # 2. Features
@@ -284,6 +329,8 @@ class AdaptMonController:
                     "train_until": self.train_until,
                     "entropy_primary_source": ENTROPY_PRIMARY_SOURCE,
                     "entropy_fallback_source": ENTROPY_FALLBACK_SOURCE,
+                    "data_plane": {"head_clone_n": self.head_clone_n,
+                                   "head_clone_n_readback": self.head_clone_n_readback},
                     "flow_model": {"trained": th is not None, **self.model.train_info},
                     "host_pair_model": {"trained": pth is not None, **self.pair_model.train_info},
                 }, f, indent=2)
@@ -316,6 +363,11 @@ class AdaptMonController:
         drop_adds, drop_dels = [], []
         new_alerts = []
         tuple_to_slot: Dict[int, Dict[tuple, int]] = {}
+        # (policy_key, row_prefix) pairs; the final level/escalated_by -- set
+        # after section 6 may still change them -- are appended just before
+        # writing, at the end of _poll() (see "flush buffered rows" below)
+        flow_row_buffer: List[tuple] = []
+        pair_row_buffer: List[tuple] = []
         for sid, w in wins.items():
             counts = [0, 0, 0, 0]
             sc = scores[sid]
@@ -345,7 +397,7 @@ class AdaptMonController:
                         level_writes[sid][slot] = int(lvl)
                         st = self.policy.state(key)
                         if lvl > old:
-                            st.escalated_by = "flow"
+                            st.escalated_by = "IF-flow"
                         if old == MonitoringLevel.DROP and lvl < MonitoringLevel.DROP \
                                 and st.rule_handle is not None:
                             drop_dels.append((sid, st.rule_handle))
@@ -363,17 +415,21 @@ class AdaptMonController:
                                 "prev_level": old.name,
                             })
                         logger.debug(f"S{sid} slot {slot} {tup}: {old.name} -> {lvl.name} "
-                                     f"(score={score:.4f}, by=flow)")
+                                     f"(score={score:.4f}, by=IF-flow)")
                 counts[lvl] += 1
                 src_count = (entropy_source[sid][j] if sid in entropy_source
                             and j < len(entropy_source[sid]) else ENTROPY_FALLBACK_SOURCE)
-                self._flow_w.writerow(
+                # Buffered, not written yet: section 6 (DPI confirmation) can
+                # still force_clone/force_drop this same key later in this
+                # same poll, and the row must reflect that final state, not
+                # this mid-poll snapshot -- see flow_row_buffer below.
+                flow_row_buffer.append((
+                    key,
                     [f"{ts:.6f}", self._window, sid, slot, *tup]
                     + [f"{v:.6g}" for v in w.X[j]]
                     + [src_count, int(w.pkt_delta[j]), int(sc is not None),
-                       f"{score:.6f}" if score != "" else "", int(raw), int(lvl),
-                       escalated_by or ""]
-                )
+                       f"{score:.6f}" if score != "" else "", int(raw)]
+                ))
             row.update({
                 f"s{sid}_n_flows": len(w.slots), f"s{sid}_n_normal": counts[0],
                 f"s{sid}_n_monitor": counts[1], f"s{sid}_n_clone": counts[2],
@@ -399,7 +455,7 @@ class AdaptMonController:
                 old, lvl = self.pair_policy.update(pstate_key, raw)
                 st = self.pair_policy.state(pstate_key)
                 if lvl > old:
-                    st.escalated_by = "host_pair"
+                    st.escalated_by = "IF-pair"
                     if lvl >= MonitoringLevel.CLONE:
                         host_clone_adds.append((sid, pstate_key, src))
                         new_alerts.append({
@@ -410,7 +466,7 @@ class AdaptMonController:
                             "level_name": lvl.name, "prev_level": old.name,
                         })
                         logger.info(f"S{sid} pair {src}->{dst}: {old.name} -> {lvl.name} "
-                                   f"(score={score:.4f}, by=host_pair)")
+                                   f"(score={score:.4f}, by=IF-pair)")
                 elif lvl < old and old >= MonitoringLevel.CLONE > lvl \
                         and st.rule_handle is not None:
                     host_clone_dels.append((sid, st.rule_handle))
@@ -418,16 +474,22 @@ class AdaptMonController:
                     st.escalated_by = None
                 if lvl >= MonitoringLevel.CLONE:
                     n_pair_clone_rules += 1
-                self._pair_w.writerow(
+                pair_row_buffer.append((
+                    pstate_key,
                     [f"{ts:.6f}", self._window, sid, src, dst]
                     + [f"{v:.6g}" for v in vec]
-                    + [int(self.pair_model.trained), f"{score:.6f}", int(raw), int(lvl),
-                       st.escalated_by or ""]
-                )
+                    + [int(self.pair_model.trained), f"{score:.6f}", int(raw)]
+                ))
             row[f"s{sid}_n_pairs"] = len(p)
             row[f"s{sid}_n_host_clone_rules"] = n_pair_clone_rules
 
-        # 6. DPI confirmation -> force DROP on a flow already at CLONE
+        # 6. DPI confirmation: a flow below CLONE jumps straight to CLONE
+        # (force_clone -- bypasses up-hysteresis, since the content/pattern
+        # match is already strong evidence on its own); a flow already at
+        # CLONE escalates to DROP (force_drop, unchanged from before). A
+        # confirmed scan class also force-clones the whole host pair, since
+        # each probe is its own short-lived flow that per-flow hysteresis
+        # alone would rarely catch in time (see controller/policy.py).
         confirmed = [a for a in self._alert_tailer.read_new()
                     if a.get("type") == "confirmed"]
         pending = self._pending_confirmations + [(a, self._window) for a in confirmed]
@@ -435,47 +497,75 @@ class AdaptMonController:
         for alert, added_window in pending:
             sid = alert["switch"]
             ft = alert["five_tuple"]
+            cls = alert["attack_class"]
             tup = (ft["src"], ft["dst"], ft["proto"], ft["sport"], ft["dport"])
             slot = tuple_to_slot.get(sid, {}).get(tup)
-            expired = (self._window - added_window) >= CONFIRMATION_RETRY_WINDOWS
             if slot is None:
+                expired = (self._window - added_window) >= CONFIRMATION_RETRY_WINDOWS
                 if not expired:
                     still_pending.append((alert, added_window))
                 else:
                     logger.warning(
-                        f"S{sid} DPI confirmed {alert['attack_class']} on inactive "
+                        f"S{sid} DPI confirmed {cls} on inactive "
                         f"flow {tup}: expired unactioned after "
                         f"{CONFIRMATION_RETRY_WINDOWS} windows")
                 continue
             key = (sid, slot)
             st = self.policy.state(key)
+            if st.level == MonitoringLevel.DROP:
+                continue   # already forced (by this or an earlier confirmation); consumed
             if st.level == MonitoringLevel.CLONE:
-                old = self.policy.force_drop(key)
+                old, new_level, escalated_by = self.policy.force_drop(key), \
+                    MonitoringLevel.DROP, f"dpi_confirmed:{cls}"
                 drop_adds.append((sid, key, tup))
-                st.escalated_by = f"dpi_confirmed:{alert['attack_class']}"
                 self._n_forced_drops += 1
-                level_writes[sid][slot] = int(MonitoringLevel.DROP)
-                new_alerts.append({
-                    "type": "forced_drop", "detector": "dpi_confirmation", "ts": ts,
-                    "window": self._window, "switch": sid, "flow_idx": slot,
-                    "five_tuple": ft, "attack_class": alert["attack_class"],
-                    "prev_level": old.name, "level": int(MonitoringLevel.DROP),
-                    "level_name": "DROP",
-                })
-                logger.info(f"S{sid} flow {tup}: {old.name} -> DROP by DPI confirmation "
-                           f"(class={alert['attack_class']})")
-            elif st.level == MonitoringLevel.DROP:
-                pass   # already forced (by this or an earlier confirmation); consumed
-            elif not expired:
-                still_pending.append((alert, added_window))
             else:
-                logger.warning(
-                    f"S{sid} DPI confirmed {alert['attack_class']} on flow {tup} that "
-                    f"never reached CLONE (stayed {st.level.name}): expired unactioned "
-                    f"after {CONFIRMATION_RETRY_WINDOWS} windows")
+                old, new_level, escalated_by = self.policy.force_clone(key), \
+                    MonitoringLevel.CLONE, self._dpi_trigger(sid, alert)
+            st.escalated_by = escalated_by
+            level_writes[sid][slot] = int(new_level)
+            new_alerts.append({
+                "type": "forced_drop" if new_level == MonitoringLevel.DROP else "forced_clone",
+                "detector": "dpi_confirmation", "ts": ts,
+                "window": self._window, "switch": sid, "flow_idx": slot,
+                "five_tuple": ft, "attack_class": cls,
+                "clone_reason": alert.get("clone_reason"), "trigger": escalated_by,
+                "prev_level": old.name, "level": int(new_level),
+                "level_name": new_level.name,
+            })
+            logger.info(f"S{sid} flow {tup}: {old.name} -> {new_level.name} by DPI "
+                       f"confirmation (class={cls}, trigger={escalated_by})")
+            if new_level == MonitoringLevel.CLONE and cls in SCAN_ATTACK_CLASSES:
+                pstate_key = (sid, ft["src"], ft["dst"])
+                pst = self.pair_policy.state(pstate_key)
+                if pst.level < MonitoringLevel.CLONE:
+                    pold = self.pair_policy.force_clone(pstate_key)
+                    pst.escalated_by = escalated_by
+                    host_clone_adds.append((sid, pstate_key, ft["src"]))
+                    new_alerts.append({
+                        "type": "pair_escalation", "detector": "dpi_confirmation",
+                        "ts": ts, "window": self._window, "switch": sid,
+                        "src": ft["src"], "dst": ft["dst"], "attack_class": cls,
+                        "clone_reason": alert.get("clone_reason"), "trigger": escalated_by,
+                        "prev_level": pold.name, "level": int(MonitoringLevel.CLONE),
+                        "level_name": "CLONE",
+                    })
+                    logger.info(f"S{sid} pair {ft['src']}->{ft['dst']}: {pold.name} -> "
+                               f"CLONE by DPI confirmation (class={cls}, trigger={escalated_by})")
         self._pending_confirmations = still_pending
         for a in new_alerts:
             self.alerts.write(a)
+
+        # Flush the buffered rows now that section 6 has had its chance to
+        # force_clone/force_drop a key -- each row gets that key's *final*
+        # level/escalated_by for this window, not the pre-DPI snapshot from
+        # when it was buffered (see flow_row_buffer/pair_row_buffer above).
+        for key, prefix in flow_row_buffer:
+            st = self.policy.state(key)
+            self._flow_w.writerow(prefix + [int(st.level), st.escalated_by or ""])
+        for pstate_key, prefix in pair_row_buffer:
+            pst = self.pair_policy.state(pstate_key)
+            self._pair_w.writerow(prefix + [int(pst.level), pst.escalated_by or ""])
         t4 = time.perf_counter()
 
         # 7. Write back: levels, drop/host-clone rules, aging
@@ -512,7 +602,11 @@ class AdaptMonController:
 
         for sid, c in dp.items():
             row.update({f"s{sid}_fwd": c["forwarded"], f"s{sid}_cloned": c["cloned"],
-                        f"s{sid}_dropped": c["dropped"]})
+                        f"s{sid}_dropped": c["dropped"],
+                        f"s{sid}_fwd_bytes": c["forwarded_bytes"],
+                        f"s{sid}_cloned_bytes": c["cloned_bytes"],
+                        f"s{sid}_dropped_bytes": c["dropped_bytes"]})
+            row.update({f"s{sid}_{k}": c[k] for k in DP_COUNTER_FIELDS if k.startswith("clone_")})
         row.update({
             "phase": "warmup" if in_warmup else ("scored" if self.model.trained else "untrained"),
             "n_flows_total": sum(len(w.slots) for w in wins.values()),
@@ -536,9 +630,31 @@ class AdaptMonController:
             self._flow_f.flush()
             self._pair_f.flush()
 
+    def _dpi_trigger(self, sid: int, alert: dict) -> str:
+        """
+        escalated_by for a DPI confirmation on a flow below CLONE: why DPI
+        had the packet at all (the confirmed alert's clone_reason). A
+        host-pair clone rule (reason 3) is credited to whatever escalated
+        the pair that installed it -- IF-pair, or a DPI-head/DPI-sample scan
+        confirmation -- since that is what put this source under full
+        capture. An alert without clone_reason (older DPI) counts as
+        DPI-sample, the only non-level path there was before flow heads.
+        """
+        reason = alert.get("clone_reason")
+        if reason == 3:
+            src = alert["five_tuple"]["src"]
+            for (psid, psrc, _), pst in self.pair_policy.flows.items():
+                if psid == sid and psrc == src and pst.rule_handle is not None \
+                        and pst.escalated_by:
+                    return pst.escalated_by
+            return "IF-pair"
+        return DPI_TRIGGER_BY_REASON.get(reason, "DPI-sample")
+
     def summary(self) -> Dict:
         return {
             "windows": self._window,
+            "head_clone_n": self.head_clone_n,
+            "head_clone_n_readback": self.head_clone_n_readback,
             "trained": self.model.trained,
             "pair_trained": self.pair_model.trained,
             "flow_train_info": self.model.train_info,

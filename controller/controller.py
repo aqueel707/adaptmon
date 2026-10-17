@@ -58,6 +58,9 @@ def parse_args():
     parser.add_argument("--dpi-ifaces", type=str, default=None,
                         help="Start controller/dpi.py on these CPU-port "
                              "interfaces, e.g. 1:am_s1dpi,2:am_s2dpi")
+    parser.add_argument("--head-clone-n", type=int, default=3,
+                        help="Flow-head cloning: clone the first N packets of "
+                             "every new flow to the CPU port (0 = off)")
     parser.add_argument("--verbose", action="store_true",
                         help="Enable debug logging")
     return parser.parse_args()
@@ -109,6 +112,7 @@ def main():
         train_until     = train_until,
         flow_idle_polls = args.flow_idle_polls,
         dpi_pid         = dpi_proc.pid if dpi_proc else None,
+        head_clone_n    = args.head_clone_n,
     )
 
     stopping = {"flag": False}

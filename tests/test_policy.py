@@ -11,15 +11,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from controller.model import Thresholds
 from controller.policy import FlowPolicy, MonitoringLevel as L, score_to_level
 
-TH = Thresholds(monitor=0.0, clone=-0.2, warmup_min=-0.2, warmup_p5=0.0,
-                warmup_mean=0.1, warmup_std=0.1, n_warmup=100)
+TH = Thresholds(monitor=0.0, clone=-0.2, warmup_min=-0.3, warmup_p1=-0.2,
+                warmup_p5=0.0, warmup_p10=0.05, warmup_mean=0.1, warmup_std=0.1,
+                n_warmup=100)
 
 
 def test_score_to_level_boundaries():
     assert score_to_level(0.01, TH) == L.NORMAL
     assert score_to_level(0.0, TH) == L.MONITOR     # not above p5
     assert score_to_level(-0.1, TH) == L.MONITOR
-    assert score_to_level(-0.2, TH) == L.CLONE       # not above warm-up min
+    assert score_to_level(-0.2, TH) == L.CLONE       # not above p1
     assert score_to_level(-5, TH) == L.CLONE
 
 

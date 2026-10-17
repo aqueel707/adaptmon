@@ -1,0 +1,2004 @@
+{
+  "n_flows": 1310,
+  "overall": {
+    "tp": 755,
+    "fn": 85,
+    "fp": 37,
+    "tn": 433,
+    "tpr": 0.8988095238095238,
+    "tpr_ci95": [
+      0.8763998275860261,
+      0.9183712966054766
+    ],
+    "fpr": 0.07872340425531915,
+    "fpr_ci95": [
+      0.056031989905237806,
+      0.10687877316028689
+    ]
+  },
+  "benign": {
+    "n": 470,
+    "n_escalated_clone_or_above": 37,
+    "false_positives_by_trigger": {
+      "IF-flow": {
+        "k": 29,
+        "n": 470,
+        "rate": 0.06170212765957447,
+        "ci95": [
+          0.04170861227422262,
+          0.08741508650461019
+        ]
+      },
+      "IF-pair": {
+        "k": 1,
+        "n": 470,
+        "rate": 0.002127659574468085,
+        "ci95": [
+          5.386622572508097e-05,
+          0.011797066749796902
+        ]
+      },
+      "DPI-head": {
+        "k": 7,
+        "n": 470,
+        "rate": 0.014893617021276596,
+        "ci95": [
+          0.0060084248384780145,
+          0.03044467963766793
+        ]
+      }
+    },
+    "n_dropped": 0,
+    "drop_rate": 0.0
+  },
+  "per_attack_class": {
+    "null_scan": {
+      "n": 320,
+      "n_observed": 320,
+      "detected_clone_or_above": 320,
+      "detected_recall": 1.0,
+      "detected_recall_ci95": [
+        0.9885384416119251,
+        1.0
+      ],
+      "recall_by_trigger": {
+        "IF-pair": {
+          "k": 8,
+          "n": 320,
+          "rate": 0.025,
+          "ci95": [
+            0.010853647128409149,
+            0.04866384235252462
+          ]
+        },
+        "DPI-head": {
+          "k": 312,
+          "n": 320,
+          "rate": 0.975,
+          "ci95": [
+            0.9513361576474754,
+            0.9891463528715908
+          ]
+        }
+      },
+      "detect_latency_s": {
+        "n": 320,
+        "mean": 0.5356719575822353,
+        "median": 0.5266742706298828,
+        "p95": 0.9821057200431828,
+        "max": 1.2089085578918457
+      },
+      "dpi_confirmed": 320,
+      "dpi_confirmed_recall": 1.0,
+      "dpi_confirmed_recall_ci95": [
+        0.9885384416119251,
+        1.0
+      ],
+      "dpi_latency_s": {
+        "n": 320,
+        "mean": 0.09348152130842209,
+        "median": 0.11420071125030518,
+        "p95": 0.12713544368743898,
+        "max": 0.13825654983520508
+      },
+      "dropped": 0
+    },
+    "rate_spike": {
+      "n": 40,
+      "n_observed": 40,
+      "detected_clone_or_above": 27,
+      "detected_recall": 0.675,
+      "detected_recall_ci95": [
+        0.5087051245215516,
+        0.8142710332366502
+      ],
+      "recall_by_trigger": {
+        "IF-flow": {
+          "k": 27,
+          "n": 40,
+          "rate": 0.675,
+          "ci95": [
+            0.5087051245215516,
+            0.8142710332366502
+          ]
+        }
+      },
+      "detect_latency_s": {
+        "n": 27,
+        "mean": 1.4779882960849338,
+        "median": 1.4797868728637695,
+        "p95": 2.011042857170105,
+        "max": 2.021470069885254
+      },
+      "dpi_confirmed": 0,
+      "dpi_confirmed_recall": 0.0,
+      "dpi_confirmed_recall_ci95": [
+        0.0,
+        0.08809730287880237
+      ],
+      "dpi_latency_s": {
+        "n": 0
+      },
+      "dropped": 0
+    },
+    "sqli": {
+      "n": 160,
+      "n_observed": 160,
+      "detected_clone_or_above": 160,
+      "detected_recall": 1.0,
+      "detected_recall_ci95": [
+        0.9772082505445334,
+        1.0
+      ],
+      "recall_by_trigger": {
+        "DPI-head": {
+          "k": 160,
+          "n": 160,
+          "rate": 1.0,
+          "ci95": [
+            0.9772082505445334,
+            1.0
+          ]
+        }
+      },
+      "detect_latency_s": {
+        "n": 160,
+        "mean": 0.47739159017801286,
+        "median": 0.46166670322418213,
+        "p95": 0.9221450567245482,
+        "max": 1.1868975162506104
+      },
+      "dpi_confirmed": 160,
+      "dpi_confirmed_recall": 1.0,
+      "dpi_confirmed_recall_ci95": [
+        0.9772082505445334,
+        1.0
+      ],
+      "dpi_latency_s": {
+        "n": 160,
+        "mean": 0.024339009821414948,
+        "median": 0.023743391036987305,
+        "p95": 0.029133665561676025,
+        "max": 0.04994988441467285
+      },
+      "dropped": 0
+    },
+    "syn_scan": {
+      "n": 320,
+      "n_observed": 320,
+      "detected_clone_or_above": 248,
+      "detected_recall": 0.775,
+      "detected_recall_ci95": [
+        0.7252458349545365,
+        0.8195823568701605
+      ],
+      "recall_by_trigger": {
+        "IF-pair": {
+          "k": 16,
+          "n": 320,
+          "rate": 0.05,
+          "ci95": [
+            0.02884590142849765,
+            0.07992853850509973
+          ]
+        },
+        "DPI-head": {
+          "k": 232,
+          "n": 320,
+          "rate": 0.725,
+          "ci95": [
+            0.6725786218072378,
+            0.773201258379155
+          ]
+        }
+      },
+      "detect_latency_s": {
+        "n": 248,
+        "mean": 0.5305125713348389,
+        "median": 0.23236727714538574,
+        "p95": 3.3780685663223267,
+        "max": 3.777208089828491
+      },
+      "dpi_confirmed": 160,
+      "dpi_confirmed_recall": 0.5,
+      "dpi_confirmed_recall_ci95": [
+        0.4438756089441841,
+        0.5561243910558158
+      ],
+      "dpi_latency_s": {
+        "n": 160,
+        "mean": 0.3657610535621643,
+        "median": 0.11522269248962402,
+        "p95": 2.7106484889984124,
+        "max": 2.761042833328247
+      },
+      "dropped": 0
+    }
+  },
+  "detect_latency_s_by_trigger": {
+    "IF-flow": {
+      "n": 27,
+      "mean": 1.4779882960849338,
+      "median": 1.4797868728637695,
+      "p95": 2.011042857170105,
+      "max": 2.021470069885254
+    },
+    "IF-pair": {
+      "n": 24,
+      "mean": 1.5613759458065033,
+      "median": 0.6745587587356567,
+      "p95": 3.7772019505500793,
+      "max": 3.777208089828491
+    },
+    "DPI-head": {
+      "n": 704,
+      "mean": 0.48564172705466097,
+      "median": 0.42744600772857666,
+      "p95": 1.0066779136657715,
+      "max": 3.3780853748321533
+    }
+  },
+  "inspection": {
+    "forwarded_packets": 668746,
+    "cloned_packets": 269927,
+    "cloned_per_forwarded": 0.403631573123428,
+    "inspection_reduction_packets": 0.596368426876572,
+    "forwarded_bytes": 315337660,
+    "cloned_bytes": 110549433,
+    "inspection_reduction_bytes": 0.6494252129606086,
+    "per_run_reduction_packets": [
+      0.5575551941960097,
+      0.8302705387402127,
+      0.423618067911664,
+      0.5094880111552336,
+      0.6507264623310469
+    ],
+    "clones_by_reason": {
+      "head": {
+        "packets": 11383,
+        "bytes": 1076715,
+        "share_of_forwarded_packets": 0.01702141022151908,
+        "share_of_forwarded_bytes": 0.0034144827484290964
+      },
+      "sample": {
+        "packets": 24019,
+        "bytes": 12220630,
+        "share_of_forwarded_packets": 0.03591647650976604,
+        "share_of_forwarded_bytes": 0.038754108849542425
+      },
+      "level": {
+        "packets": 203395,
+        "bytes": 51810306,
+        "share_of_forwarded_packets": 0.3041438752530856,
+        "share_of_forwarded_bytes": 0.16430104161995748
+      },
+      "hostpair": {
+        "packets": 31130,
+        "bytes": 45441782,
+        "share_of_forwarded_packets": 0.04654981113905728,
+        "share_of_forwarded_bytes": 0.14410515382146236
+      }
+    }
+  },
+  "capacity": {
+    "budget_pps": 2500,
+    "max_pps": 2238.8649518888406,
+    "windows_over_budget": 0,
+    "dpi_kernel_drops": 0,
+    "dpi_kernel_received": 211795
+  },
+  "resources": {
+    "poll_total_ms": {
+      "n": 1057,
+      "mean": 107.96717773294706,
+      "p95_max_over_runs": 160.8772428998236,
+      "max": 1129.504753999754
+    },
+    "poll_read_ms": {
+      "n": 1057,
+      "mean": 85.61361893245304,
+      "p95_max_over_runs": 111.53767359983247,
+      "max": 1111.9200909997744
+    },
+    "controller_cpu_pct": {
+      "n": 1057,
+      "mean": 9.461980286815418,
+      "p95_max_over_runs": 12.805,
+      "max": 91.2
+    },
+    "controller_rss_mb": {
+      "n": 1057,
+      "mean": 146.1195292806591,
+      "p95_max_over_runs": 147.21484375,
+      "max": 147.24609375
+    },
+    "dpi_cpu_pct": {
+      "n": 1057,
+      "mean": 8.478636510238605,
+      "p95_max_over_runs": 77.21,
+      "max": 88.7
+    },
+    "dpi_rss_mb": {
+      "n": 1057,
+      "mean": 174.88783618683715,
+      "p95_max_over_runs": 182.734765625,
+      "max": 182.765625
+    }
+  },
+  "series_dir": "results/paper_run_C",
+  "n_runs": 5,
+  "per_run": {
+    "run_01": {
+      "n_flows": 263,
+      "overall": {
+        "tp": 151,
+        "fn": 17,
+        "fp": 7,
+        "tn": 88,
+        "tpr": 0.8988095238095238,
+        "tpr_ci95": [
+          0.8429312289819544,
+          0.9399396778068274
+        ],
+        "fpr": 0.07368421052631578,
+        "fpr_ci95": [
+          0.030137218909825812,
+          0.14593984923312603
+        ]
+      },
+      "benign": {
+        "n": 95,
+        "n_escalated_clone_or_above": 7,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 6,
+            "n": 95,
+            "rate": 0.06315789473684211,
+            "ci95": [
+              0.02352838578430612,
+              0.1324127434884124
+            ]
+          },
+          "DPI-head": {
+            "k": 1,
+            "n": 95,
+            "rate": 0.010526315789473684,
+            "ci95": [
+              0.00026646773310538775,
+              0.05725698059313571
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 64,
+              "n": 64,
+              "rate": 1.0,
+              "ci95": [
+                0.9439909106133634,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.44179708138108253,
+            "median": 0.42250001430511475,
+            "p95": 0.9237473249435425,
+            "max": 0.9237656593322754
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.09688463434576988,
+            "median": 0.1146240234375,
+            "p95": 0.13816325664520263,
+            "max": 0.13825654983520508
+          },
+          "dropped": 0
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 7,
+          "detected_recall": 0.875,
+          "detected_recall_ci95": [
+            0.47349032912479344,
+            0.9968402764687481
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 7,
+              "n": 8,
+              "rate": 0.875,
+              "ci95": [
+                0.47349032912479344,
+                0.9968402764687481
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 7,
+            "mean": 1.6434780870165144,
+            "median": 1.6347746849060059,
+            "p95": 1.773680329322815,
+            "max": 1.778416395187378
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.4536326974630356,
+            "median": 0.40719521045684814,
+            "p95": 0.9330628156661988,
+            "max": 0.9724562168121338
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.025537826120853424,
+            "median": 0.024434924125671387,
+            "p95": 0.038302683830261225,
+            "max": 0.04451274871826172
+          },
+          "dropped": 0
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 48,
+          "detected_recall": 0.75,
+          "detected_recall_ci95": [
+            0.6260095431181809,
+            0.8498444259147272
+          ],
+          "recall_by_trigger": {
+            "IF-pair": {
+              "k": 16,
+              "n": 64,
+              "rate": 0.25,
+              "ci95": [
+                0.15015557408527277,
+                0.3739904568818191
+              ]
+            },
+            "DPI-head": {
+              "k": 32,
+              "n": 64,
+              "rate": 0.5,
+              "ci95": [
+                0.37232286289560673,
+                0.6276771371043932
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 48,
+            "mean": 0.7430822849273682,
+            "median": 0.1715322732925415,
+            "p95": 3.7772006034851073,
+            "max": 3.777208089828491
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 0.5,
+          "dpi_confirmed_recall_ci95": [
+            0.37232286289560673,
+            0.6276771371043932
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.7774205803871155,
+            "median": 0.11720573902130127,
+            "p95": 2.761036217212677,
+            "max": 2.761042833328247
+          },
+          "dropped": 0
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 7,
+          "mean": 1.6434780870165144,
+          "median": 1.6347746849060059,
+          "p95": 1.773680329322815,
+          "max": 1.778416395187378
+        },
+        "IF-pair": {
+          "n": 16,
+          "mean": 2.004783719778061,
+          "median": 2.0047852993011475,
+          "p95": 3.777203619480133,
+          "max": 3.777208089828491
+        },
+        "DPI-head": {
+          "n": 128,
+          "mean": 0.3623646069318056,
+          "median": 0.3382493257522583,
+          "p95": 0.9237456917762756,
+          "max": 0.9724562168121338
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 127912,
+        "cloned_packets": 56594,
+        "cloned_per_forwarded": 0.44244480580399026,
+        "inspection_reduction_packets": 0.5575551941960097,
+        "forwarded_bytes": 58262618,
+        "cloned_bytes": 19986391,
+        "inspection_reduction_bytes": 0.6569602999988775,
+        "per_run_reduction_packets": [
+          0.5575551941960097
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2344,
+            "bytes": 221371,
+            "share_of_forwarded_packets": 0.01832509850522234,
+            "share_of_forwarded_bytes": 0.003799537466716652
+          },
+          "sample": {
+            "packets": 3497,
+            "bytes": 2001138,
+            "share_of_forwarded_packets": 0.02733910813684408,
+            "share_of_forwarded_bytes": 0.03434686028011992
+          },
+          "level": {
+            "packets": 46857,
+            "bytes": 12085426,
+            "share_of_forwarded_packets": 0.3663221589843017,
+            "share_of_forwarded_bytes": 0.207430191344989
+          },
+          "hostpair": {
+            "packets": 3896,
+            "bytes": 5678456,
+            "share_of_forwarded_packets": 0.030458440177622115,
+            "share_of_forwarded_bytes": 0.09746311090929693
+          }
+        }
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 2032.3212521052708,
+            "p99_pps": 2023.079695133273,
+            "windows_over_budget": 0,
+            "n_windows": 253
+          },
+          "2": {
+            "max_pps": 2105.1704581996255,
+            "p99_pps": 2045.3278967987108,
+            "windows_over_budget": 0,
+            "n_windows": 253
+          }
+        },
+        "max_pps": 2105.1704581996255,
+        "windows_over_budget": 0,
+        "dpi_kernel_received": 46674,
+        "dpi_kernel_drops": 0
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 220,
+          "mean": 109.93745855456505,
+          "median": 101.70420899976308,
+          "p95": 136.31462394982918,
+          "max": 1124.41588800084
+        },
+        "poll_read_ms": {
+          "n": 220,
+          "mean": 88.06593719546899,
+          "median": 81.36179950042788,
+          "p95": 104.83240414946518,
+          "max": 1108.4952030005295
+        },
+        "controller_cpu_pct": {
+          "n": 220,
+          "mean": 9.180909090909092,
+          "median": 8.5,
+          "p95": 12.805,
+          "max": 85.6
+        },
+        "controller_rss_mb": {
+          "n": 220,
+          "mean": 146.55442116477272,
+          "median": 146.734375,
+          "p95": 147.21484375,
+          "max": 147.24609375
+        },
+        "dpi_cpu_pct": {
+          "n": 220,
+          "mean": 8.784090909090908,
+          "median": 1.9,
+          "p95": 75.36499999999998,
+          "max": 83.5
+        },
+        "dpi_rss_mb": {
+          "n": 220,
+          "mean": 175.1979403409091,
+          "median": 175.421875,
+          "p95": 180.8912109375,
+          "max": 180.91796875
+        }
+      }
+    },
+    "run_02": {
+      "n_flows": 265,
+      "overall": {
+        "tp": 152,
+        "fn": 16,
+        "fp": 7,
+        "tn": 90,
+        "tpr": 0.9047619047619048,
+        "tpr_ci95": [
+          0.8499480089523902,
+          0.944578233079393
+        ],
+        "fpr": 0.07216494845360824,
+        "fpr_ci95": [
+          0.02950516545735962,
+          0.14304845576806904
+        ]
+      },
+      "benign": {
+        "n": 97,
+        "n_escalated_clone_or_above": 7,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 7,
+            "n": 97,
+            "rate": 0.07216494845360824,
+            "ci95": [
+              0.02950516545735962,
+              0.14304845576806904
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 64,
+              "n": 64,
+              "rate": 1.0,
+              "ci95": [
+                0.9439909106133634,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.6234210021793842,
+            "median": 0.6980313062667847,
+            "p95": 1.0139103889465333,
+            "max": 1.0139241218566895
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.10829437896609306,
+            "median": 0.116263747215271,
+            "p95": 0.1224162220954895,
+            "max": 0.12243199348449707
+          },
+          "dropped": 0
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 0,
+          "detected_recall": 0.0,
+          "detected_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "recall_by_trigger": {},
+          "detect_latency_s": {
+            "n": 0
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.50154609978199,
+            "median": 0.509651780128479,
+            "p95": 0.9243647336959839,
+            "max": 0.9702877998352051
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.024947956204414368,
+            "median": 0.0232846736907959,
+            "p95": 0.031882262229919425,
+            "max": 0.04994988441467285
+          },
+          "dropped": 0
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 56,
+          "detected_recall": 0.875,
+          "detected_recall_ci95": [
+            0.7684736940339959,
+            0.944457208820398
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 56,
+              "n": 64,
+              "rate": 0.875,
+              "ci95": [
+                0.7684736940339959,
+                0.944457208820398
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 56,
+            "mean": 0.6677761205605098,
+            "median": 0.0,
+            "p95": 3.3780718445777893,
+            "max": 3.3780853748321533
+          },
+          "dpi_confirmed": 24,
+          "dpi_confirmed_recall": 0.375,
+          "dpi_confirmed_recall_ci95": [
+            0.2570489224480665,
+            0.5049235399473353
+          ],
+          "dpi_latency_s": {
+            "n": 24,
+            "mean": 0.9664849241574606,
+            "median": 0.12041151523590088,
+            "p95": 2.7079871535301208,
+            "max": 2.7079968452453613
+          },
+          "dropped": 0
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "DPI-head": {
+          "n": 152,
+          "mean": 0.6141044873940317,
+          "median": 0.4075990915298462,
+          "p95": 2.077786600589725,
+          "max": 3.3780853748321533
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 136912,
+        "cloned_packets": 23238,
+        "cloned_per_forwarded": 0.1697294612597873,
+        "inspection_reduction_packets": 0.8302705387402127,
+        "forwarded_bytes": 66720896,
+        "cloned_bytes": 19721586,
+        "inspection_reduction_bytes": 0.7044166493207765,
+        "per_run_reduction_packets": [
+          0.8302705387402127
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2301,
+            "bytes": 219468,
+            "share_of_forwarded_packets": 0.01680641579992988,
+            "share_of_forwarded_bytes": 0.003289344315759788
+          },
+          "sample": {
+            "packets": 9528,
+            "bytes": 3256172,
+            "share_of_forwarded_packets": 0.0695921467804137,
+            "share_of_forwarded_bytes": 0.048802881783841755
+          },
+          "level": {
+            "packets": 4962,
+            "bytes": 6854352,
+            "share_of_forwarded_packets": 0.03624225780063106,
+            "share_of_forwarded_bytes": 0.10273171391463327
+          },
+          "hostpair": {
+            "packets": 6447,
+            "bytes": 9391594,
+            "share_of_forwarded_packets": 0.04708864087881267,
+            "share_of_forwarded_bytes": 0.14075941066498868
+          }
+        }
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 1202.3108855798403,
+            "p99_pps": 1133.367962910717,
+            "windows_over_budget": 0,
+            "n_windows": 255
+          },
+          "2": {
+            "max_pps": 1262.2765157833235,
+            "p99_pps": 1144.6091939457021,
+            "windows_over_budget": 0,
+            "n_windows": 255
+          }
+        },
+        "max_pps": 1262.2765157833235,
+        "windows_over_budget": 0,
+        "dpi_kernel_received": 10990,
+        "dpi_kernel_drops": 0
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 222,
+          "mean": 104.7192795314856,
+          "median": 99.35644950019196,
+          "p95": 142.26708924988995,
+          "max": 240.2427199995145
+        },
+        "poll_read_ms": {
+          "n": 222,
+          "mean": 82.46786223871986,
+          "median": 79.54309300021123,
+          "p95": 106.8422452995037,
+          "max": 165.99236899946845
+        },
+        "controller_cpu_pct": {
+          "n": 222,
+          "mean": 11.534234234234233,
+          "median": 8.45,
+          "p95": 12.574999999999994,
+          "max": 91.2
+        },
+        "controller_rss_mb": {
+          "n": 222,
+          "mean": 145.8902730855856,
+          "median": 145.8671875,
+          "p95": 146.33984375,
+          "max": 146.47265625
+        },
+        "dpi_cpu_pct": {
+          "n": 222,
+          "mean": 3.031081081081081,
+          "median": 2.0,
+          "p95": 13.995,
+          "max": 16.7
+        },
+        "dpi_rss_mb": {
+          "n": 222,
+          "mean": 172.98435740427928,
+          "median": 172.953125,
+          "p95": 174.76796875,
+          "max": 174.8046875
+        }
+      }
+    },
+    "run_03": {
+      "n_flows": 258,
+      "overall": {
+        "tp": 144,
+        "fn": 24,
+        "fp": 8,
+        "tn": 82,
+        "tpr": 0.8571428571428571,
+        "tpr_ci95": [
+          0.7949358470641996,
+          0.9062746186876336
+        ],
+        "fpr": 0.08888888888888889,
+        "fpr_ci95": [
+          0.03916069274915107,
+          0.16765322087413737
+        ]
+      },
+      "benign": {
+        "n": 90,
+        "n_escalated_clone_or_above": 8,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 8,
+            "n": 90,
+            "rate": 0.08888888888888889,
+            "ci95": [
+              0.03916069274915107,
+              0.16765322087413737
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 64,
+              "n": 64,
+              "rate": 1.0,
+              "ci95": [
+                0.9439909106133634,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.5210943818092346,
+            "median": 0.4751920700073242,
+            "p95": 0.9650021553039551,
+            "max": 0.9650149345397949
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.09834379330277443,
+            "median": 0.11406147480010986,
+            "p95": 0.12979778051376342,
+            "max": 0.13128066062927246
+          },
+          "dropped": 0
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 8,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.6305833524471807,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 8,
+              "n": 8,
+              "rate": 1.0,
+              "ci95": [
+                0.6305833524471807,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 8,
+            "mean": 1.2649166882038116,
+            "median": 1.159375548362732,
+            "p95": 1.5816404581069945,
+            "max": 1.5992648601531982
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.4578832685947418,
+            "median": 0.4027843475341797,
+            "p95": 0.9646778345108032,
+            "max": 1.1868975162506104
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.02411225438117981,
+            "median": 0.024088740348815918,
+            "p95": 0.028073179721832275,
+            "max": 0.033098697662353516
+          },
+          "dropped": 0
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 40,
+          "detected_recall": 0.625,
+          "detected_recall_ci95": [
+            0.4950764600526648,
+            0.7429510775519335
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 40,
+              "n": 64,
+              "rate": 0.625,
+              "ci95": [
+                0.4950764600526648,
+                0.7429510775519335
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 40,
+            "mean": 0.7166041016578675,
+            "median": 0.6114598512649536,
+            "p95": 0.9801162004470825,
+            "max": 0.9801292419433594
+          },
+          "dpi_confirmed": 40,
+          "dpi_confirmed_recall": 0.625,
+          "dpi_confirmed_recall_ci95": [
+            0.4950764600526648,
+            0.7429510775519335
+          ],
+          "dpi_latency_s": {
+            "n": 40,
+            "mean": 0.10257598161697387,
+            "median": 0.11427521705627441,
+            "p95": 0.1179805040359497,
+            "max": 0.11799240112304688
+          },
+          "dropped": 0
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 8,
+          "mean": 1.2649166882038116,
+          "median": 1.159375548362732,
+          "p95": 1.5816404581069945,
+          "max": 1.5992648601531982
+        },
+        "DPI-head": {
+          "n": 136,
+          "mean": 0.5637240374789518,
+          "median": 0.5414515733718872,
+          "p95": 0.9801123142242432,
+          "max": 1.1868975162506104
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 133762,
+        "cloned_packets": 77098,
+        "cloned_per_forwarded": 0.576381932088336,
+        "inspection_reduction_packets": 0.423618067911664,
+        "forwarded_bytes": 62576420,
+        "cloned_bytes": 29129130,
+        "inspection_reduction_bytes": 0.5345030923788865,
+        "per_run_reduction_packets": [
+          0.423618067911664
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2322,
+            "bytes": 216538,
+            "share_of_forwarded_packets": 0.017359190203495762,
+            "share_of_forwarded_bytes": 0.0034603769279226903
+          },
+          "sample": {
+            "packets": 1839,
+            "bytes": 1264326,
+            "share_of_forwarded_packets": 0.013748299218014084,
+            "share_of_forwarded_bytes": 0.02020451153965024
+          },
+          "level": {
+            "packets": 64838,
+            "bytes": 15615196,
+            "share_of_forwarded_packets": 0.4847266039682421,
+            "share_of_forwarded_bytes": 0.24953802087112045
+          },
+          "hostpair": {
+            "packets": 8099,
+            "bytes": 12033070,
+            "share_of_forwarded_packets": 0.06054783869858405,
+            "share_of_forwarded_bytes": 0.1922939982824201
+          }
+        }
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 2123.8718882589983,
+            "p99_pps": 2052.936796355303,
+            "windows_over_budget": 0,
+            "n_windows": 252
+          },
+          "2": {
+            "max_pps": 2238.8649518888406,
+            "p99_pps": 2102.0673074452247,
+            "windows_over_budget": 0,
+            "n_windows": 252
+          }
+        },
+        "max_pps": 2238.8649518888406,
+        "windows_over_budget": 0,
+        "dpi_kernel_received": 62216,
+        "dpi_kernel_drops": 0
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 219,
+          "mean": 104.45484469403307,
+          "median": 99.9455900000612,
+          "p95": 140.84701029978532,
+          "max": 238.78960899946836
+        },
+        "poll_read_ms": {
+          "n": 219,
+          "mean": 83.20882910958233,
+          "median": 80.4883989994778,
+          "p95": 111.23407120048797,
+          "max": 149.5610009997108
+        },
+        "controller_cpu_pct": {
+          "n": 219,
+          "mean": 8.575342465753424,
+          "median": 8.2,
+          "p95": 11.5,
+          "max": 19.5
+        },
+        "controller_rss_mb": {
+          "n": 219,
+          "mean": 146.0129316495434,
+          "median": 146.078125,
+          "p95": 146.43125,
+          "max": 146.5078125
+        },
+        "dpi_cpu_pct": {
+          "n": 219,
+          "mean": 11.453881278538812,
+          "median": 2.0,
+          "p95": 77.21,
+          "max": 88.7
+        },
+        "dpi_rss_mb": {
+          "n": 219,
+          "mean": 176.2277575627854,
+          "median": 176.2265625,
+          "p95": 182.734765625,
+          "max": 182.765625
+        }
+      }
+    },
+    "run_04": {
+      "n_flows": 260,
+      "overall": {
+        "tp": 152,
+        "fn": 16,
+        "fp": 8,
+        "tn": 84,
+        "tpr": 0.9047619047619048,
+        "tpr_ci95": [
+          0.8499480089523902,
+          0.944578233079393
+        ],
+        "fpr": 0.08695652173913043,
+        "fpr_ci95": [
+          0.038292057035910654,
+          0.16416675088820692
+        ]
+      },
+      "benign": {
+        "n": 92,
+        "n_escalated_clone_or_above": 8,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 4,
+            "n": 92,
+            "rate": 0.043478260869565216,
+            "ci95": [
+              0.011971594171927266,
+              0.10759345090975951
+            ]
+          },
+          "IF-pair": {
+            "k": 1,
+            "n": 92,
+            "rate": 0.010869565217391304,
+            "ci95": [
+              0.0002751557027707387,
+              0.059077851149814745
+            ]
+          },
+          "DPI-head": {
+            "k": 3,
+            "n": 92,
+            "rate": 0.03260869565217391,
+            "ci95": [
+              0.0067758504711938955,
+              0.09234988155250508
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-pair": {
+              "k": 8,
+              "n": 64,
+              "rate": 0.125,
+              "ci95": [
+                0.05554279117960204,
+                0.23152630596600407
+              ]
+            },
+            "DPI-head": {
+              "k": 56,
+              "n": 64,
+              "rate": 0.875,
+              "ci95": [
+                0.7684736940339959,
+                0.944457208820398
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.4335663802921772,
+            "median": 0.511106014251709,
+            "p95": 0.7536474227905273,
+            "max": 0.7536559104919434
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.08862173184752464,
+            "median": 0.10171496868133545,
+            "p95": 0.1266240119934082,
+            "max": 0.12664389610290527
+          },
+          "dropped": 0
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 8,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.6305833524471807,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 8,
+              "n": 8,
+              "rate": 1.0,
+              "ci95": [
+                0.6305833524471807,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 8,
+            "mean": 1.6779143512248993,
+            "median": 1.6929572820663452,
+            "p95": 2.0203119993209837,
+            "max": 2.021470069885254
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.49616212397813797,
+            "median": 0.5475072860717773,
+            "p95": 0.888778281211853,
+            "max": 0.9080183506011963
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.023358918726444244,
+            "median": 0.02296590805053711,
+            "p95": 0.02699958086013794,
+            "max": 0.02793288230895996
+          },
+          "dropped": 0
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 48,
+          "detected_recall": 0.75,
+          "detected_recall_ci95": [
+            0.6260095431181809,
+            0.8498444259147272
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 48,
+              "n": 64,
+              "rate": 0.75,
+              "ci95": [
+                0.6260095431181809,
+                0.8498444259147272
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 48,
+            "mean": 0.29017473757267,
+            "median": 0.0,
+            "p95": 1.0156336307525635,
+            "max": 1.015643835067749
+          },
+          "dpi_confirmed": 16,
+          "dpi_confirmed_recall": 0.25,
+          "dpi_confirmed_recall_ci95": [
+            0.15015557408527277,
+            0.3739904568818191
+          ],
+          "dpi_latency_s": {
+            "n": 16,
+            "mean": 0.11336176097393036,
+            "median": 0.11336565017700195,
+            "p95": 0.11482381820678711,
+            "max": 0.11483097076416016
+          },
+          "dropped": 0
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 8,
+          "mean": 1.6779143512248993,
+          "median": 1.6929572820663452,
+          "p95": 2.0203119993209837,
+          "max": 2.021470069885254
+        },
+        "IF-pair": {
+          "n": 8,
+          "mean": 0.6745603978633881,
+          "median": 0.6745587587356567,
+          "p95": 0.674575674533844,
+          "max": 0.6745800971984863
+        },
+        "DPI-head": {
+          "n": 136,
+          "mean": 0.3835098568130942,
+          "median": 0.3690452575683594,
+          "p95": 1.0156161785125732,
+          "max": 1.015643835067749
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 131956,
+        "cloned_packets": 64726,
+        "cloned_per_forwarded": 0.49051198884476643,
+        "inspection_reduction_packets": 0.5094880111552336,
+        "forwarded_bytes": 60710536,
+        "cloned_bytes": 19735520,
+        "inspection_reduction_bytes": 0.6749242997953435,
+        "per_run_reduction_packets": [
+          0.5094880111552336
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2008,
+            "bytes": 193800,
+            "share_of_forwarded_packets": 0.015217193609991209,
+            "share_of_forwarded_bytes": 0.00319219715009599
+          },
+          "sample": {
+            "packets": 3538,
+            "bytes": 3085000,
+            "share_of_forwarded_packets": 0.02681196762557216,
+            "share_of_forwarded_bytes": 0.05081490303429375
+          },
+          "level": {
+            "packets": 52721,
+            "bytes": 7372370,
+            "share_of_forwarded_packets": 0.3995346933826427,
+            "share_of_forwarded_bytes": 0.12143477039965518
+          },
+          "hostpair": {
+            "packets": 6459,
+            "bytes": 9084350,
+            "share_of_forwarded_packets": 0.04894813422656037,
+            "share_of_forwarded_bytes": 0.14963382962061147
+          }
+        }
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 2048.8411656587755,
+            "p99_pps": 2021.0640127560816,
+            "windows_over_budget": 0,
+            "n_windows": 208
+          },
+          "2": {
+            "max_pps": 2072.1051414493136,
+            "p99_pps": 2055.792626878711,
+            "windows_over_budget": 0,
+            "n_windows": 208
+          }
+        },
+        "max_pps": 2072.1051414493136,
+        "windows_over_budget": 0,
+        "dpi_kernel_received": 55595,
+        "dpi_kernel_drops": 0
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 175,
+          "mean": 119.39557211993295,
+          "median": 108.47827999987204,
+          "p95": 160.8772428998236,
+          "max": 1129.504753999754
+        },
+        "poll_read_ms": {
+          "n": 175,
+          "mean": 94.33530530852295,
+          "median": 86.06468200014206,
+          "p95": 111.53767359983247,
+          "max": 1111.9200909997744
+        },
+        "controller_cpu_pct": {
+          "n": 175,
+          "mean": 9.573714285714283,
+          "median": 9.0,
+          "p95": 11.359999999999998,
+          "max": 89.4
+        },
+        "controller_rss_mb": {
+          "n": 175,
+          "mean": 146.221875,
+          "median": 146.21875,
+          "p95": 146.87890625,
+          "max": 146.87890625
+        },
+        "dpi_cpu_pct": {
+          "n": 175,
+          "mean": 12.181142857142856,
+          "median": 2.0,
+          "p95": 72.58999999999999,
+          "max": 86.1
+        },
+        "dpi_rss_mb": {
+          "n": 175,
+          "mean": 175.8733705357143,
+          "median": 175.99609375,
+          "p95": 181.53632812499998,
+          "max": 181.703125
+        }
+      }
+    },
+    "run_05": {
+      "n_flows": 264,
+      "overall": {
+        "tp": 156,
+        "fn": 12,
+        "fp": 7,
+        "tn": 89,
+        "tpr": 0.9285714285714286,
+        "tpr_ci95": [
+          0.8785532293671269,
+          0.9625491877391416
+        ],
+        "fpr": 0.07291666666666667,
+        "fpr_ci95": [
+          0.029817842321782213,
+          0.14447970722569897
+        ]
+      },
+      "benign": {
+        "n": 96,
+        "n_escalated_clone_or_above": 7,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 4,
+            "n": 96,
+            "rate": 0.041666666666666664,
+            "ci95": [
+              0.011467689166132269,
+              0.10325744444981882
+            ]
+          },
+          "DPI-head": {
+            "k": 3,
+            "n": 96,
+            "rate": 0.03125,
+            "ci95": [
+              0.006491454769864334,
+              0.08861809966156096
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 64,
+              "n": 64,
+              "rate": 1.0,
+              "ci95": [
+                0.9439909106133634,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.6584809422492981,
+            "median": 0.545142650604248,
+            "p95": 1.20889550447464,
+            "max": 1.2089085578918457
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.07526306807994843,
+            "median": 0.053914427757263184,
+            "p95": 0.12700141668319703,
+            "max": 0.12701869010925293
+          },
+          "dropped": 0
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 4,
+          "detected_recall": 0.5,
+          "detected_recall_ci95": [
+            0.15701277048705795,
+            0.842987229512942
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 4,
+              "n": 8,
+              "rate": 0.5,
+              "ci95": [
+                0.15701277048705795,
+                0.842987229512942
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 4,
+            "mean": 1.2146722674369812,
+            "median": 1.1984761953353882,
+            "p95": 1.3695191860198974,
+            "max": 1.3841922283172607
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.4777337610721588,
+            "median": 0.5011024475097656,
+            "p95": 0.8887821316719055,
+            "max": 0.9443058967590332
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.023738093674182892,
+            "median": 0.023088693618774414,
+            "p95": 0.027966904640197753,
+            "max": 0.028165102005004883
+          },
+          "dropped": 0
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 56,
+          "detected_recall": 0.875,
+          "detected_recall_ci95": [
+            0.7684736940339959,
+            0.944457208820398
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 56,
+              "n": 64,
+              "rate": 0.875,
+              "ci95": [
+                0.7684736940339959,
+                0.944457208820398
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 56,
+            "mean": 0.2841277463095529,
+            "median": 0.17706811428070068,
+            "p95": 0.7430527210235596,
+            "max": 0.7430689334869385
+          },
+          "dpi_confirmed": 48,
+          "dpi_confirmed_recall": 0.75,
+          "dpi_confirmed_recall_ci95": [
+            0.6260095431181809,
+            0.8498444259147272
+          ],
+          "dpi_latency_s": {
+            "n": 48,
+            "mean": 0.09441342453161876,
+            "median": 0.1090160608291626,
+            "p95": 0.12484785318374633,
+            "max": 0.12488555908203125
+          },
+          "dropped": 0
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 4,
+          "mean": 1.2146722674369812,
+          "median": 1.1984761953353882,
+          "p95": 1.3695191860198974,
+          "max": 1.3841922283172607
+        },
+        "DPI-head": {
+          "n": 152,
+          "mean": 0.4825093056026258,
+          "median": 0.4644428491592407,
+          "p95": 1.0633692622184723,
+          "max": 1.2089085578918457
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 138204,
+        "cloned_packets": 48271,
+        "cloned_per_forwarded": 0.34927353766895314,
+        "inspection_reduction_packets": 0.6507264623310469,
+        "forwarded_bytes": 67067190,
+        "cloned_bytes": 21976806,
+        "inspection_reduction_bytes": 0.6723165828179174,
+        "per_run_reduction_packets": [
+          0.6507264623310469
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2408,
+            "bytes": 225538,
+            "share_of_forwarded_packets": 0.017423518856183613,
+            "share_of_forwarded_bytes": 0.0033628664030802544
+          },
+          "sample": {
+            "packets": 5617,
+            "bytes": 2613994,
+            "share_of_forwarded_packets": 0.040642817863448234,
+            "share_of_forwarded_bytes": 0.038975749543107445
+          },
+          "level": {
+            "packets": 34017,
+            "bytes": 9882962,
+            "share_of_forwarded_packets": 0.24613614656594598,
+            "share_of_forwarded_bytes": 0.14735911851980082
+          },
+          "hostpair": {
+            "packets": 6229,
+            "bytes": 9254312,
+            "share_of_forwarded_packets": 0.0450710543833753,
+            "share_of_forwarded_bytes": 0.13798568271609413
+          }
+        }
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 2067.540755321643,
+            "p99_pps": 2041.5296693030637,
+            "windows_over_budget": 0,
+            "n_windows": 254
+          },
+          "2": {
+            "max_pps": 2090.1818974899516,
+            "p99_pps": 2046.1914721284986,
+            "windows_over_budget": 0,
+            "n_windows": 254
+          }
+        },
+        "max_pps": 2090.1818974899516,
+        "windows_over_budget": 0,
+        "dpi_kernel_received": 36320,
+        "dpi_kernel_drops": 0
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 221,
+          "mean": 101.32873376471862,
+          "median": 97.41285800009793,
+          "p95": 133.9799059996949,
+          "max": 253.7241879999783
+        },
+        "poll_read_ms": {
+          "n": 221,
+          "mean": 79.99016080997107,
+          "median": 77.71122899976035,
+          "p95": 100.91313600059948,
+          "max": 132.99712499974703
+        },
+        "controller_cpu_pct": {
+          "n": 221,
+          "mean": 8.445701357466064,
+          "median": 8.1,
+          "p95": 11.0,
+          "max": 19.4
+        },
+        "controller_rss_mb": {
+          "n": 221,
+          "mean": 145.91814550339367,
+          "median": 145.99609375,
+          "p95": 146.4375,
+          "max": 146.453125
+        },
+        "dpi_cpu_pct": {
+          "n": 221,
+          "mean": 6.942986425339367,
+          "median": 2.0,
+          "p95": 64.5,
+          "max": 84.7
+        },
+        "dpi_rss_mb": {
+          "n": 221,
+          "mean": 174.15575509049773,
+          "median": 174.26171875,
+          "p95": 178.2109375,
+          "max": 178.28125
+        }
+      }
+    }
+  }
+}

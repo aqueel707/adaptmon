@@ -1,0 +1,73 @@
+{
+  "checks": {
+    "ground_truth_has_all_classes": true,
+    "ground_truth_flows_have_valid_windows": true,
+    "nmap_scans_ran_ok": true,
+    "sqli_bodies_actually_on_the_wire": true,
+    "dpi_confirms_scans_and_sqli": true,
+    "peak_offered_rate_under_decision_d_budget": true
+  },
+  "detail": {
+    "ground_truth_has_all_classes": {
+      "pass": true,
+      "classes": [
+        "benign",
+        "null_scan",
+        "rate_spike",
+        "sqli",
+        "syn_scan"
+      ]
+    },
+    "ground_truth_flows_have_valid_windows": {
+      "pass": true,
+      "n_flows": 22
+    },
+    "nmap_scans_ran_ok": {
+      "pass": true
+    },
+    "sqli_bodies_actually_on_the_wire": {
+      "pass": true,
+      "found": 4,
+      "expected": 4
+    },
+    "dpi_confirms_scans_and_sqli": {
+      "pass": true,
+      "syn_confirmed_ports": [
+        21,
+        22,
+        80,
+        443,
+        8080
+      ],
+      "null_confirmed_ports": [
+        21,
+        22,
+        80,
+        443,
+        8080
+      ],
+      "sqli_confirmed": 4
+    },
+    "peak_offered_rate_under_decision_d_budget": {
+      "pass": true,
+      "samples": {
+        "iperf3_benign": 230.1,
+        "http_benign": 18.1,
+        "sqli_attack": 22.3,
+        "nmap_syn": 39.5,
+        "nmap_null": 39.3,
+        "rate_spike": 1595.2
+      }
+    }
+  },
+  "ground_truth_summary": {
+    "n_flows": 22,
+    "by_class": {
+      "benign": 7,
+      "sqli": 4,
+      "syn_scan": 5,
+      "null_scan": 5,
+      "rate_spike": 1
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "n_cycles": 8,
+  "seed": 1250895948,
+  "ground_truth": {
+    "n_flows": 258,
+    "by_class": {
+      "benign": 90,
+      "null_scan": 64,
+      "sqli": 32,
+      "rate_spike": 8,
+      "syn_scan": 64
+    }
+  }
+}

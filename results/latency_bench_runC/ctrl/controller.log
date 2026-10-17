@@ -1,0 +1,47 @@
+2026-10-17 19:39:38 [INFO] controller.utils: Logging to results/latency_bench_runC/ctrl/controller.log
+2026-10-17 19:39:38 [INFO] __main__: AdaptMon Controller starting (run_id=20261017_193938, out_dir=results/latency_bench_runC/ctrl)
+2026-10-17 19:39:38 [INFO] __main__: DPI started (pid=279) on 1:am_s1dpi,2:am_s2dpi
+2026-10-17 19:39:38 [INFO] controller.dataplane: DataPlaneManager initialized with 2 switches
+2026-10-17 19:39:38 [INFO] __main__: Waiting for switches to come up...
+2026-10-17 19:39:39 [INFO] controller.dataplane: All switches are alive
+2026-10-17 19:39:39 [INFO] __main__: S1: mirroring session 100 -> CPU port 255 configured
+2026-10-17 19:39:39 [INFO] __main__: S2: mirroring session 100 -> CPU port 255 configured
+2026-10-17 19:39:39 [INFO] controller.monitor: Decision A: score -> level thresholds are per-model warm-up percentiles (MONITOR < p5, CLONE < p1); DROP is never set from a score -- only by a DPI-confirmed attack on a flow already at CLONE. A DPI confirmation on a flow below CLONE force-clones it (and its host pair, for a scan class). The z-score trigger of the earlier switch-global design is removed.
+2026-10-17 19:39:39 [INFO] controller.monitor: Decision B: a second IsolationForest scores host-pair aggregates ['new_flows', 'distinct_dst_ports', 'syn_only_ratio', 'pkt_count']; a pair escalating to CLONE installs a src-IP clone rule (every packet from that source is cloned from then on).
+2026-10-17 19:39:39 [INFO] controller.monitor: Decision C: data-plane adaptive sampling (NORMAL 1-in-64, MONITOR 1-in-8, CLONE/DROP every packet); the entropy feature is payload byte entropy from sampled clones (payload_sampled) when available this window, else flow-distribution entropy (flow_distribution).
+2026-10-17 19:39:39 [INFO] controller.monitor: Flow features=['pkt_count', 'byte_count', 'duration_s', 'pkt_rate', 'mean_pkt_size', 'entropy'], hysteresis up=2 / down=3 windows, train_until=1792246380.1008685
+2026-10-17 19:39:39 [INFO] controller.monitor: Flow-head cloning: the first N=3 packets of every new flow are cloned to the CPU port (clone_reason 4; N=0 disables). head_clone_n read back per switch: {1: 3, 2: 3}
+2026-10-17 19:39:39 [INFO] controller.monitor: Monitor started for switches [1, 2]
+2026-10-17 19:43:02 [INFO] controller.model: IsolationForest[pkt_count,byte_count,duration_s,pkt_rate,mean_pkt_size,entropy] trained once on 19580 warm-up vectors (838 ms); frozen. Thresholds: NORMAL > 0.0000 (p5), MONITOR > -0.0671 (p1), else CLONE (warm-up min was -0.1657); DROP only on DPI confirmation
+2026-10-17 19:43:02 [INFO] controller.model: IsolationForest[new_flows,distinct_dst_ports,syn_only_ratio,pkt_count] trained once on 9980 warm-up vectors (436 ms); frozen. Thresholds: NORMAL > 0.0000 (p5), MONITOR > -0.2210 (p1), else CLONE (warm-up min was -0.2758); DROP only on DPI confirmation
+2026-10-17 19:47:23 [INFO] controller.monitor: S1 pair 10.100.6.13->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:23 [INFO] controller.monitor: S1 pair 10.100.6.110->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:23 [INFO] controller.monitor: S1 pair 10.100.6.106->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:23 [INFO] controller.monitor: S1 pair 10.100.6.107->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:23 [INFO] controller.monitor: S1 pair 10.100.6.108->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:23 [INFO] controller.monitor: S1 pair 10.100.5.118->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.99->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.72->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.244->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.181->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.235->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.167->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.243->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.122->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.183->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.151->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.24->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.6.134->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.144->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.179->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.6.229->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.6.221->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.234->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.66->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.201->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.6.223->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:47:27 [INFO] controller.monitor: S1 pair 10.100.7.153->10.0.1.2: NORMAL -> CLONE (score=-0.2449, by=IF-pair)
+2026-10-17 19:48:03 [INFO] __main__: Received signal, shutting down...
+2026-10-17 19:48:03 [INFO] __main__: Stopping
+2026-10-17 19:48:03 [INFO] controller.monitor: Monitor stopped
+2026-10-17 19:48:05 [INFO] __main__: Controller terminated cleanly

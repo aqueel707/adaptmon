@@ -64,6 +64,24 @@ def _ns_run(ns: str, cmd: str, check: bool = False) -> Tuple[int, str, str]:
     return _run(f"ip netns exec {ns} {cmd}", check=check)
 
 
+def _disable_offload(ns: Optional[str], iface: str) -> None:
+    """
+    Disable checksum/segmentation offload on a veth end.
+
+    veth defaults to deferring TX checksums to "hardware" (CHECKSUM_PARTIAL);
+    there is no hardware here, and bmv2 relays packets between unrelated veth
+    pairs via raw AF_PACKET sockets, so the real checksum is never filled in.
+    The receiving host's kernel then validates the (unfinished) checksum and
+    silently drops the segment -- TCP never gets a RST, so a dead connect()
+    just times out, while ICMP (software-checksummed unconditionally) looks
+    fine. Without this, every real TCP/UDP flow through bmv2 is broken.
+    """
+    cmd = f"ethtool -K {iface} tx off rx off sg off tso off gso off gro off"
+    rc, _, err = _ns_run(ns, cmd) if ns else _run(cmd)
+    if rc != 0:
+        logger.warning(f"  Could not disable offload on {iface}: {err}")
+
+
 # --------------------------------------------------------------------------
 # Topology definition
 # --------------------------------------------------------------------------
@@ -272,10 +290,12 @@ class NetworkNamespaceTopo:
 
             # Bring up switch side in root namespace
             _run(f"ip link set {sv} up", check=True)
+            _disable_offload(None, sv)
 
             # Configure host side inside namespace
             _ns_run(ns, f"ip link set {hv} address {mac}")
             _ns_run(ns, f"ip link set {hv} up")
+            _disable_offload(ns, hv)
             _ns_run(ns, f"ip addr add {ip}/{pfx} dev {hv}")
             _ns_run(ns, f"ip link set lo up")
             # No IPv6: keeps kernel RS/ND/MLD packets out of the switch ports
@@ -292,6 +312,8 @@ class NetworkNamespaceTopo:
         _run(f"ip link add {vs1} type veth peer name {vs2}", check=True)
         _run(f"ip link set {vs1} up", check=True)
         _run(f"ip link set {vs2} up", check=True)
+        _disable_offload(None, vs1)
+        _disable_offload(None, vs2)
         logger.info(f"  Inter-switch: {vs1} <--> {vs2}")
 
         # 4. CPU port links (switch port 255 <-> DPI sniffer side)

@@ -1,0 +1,28 @@
+{
+  "engine": {
+    "clones": 66300,
+    "short": 0,
+    "non_ip": 0,
+    "tcp": 0,
+    "udp": 66300,
+    "other_l4": 0,
+    "http_payload_pkts": 0,
+    "confirmed": 0,
+    "clones_by_reason": {
+      "4": 4044,
+      "2": 2333,
+      "3": 59923
+    }
+  },
+  "sockets": {
+    "am_s1dpi": {
+      "kernel_received": 66413,
+      "kernel_drops": 113
+    },
+    "am_s2dpi": {
+      "kernel_received": 0,
+      "kernel_drops": 0
+    }
+  },
+  "runtime_s": 285.9512560367584
+}

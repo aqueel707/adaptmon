@@ -1,0 +1,114 @@
+{
+  "run_id": "20261017_143510",
+  "windows": 251,
+  "trained": true,
+  "pair_trained": true,
+  "flow_train_info": {
+    "sklearn_version": "1.7.2",
+    "params": {
+      "n_estimators": 100,
+      "max_samples": 256,
+      "contamination": 0.05,
+      "random_state": 42
+    },
+    "features": [
+      "pkt_count",
+      "byte_count",
+      "duration_s",
+      "pkt_rate",
+      "mean_pkt_size",
+      "entropy"
+    ],
+    "log1p_features": [
+      "pkt_count",
+      "byte_count",
+      "duration_s",
+      "pkt_rate"
+    ],
+    "n_train": 424,
+    "max_samples_effective": 256,
+    "fit_seconds": 0.10590027800003554,
+    "warmup_score_min": -0.1190002316099803,
+    "warmup_score_p5": -4.4885969940899884e-17,
+    "warmup_score_mean": 0.15094236295669203,
+    "warmup_score_std": 0.08337437534393058,
+    "thresholds": {
+      "monitor": -4.4885969940899884e-17,
+      "clone": -0.1190002316099803,
+      "warmup_min": -0.1190002316099803,
+      "warmup_p5": -4.4885969940899884e-17,
+      "warmup_mean": 0.15094236295669203,
+      "warmup_std": 0.08337437534393058,
+      "n_warmup": 424
+    },
+    "train_feature_min": [
+      5.0,
+      452.0,
+      0.003529,
+      0.0,
+      66.00644122383252,
+      0.0
+    ],
+    "train_feature_max": [
+      2536.0,
+      3816413.0,
+      28.690098,
+      94.77210373139943,
+      1519.096881959911,
+      1.723387260210064
+    ]
+  },
+  "pair_train_info": {
+    "sklearn_version": "1.7.2",
+    "params": {
+      "n_estimators": 100,
+      "max_samples": 256,
+      "contamination": 0.05,
+      "random_state": 42
+    },
+    "features": [
+      "new_flows",
+      "distinct_dst_ports",
+      "syn_only_ratio",
+      "pkt_count"
+    ],
+    "log1p_features": [
+      "new_flows",
+      "distinct_dst_ports",
+      "pkt_count"
+    ],
+    "n_train": 232,
+    "max_samples_effective": 232,
+    "fit_seconds": 0.09745453899995482,
+    "warmup_score_min": -0.1108223923349898,
+    "warmup_score_p5": 2.949029909160572e-17,
+    "warmup_score_mean": 0.1272410610923133,
+    "warmup_score_std": 0.0649598605914194,
+    "thresholds": {
+      "monitor": 2.949029909160572e-17,
+      "clone": -0.1108223923349898,
+      "warmup_min": -0.1108223923349898,
+      "warmup_p5": 2.949029909160572e-17,
+      "warmup_mean": 0.1272410610923133,
+      "warmup_std": 0.0649598605914194,
+      "n_warmup": 232
+    },
+    "train_feature_min": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "train_feature_max": [
+      2.0,
+      3.0,
+      0.2,
+      91.0
+    ]
+  },
+  "flows_tracked": 0,
+  "pairs_tracked": 8,
+  "forced_drops": 0,
+  "pending_confirmations": 0,
+  "alerts_written": 2
+}

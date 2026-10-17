@@ -14,11 +14,21 @@ since Isolation Forest splits are invariant to per-feature affine
 transforms). Scores are IsolationForest.decision_function(): lower = more
 anomalous.
 
-Thresholds (Decision A): derived from each model's own scores on its own
-warm-up samples -- MONITOR below the warm-up 5th percentile, CLONE below
-the warm-up minimum. DROP is never reached from a score: a flow or pair
-already at CLONE is escalated to DROP only when controller/dpi.py confirms
-an attack on it (see controller/monitor.py and controller/policy.py).
+Thresholds (Decision A, revised): derived from each model's own scores on
+its own warm-up samples -- MONITOR below the warm-up 5th percentile, CLONE
+below the warm-up 1st percentile. DROP is never reached from a score: a
+flow or pair already at CLONE is escalated to DROP only when
+controller/dpi.py confirms an attack on it (see controller/monitor.py and
+controller/policy.py).
+
+CLONE was originally the raw warm-up minimum (the single most extreme
+score seen anywhere in warm-up). That is fragile: it takes only one
+unusually quiet or unusually bursty benign sample during warm-up to set a
+bar that no later attack sample needs to beat to go undetected -- measured
+on a real run, the warm-up minimum was *more* extreme than the best score
+any attack flow reached, for every attack class. The 1st percentile keeps
+the same "far out in the warm-up's own tail" intent without anchoring to
+whichever single sample happened to be the worst.
 """
 
 import logging
@@ -53,9 +63,11 @@ class Thresholds:
     else => CLONE. DROP is never reached from the score alone.
     """
     monitor    : float     # warm-up 5th percentile
-    clone      : float     # warm-up min
+    clone      : float     # warm-up 1st percentile
     warmup_min : float
+    warmup_p1  : float
     warmup_p5  : float
+    warmup_p10 : float
     warmup_mean: float
     warmup_std : float
     n_warmup   : int
@@ -105,13 +117,16 @@ class IFModel:
         model.fit(Xp)
         scores = model.decision_function(Xp)
         mn  = float(scores.min())
+        p1  = float(np.percentile(scores, 1))
         p5  = float(np.percentile(scores, 5))
+        p10 = float(np.percentile(scores, 10))
         std = float(scores.std())
         fit_s = time.perf_counter() - t0
         self.model = model
         self.thresholds = Thresholds(
-            monitor=p5, clone=mn, warmup_min=mn, warmup_p5=p5,
-            warmup_mean=float(scores.mean()), warmup_std=std, n_warmup=n,
+            monitor=p5, clone=p1, warmup_min=mn, warmup_p1=p1, warmup_p5=p5,
+            warmup_p10=p10, warmup_mean=float(scores.mean()), warmup_std=std,
+            n_warmup=n,
         )
         self.train_info = {
             "sklearn_version": sklearn.__version__,
@@ -122,9 +137,12 @@ class IFModel:
             "max_samples_effective": min(self.params["max_samples"], n),
             "fit_seconds": fit_s,
             "warmup_score_min": mn,
+            "warmup_score_p1": p1,
             "warmup_score_p5": p5,
+            "warmup_score_p10": p10,
             "warmup_score_mean": float(scores.mean()),
             "warmup_score_std": std,
+            "warmup_scores": scores.tolist(),
             "thresholds": asdict(self.thresholds),
             "train_feature_min": X_warmup.min(axis=0).tolist(),
             "train_feature_max": X_warmup.max(axis=0).tolist(),
@@ -132,8 +150,8 @@ class IFModel:
         logger.info(
             f"IsolationForest[{','.join(self.feature_names)}] trained once on "
             f"{n} warm-up vectors ({fit_s*1000:.0f} ms); frozen. "
-            f"Thresholds: NORMAL > {p5:.4f} (p5), MONITOR > {mn:.4f} (min), "
-            f"else CLONE; DROP only on DPI confirmation"
+            f"Thresholds: NORMAL > {p5:.4f} (p5), MONITOR > {p1:.4f} (p1), "
+            f"else CLONE (warm-up min was {mn:.4f}); DROP only on DPI confirmation"
         )
         return self.thresholds
 

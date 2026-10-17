@@ -1,0 +1,43 @@
+{
+  "checks": {
+    "syn_scan_all_8": true,
+    "null_scan_all_3": true,
+    "sqli": true,
+    "benign_not_flagged": true,
+    "all_rule_clones_seen": true,
+    "flow_idx_in_alert_matches_slot": true
+  },
+  "n_alerts": 12,
+  "rule_clones_switch": 14,
+  "burst": {
+    "sent": 3000,
+    "send_seconds": 1.8785474300384521,
+    "offered_pps": 1596.9785761217606,
+    "clones_by_switch": 696,
+    "dpi_processed_total": 710,
+    "dpi_processed_burst": 696,
+    "dpi_loss_fraction": 0.0
+  },
+  "dpi_stats": {
+    "engine": {
+      "clones": 710,
+      "short": 0,
+      "non_ip": 0,
+      "tcp": 13,
+      "udp": 697,
+      "other_l4": 0,
+      "http_payload_pkts": 2,
+      "confirmed": 12,
+      "clones_by_reason": {
+        "1": 710
+      }
+    },
+    "sockets": {
+      "am_s1dpi": {
+        "kernel_received": 710,
+        "kernel_drops": 0
+      }
+    },
+    "runtime_s": 9.341305494308472
+  }
+}

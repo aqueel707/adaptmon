@@ -7,15 +7,22 @@ Deep packet inspection of the clones the switches send to their CPU port.
 
 A Scapy sniffer on each CPU-port interface receives clones, i.e.
 cpu_hdr (14 B: flow_index u32, flow_level u8, pkt_count u32, byte_count u32,
-reason u8) followed by the original Ethernet frame. The cpu_hdr is stripped,
+reason u8 -- 1 level, 2 sample, 3 host-pair rule, 4 flow head) followed by
+the original Ethernet frame. Clones are processed identically whatever
+their reason; the reason only rides along on the confirmed alert
+("clone_reason") so the controller can attribute the escalation. The cpu_hdr is stripped,
 the frame is parsed with Scapy, and these rules run:
 
-  syn_scan  per (src IP, dst IP) aggregate of cloned TCP packets: share of
-            SYN-only packets (flags == SYN) > 0.9 AND >= 5 distinct dst
-            ports. A single 5-tuple has exactly one dst port, so the
-            ">= 5 distinct dst ports within the flow" condition is evaluated
-            on the host-pair aggregate; each SYN-only 5-tuple flow of a
-            matching aggregate gets the confirmed alert.
+  syn_scan  per (src IP, dst IP) aggregate of the cloned TCP packets between
+            that pair in the last SYN_PAIR_WINDOW_SECS seconds (aged by
+            time, not a lifetime count -- otherwise one ordinary TCP session
+            to a host pair permanently dilutes its ratio and masks a real
+            scan of the same pair later): share of SYN-only packets
+            (flags == SYN) > 0.9 AND >= 5 distinct dst ports. A single
+            5-tuple has exactly one dst port, so the ">= 5 distinct dst
+            ports" condition is evaluated on the host-pair aggregate; each
+            SYN-only 5-tuple flow of a matching aggregate gets the confirmed
+            alert.
   null_scan TCP packet with no flags set.
   sqli      in HTTP payloads only (TCP payload of a flow from its first
             cloned HTTP request line on), URL-decoded, compiled
@@ -51,8 +58,8 @@ import struct
 import sys
 import threading
 import time
-from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from collections import defaultdict, deque
+from typing import Deque, Dict, List, Optional, Tuple
 from urllib.parse import unquote_plus
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -66,6 +73,14 @@ CPU_HDR_LEN = CPU_HDR.size     # 14
 SYN, RST, ACK, FIN = 0x02, 0x04, 0x10, 0x01
 SYN_ONLY_RATIO = 0.9
 SYN_MIN_PORTS = 5
+# Recent-history window (seconds, by packet timestamp) the syn-scan ratio is
+# computed over, per host pair -- not a lifetime counter (see the comment at
+# its one use below). A count-based window does not work here: an ordinary
+# TCP session can put far more packets through a pair than a port scan ever
+# will, so a scan's own packets would never be enough of the window to clear
+# the ratio threshold. Aging by elapsed time instead means a scan is judged
+# only against what happened in the last few seconds on that pair.
+SYN_PAIR_WINDOW_SECS = 3.0
 
 SQLI_PATTERNS = {
     "or_1_eq_1"   : re.compile(r"\bor\s+'?1'?\s*=\s*'?1\b", re.IGNORECASE),
@@ -88,7 +103,8 @@ def byte_entropy(hist: List[int]) -> float:
 
 class FlowRecord:
     __slots__ = ("switch", "tuple", "flow_idx", "n", "payload_bytes", "hist",
-                 "is_http", "classes", "first_ts", "last_ts", "max_level")
+                 "is_http", "classes", "first_ts", "last_ts", "max_level",
+                 "last_reason", "reasons")
 
     def __init__(self, switch, tup, flow_idx, ts):
         self.switch, self.tuple, self.flow_idx = switch, tup, flow_idx
@@ -99,6 +115,8 @@ class FlowRecord:
         self.classes = set()
         self.first_ts = self.last_ts = ts
         self.max_level = 0
+        self.last_reason = 0      # cpu_hdr.reason of this flow's latest clone
+        self.reasons = set()      # every cpu_hdr.reason this flow was cloned for
 
 
 class DPIEngine:
@@ -108,11 +126,14 @@ class DPIEngine:
         from scapy.all import Ether, IP, TCP, UDP   # lazy: heavy import
         self._Ether, self._IP, self._TCP, self._UDP = Ether, IP, TCP, UDP
         self.flows: Dict[Tuple[int, FiveTuple], FlowRecord] = {}
-        # (switch, src, dst) -> {"syn_only": n, "tcp": n, "ports": set, "flows": set}
-        self.pairs: Dict[tuple, dict] = defaultdict(
-            lambda: {"syn_only": 0, "tcp": 0, "ports": set(), "syn_flows": set()})
+        # (switch, src, dst) -> deque of (ts, is_syn_only, dport, five_tuple)
+        # for the TCP packets seen between that pair in the last
+        # SYN_PAIR_WINDOW_SECS seconds (entries older than that are dropped
+        # as new packets arrive; see process())
+        self.pairs: Dict[tuple, Deque[tuple]] = defaultdict(deque)
         self.stats = {"clones": 0, "short": 0, "non_ip": 0, "tcp": 0, "udp": 0,
-                      "other_l4": 0, "http_payload_pkts": 0, "confirmed": 0}
+                      "other_l4": 0, "http_payload_pkts": 0, "confirmed": 0,
+                      "clones_by_reason": {}}
 
     def _confirm(self, rec: FlowRecord, cls: str, ts: float, cpu: dict,
                  evidence: dict) -> Optional[dict]:
@@ -125,6 +146,11 @@ class DPIEngine:
             "flow_idx": cpu["flow_index"],
             "five_tuple": dict(zip(("src", "dst", "proto", "sport", "dport"), rec.tuple)),
             "attack_class": cls, "level": cpu["level"],
+            # Why the flow's packet was on the CPU port at all (p4/adaptmon.p4
+            # clone_reason: 1 level, 2 sample, 3 host-pair rule, 4 flow head)
+            # -- controller/monitor.py attributes the escalation to it
+            "clone_reason": cpu.get("reason", rec.last_reason),
+            "clone_reasons_seen": sorted(rec.reasons),
             "evidence": evidence,
             "payload_entropy": round(byte_entropy(rec.hist), 4),
             "clones_seen": rec.n,
@@ -138,6 +164,8 @@ class DPIEngine:
         idx, level, pkt_count, byte_count, reason = CPU_HDR.unpack_from(raw)
         cpu = {"flow_index": idx, "level": level, "pkt_count": pkt_count,
                "byte_count": byte_count, "reason": reason}
+        by_reason = self.stats["clones_by_reason"]
+        by_reason[str(reason)] = by_reason.get(str(reason), 0) + 1
         eth = self._Ether(raw[CPU_HDR_LEN:])
         if not eth.haslayer(self._IP):
             self.stats["non_ip"] += 1
@@ -163,6 +191,8 @@ class DPIEngine:
         rec.n += 1
         rec.last_ts = ts
         rec.max_level = max(rec.max_level, level)
+        rec.last_reason = reason
+        rec.reasons.add(reason)
         payload = bytes(l4.payload) if l4 is not None else bytes(ip.payload)
         rec.payload_bytes += len(payload)
         for b in payload:
@@ -175,23 +205,31 @@ class DPIEngine:
                 a = self._confirm(rec, "null_scan", ts, cpu, {"tcp_flags": 0})
                 if a:
                     alerts.append(a)
-            # SYN scan (host-pair aggregate)
+            # SYN scan (host-pair aggregate over a recent time window): aged
+            # by elapsed time, not a lifetime counter -- otherwise one
+            # ordinary TCP session to a host pair (SYN+ACK+data, mostly
+            # non-SYN-only packets) permanently dilutes that pair's ratio
+            # below the threshold for the rest of the process, masking a
+            # real scan of the same pair later on.
             pair = self.pairs[(switch, ip.src, ip.dst)]
-            pair["tcp"] += 1
-            pair["ports"].add(int(l4.dport))
-            if flags == SYN:
-                pair["syn_only"] += 1
-                pair["syn_flows"].add(tup)
-            ratio = pair["syn_only"] / pair["tcp"]
-            if ratio > SYN_ONLY_RATIO and len(pair["ports"]) >= SYN_MIN_PORTS:
+            pair.append((ts, flags == SYN, int(l4.dport), tup))
+            cutoff = ts - SYN_PAIR_WINDOW_SECS
+            while pair and pair[0][0] < cutoff:
+                pair.popleft()
+            syn_only_n = sum(1 for _, is_syn, _, _ in pair if is_syn)
+            ports = {dport for _, _, dport, _ in pair}
+            ratio = syn_only_n / len(pair)
+            if ratio > SYN_ONLY_RATIO and len(ports) >= SYN_MIN_PORTS:
                 ev = {"syn_only_ratio": round(ratio, 4),
-                      "distinct_dst_ports": len(pair["ports"]),
-                      "pair_tcp_pkts": pair["tcp"]}
-                for t in pair["syn_flows"]:
+                      "distinct_dst_ports": len(ports),
+                      "pair_tcp_pkts": len(pair)}
+                syn_flows = {t for _, is_syn, _, t in pair if is_syn}
+                for t in syn_flows:
                     r = self.flows.get((switch, t))
                     if r is not None:
                         a = self._confirm(r, "syn_scan", ts, cpu if r is rec else
-                                          {"flow_index": r.flow_idx, "level": r.max_level}, ev)
+                                          {"flow_index": r.flow_idx, "level": r.max_level,
+                                           "reason": r.last_reason}, ev)
                         if a:
                             alerts.append(a)
             # SQLi in HTTP payloads
