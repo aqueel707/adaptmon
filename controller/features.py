@@ -1,333 +1,155 @@
 """
 controller/features.py
-Feature extraction from raw register snapshots.
-Computes per-flow statistics: pps, bps, entropy, duration, etc.
+Per-flow feature extraction from raw register snapshots.
+
+One feature vector per occupied register slot (= flow, keyed by the 5-tuple
+hash) per poll window:
+
+  [0] pkt_count      packets in the slot since the flow started (pkt_counter)
+  [1] byte_count     bytes since the flow started (byte_counter)
+  [2] duration_s     flow_last_ts - flow_first_ts (data-plane timestamps)
+  [3] pkt_rate       packets in this window / window length (pkt/s)
+  [4] mean_pkt_size  byte_count / pkt_count
+  [5] entropy        see ENTROPY_SOURCE
+
+ENTROPY_SOURCE = "flow_distribution": the Shannon entropy (bits) of this
+window's per-flow packet deltas across all active slots of the switch,
+H = -sum p_i log2 p_i with p_i = dpkts_i / sum(dpkts). It is a window-level
+value, identical for every flow of that switch in that window.
+Payload byte entropy is NOT an Isolation Forest input: it exists only for
+cloned flows (level >= CLONE), never during the benign warm-up the model is
+trained on, so the model could not learn it. controller/dpi.py computes it
+for cloned packets and reports it in the alerts instead.
 """
 
-import numpy as np
-import time
 import logging
-from typing import Dict, List, Tuple, Optional
-from collections import defaultdict
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
+
+from .utils import ip_int_to_str
 
 logger = logging.getLogger(__name__)
 
 MAX_FLOWS = 4096
 
+FEATURE_NAMES = [
+    "pkt_count", "byte_count", "duration_s",
+    "pkt_rate", "mean_pkt_size", "entropy",
+]
+N_FEATURES = len(FEATURE_NAMES)
+ENTROPY_SOURCE = "flow_distribution"
 
-class FlowRecord:
-    """Stores time-series data for a single flow."""
-
-    def __init__(self, flow_index: int):
-        self.flow_index   = flow_index
-        self.timestamps   : List[float]  = []
-        self.pkt_counts   : List[int]    = []
-        self.byte_counts  : List[int]    = []
-        self.first_seen   : float        = 0.0
-        self.last_seen    : float        = 0.0
-        self.active       : bool         = False
-
-    def update(
-        self,
-        timestamp: float,
-        pkt_count: int,
-        byte_count: int
-    ) -> None:
-        self.timestamps.append(timestamp)
-        self.pkt_counts.append(pkt_count)
-        self.byte_counts.append(byte_count)
-        if not self.active:
-            self.first_seen = timestamp
-            self.active = True
-        self.last_seen = timestamp
-        # Keep rolling window of last 60 samples
-        if len(self.timestamps) > 60:
-            self.timestamps.pop(0)
-            self.pkt_counts.pop(0)
-            self.byte_counts.pop(0)
-
-    @property
-    def duration(self) -> float:
-        if self.first_seen == 0 or self.last_seen == 0:
-            return 0.0
-        return self.last_seen - self.first_seen
-
-    @staticmethod
-    def _counter_delta(counts: List[int]) -> int:
-        if len(counts) < 2:
-            return 0
-        # A drop means the controller reset the registers (flow aging)
-        # since the last poll; everything counted now arrived after it.
-        if counts[-1] < counts[-2]:
-            return counts[-1]
-        return counts[-1] - counts[-2]
-
-    @property
-    def pkt_delta(self) -> int:
-        return self._counter_delta(self.pkt_counts)
-
-    @property
-    def byte_delta(self) -> int:
-        return self._counter_delta(self.byte_counts)
-
-    @property
-    def time_delta(self) -> float:
-        if len(self.timestamps) < 2:
-            return 1.0
-        delta = self.timestamps[-1] - self.timestamps[-2]
-        return delta if delta > 0 else 1.0
-
-    def packets_per_second(self) -> float:
-        return self.pkt_delta / self.time_delta
-
-    def bytes_per_second(self) -> float:
-        return self.byte_delta / self.time_delta
-
-    def mean_pkt_size(self) -> float:
-        if self.pkt_counts[-1] == 0 if self.pkt_counts else True:
-            return 0.0
-        total_pkts = self.pkt_counts[-1]
-        total_bytes = self.byte_counts[-1]
-        return total_bytes / total_pkts if total_pkts > 0 else 0.0
-
-    def pkt_rate_variance(self) -> float:
-        if len(self.pkt_counts) < 3:
-            return 0.0
-        deltas = [
-            max(0, self.pkt_counts[i] - self.pkt_counts[i-1])
-            for i in range(1, len(self.pkt_counts))
-        ]
-        return float(np.var(deltas))
+FiveTuple = Tuple[str, str, int, int, int]
 
 
-class FeatureExtractor:
+@dataclass
+class SwitchWindow:
+    """Per-flow features of one switch for one poll window."""
+    switch_id : int
+    timestamp : float
+    dt        : float               # seconds since the previous poll
+    slots     : np.ndarray          # occupied slot indices
+    tuples    : List[FiveTuple]     # (src, dst, proto, sport, dport) per slot
+    X         : np.ndarray          # (n, N_FEATURES)
+    pkt_delta : np.ndarray          # packets in this window per slot
+    flow_level: np.ndarray          # flow_level register as read
+    entropy   : float
+    n_tuple_changes: int            # slots whose 5-tuple changed without reset
+
+
+def shannon_entropy(counts: np.ndarray) -> float:
+    counts = counts[counts > 0].astype(np.float64)
+    total = counts.sum()
+    if total <= 0:
+        return 0.0
+    p = counts / total
+    return float(-(p * np.log2(p)).sum())
+
+
+class FlowFeatureExtractor:
     """
-    Maintains flow state and extracts feature vectors
-    from periodic register snapshots.
+    Keeps the previous snapshot of one switch and turns each new register
+    snapshot into per-flow feature vectors.
     """
 
-    def __init__(self, poll_interval: float = 1.0):
-        self.poll_interval  = poll_interval
-        self.flow_records   : Dict[int, FlowRecord] = {}
-        self.prev_pkts      : Dict[int, int]  = {}
-        self.prev_bytes     : Dict[int, int]  = {}
-        self.prev_timestamp : float            = 0.0
-        self._global_entropy_history : List[float] = []
+    def __init__(self, switch_id: int):
+        self.switch_id = switch_id
+        self._prev_pkts: Optional[np.ndarray] = None
+        self._prev_ts  : Optional[float] = None
+        self._prev_tuples: Optional[np.ndarray] = None
 
-    def _get_or_create(self, idx: int) -> FlowRecord:
-        if idx not in self.flow_records:
-            self.flow_records[idx] = FlowRecord(idx)
-        return self.flow_records[idx]
+    def forget(self, slots: List[int]) -> None:
+        """Slots cleared by the controller (aging): next delta starts at 0."""
+        if self._prev_pkts is not None and slots:
+            self._prev_pkts[slots] = 0
 
-    def update_snapshot(
-        self,
-        pkt_counters  : Dict[int, int],
-        byte_counters : Dict[int, int],
-        timestamp     : float
-    ) -> None:
-        """Ingest a new register snapshot."""
-        for idx in range(MAX_FLOWS):
-            pkt_val  = pkt_counters.get(idx, 0)
-            byte_val = byte_counters.get(idx, 0)
-            if pkt_val > 0:
-                rec = self._get_or_create(idx)
-                rec.update(timestamp, pkt_val, byte_val)
-            else:
-                # Empty slot (aged out): a later flow hashing here is new
-                self.flow_records.pop(idx, None)
-        self.prev_timestamp = timestamp
-
-    def compute_entropy(
-        self,
-        pkt_counters: Dict[int, int]
-    ) -> float:
+    def extract(self, regs: Dict[str, List[int]], timestamp: float) -> Optional[SwitchWindow]:
         """
-        Shannon entropy of flow packet distribution.
-        H = -sum(p_i * log2(p_i))
+        regs: whole register arrays from SwitchInterface.read_registers().
+        Returns None for the first snapshot (no previous one to diff
+        against) or if the read was incomplete.
         """
-        counts = np.array(
-            [v for v in pkt_counters.values() if v > 0],
-            dtype=np.float64
-        )
-        if len(counts) == 0:
-            return 0.0
-        total = counts.sum()
-        if total == 0:
-            return 0.0
-        probs = counts / total
-        entropy = -np.sum(probs * np.log2(probs + 1e-12))
-        return float(entropy)
+        try:
+            pkts  = np.asarray(regs["pkt_counter"],  dtype=np.int64)
+            bytes_= np.asarray(regs["byte_counter"], dtype=np.int64)
+            first = np.asarray(regs["flow_first_ts"], dtype=np.int64)
+            last  = np.asarray(regs["flow_last_ts"],  dtype=np.int64)
+            src   = np.asarray(regs["flow_src_ip"],   dtype=np.int64)
+            dst   = np.asarray(regs["flow_dst_ip"],   dtype=np.int64)
+            proto = np.asarray(regs["flow_protocol"], dtype=np.int64)
+            sport = np.asarray(regs["flow_src_port"], dtype=np.int64)
+            dport = np.asarray(regs["flow_dst_port"], dtype=np.int64)
+            level = np.asarray(regs["flow_level"],    dtype=np.int64)
+        except KeyError as e:
+            logger.warning(f"S{self.switch_id}: register missing from read: {e}")
+            return None
+        if not all(len(a) == MAX_FLOWS for a in (pkts, bytes_, first, last, src, dst,
+                                                 proto, sport, dport, level)):
+            logger.warning(f"S{self.switch_id}: incomplete register read")
+            return None
 
-    def compute_flow_distribution(
-        self,
-        pkt_counters: Dict[int, int]
-    ) -> Dict[str, float]:
-        """Compute distribution statistics across flows."""
-        vals = [v for v in pkt_counters.values() if v > 0]
-        if not vals:
-            return {
-                "n_active_flows": 0,
-                "mean_pkts"     : 0.0,
-                "std_pkts"      : 0.0,
-                "max_pkts"      : 0.0,
-                "gini"          : 0.0,
-            }
-        arr = np.array(vals, dtype=np.float64)
-        return {
-            "n_active_flows": len(vals),
-            "mean_pkts"     : float(arr.mean()),
-            "std_pkts"      : float(arr.std()),
-            "max_pkts"      : float(arr.max()),
-            "gini"          : self._gini(arr),
-        }
+        prev, prev_ts = self._prev_pkts, self._prev_ts
+        tuples_now = np.vstack([src, dst, proto, sport, dport])
+        prev_tuples = self._prev_tuples
+        self._prev_pkts, self._prev_ts = pkts.copy(), timestamp
+        self._prev_tuples = tuples_now
+        if prev is None:
+            return None
 
-    @staticmethod
-    def _gini(arr: np.ndarray) -> float:
-        """Gini coefficient of array."""
-        if arr.sum() == 0:
-            return 0.0
-        sorted_arr = np.sort(arr)
-        n = len(sorted_arr)
-        index = np.arange(1, n + 1)
-        return float(
-            (2 * np.sum(index * sorted_arr)) / (n * sorted_arr.sum()) - (n + 1) / n
-        )
+        dt = max(timestamp - prev_ts, 1e-3)
+        occupied = np.nonzero(pkts > 0)[0]
+        # A counter below its previous value means the slot was cleared
+        # (aging) since the last poll: everything counted arrived after it
+        delta = np.where(pkts >= prev, pkts - prev, pkts)[occupied]
+        # 5-tuple changed while the counter kept growing: another flow hashed
+        # into an occupied slot (collision); the slot now mixes two flows
+        changed = int(np.count_nonzero(
+            (prev[occupied] > 0) & (pkts[occupied] >= prev[occupied])
+            & (tuples_now[:, occupied] != prev_tuples[:, occupied]).any(axis=0)
+        ))
 
-    def get_active_flows(self) -> List[int]:
-        """Return indices of currently active flows."""
-        return [
-            idx for idx, rec in self.flow_records.items()
-            if rec.active and len(rec.pkt_counts) > 0
-            and rec.pkt_counts[-1] > 0
+        entropy = shannon_entropy(delta)
+        p = pkts[occupied].astype(np.float64)
+        b = bytes_[occupied].astype(np.float64)
+        X = np.column_stack([
+            p,
+            b,
+            np.maximum(last[occupied] - first[occupied], 0) / 1e6,
+            delta / dt,
+            np.divide(b, p, out=np.zeros_like(b), where=p > 0),
+            np.full(len(occupied), entropy),
+        ]) if len(occupied) else np.zeros((0, N_FEATURES))
+
+        tuples = [
+            (ip_int_to_str(int(src[i])), ip_int_to_str(int(dst[i])),
+             int(proto[i]), int(sport[i]), int(dport[i]))
+            for i in occupied
         ]
-
-    def extract_feature_vector(
-        self,
-        pkt_counters  : Dict[int, int],
-        byte_counters : Dict[int, int],
-        timestamp     : float
-    ) -> np.ndarray:
-        """
-        Build the global feature vector used by anomaly detection.
-        Features:
-          [0] entropy
-          [1] n_active_flows
-          [2] mean_pps (avg packets/sec across active flows)
-          [3] mean_bps (avg bytes/sec across active flows)
-          [4] max_pps
-          [5] max_bps
-          [6] std_pps
-          [7] std_bps
-          [8] gini_pkts
-          [9] top_flow_fraction
-        """
-        entropy = self.compute_entropy(pkt_counters)
-        dist    = self.compute_flow_distribution(pkt_counters)
-
-        active_flows = self.get_active_flows()
-        n_active = len(active_flows)
-
-        pps_list = []
-        bps_list = []
-        for idx in active_flows:
-            rec = self.flow_records[idx]
-            if len(rec.timestamps) >= 2:
-                pps_list.append(rec.packets_per_second())
-                bps_list.append(rec.bytes_per_second())
-
-        pps_arr = np.array(pps_list, dtype=np.float64) if pps_list else np.array([0.0])
-        bps_arr = np.array(bps_list, dtype=np.float64) if bps_list else np.array([0.0])
-
-        total_pkts = sum(pkt_counters.values())
-        top_count  = max(pkt_counters.values(), default=0)
-        top_fraction = top_count / total_pkts if total_pkts > 0 else 0.0
-
-        features = np.array([
-            entropy,                          # [0]
-            float(n_active),                  # [1]
-            float(pps_arr.mean()),            # [2]
-            float(bps_arr.mean()),            # [3]
-            float(pps_arr.max()),             # [4]
-            float(bps_arr.max()),             # [5]
-            float(pps_arr.std()),             # [6]
-            float(bps_arr.std()),             # [7]
-            dist["gini"],                     # [8]
-            top_fraction,                     # [9]
-        ], dtype=np.float64)
-
-        return features
-
-    def extract_per_flow_features(
-        self,
-        indices: List[int]
-    ) -> Dict[int, np.ndarray]:
-        """
-        Extract per-flow feature vectors.
-        Returns dict: flow_index -> feature_vector
-        """
-        result = {}
-        for idx in indices:
-            rec = self.flow_records.get(idx)
-            if rec is None or len(rec.timestamps) < 2:
-                continue
-            fv = np.array([
-                rec.packets_per_second(),
-                rec.bytes_per_second(),
-                rec.mean_pkt_size(),
-                rec.pkt_rate_variance(),
-                float(rec.duration),
-                float(rec.pkt_counts[-1]),
-                float(rec.byte_counts[-1]),
-            ], dtype=np.float64)
-            result[idx] = fv
-        return result
-
-    def get_entropy_history(self) -> List[float]:
-        return self._global_entropy_history.copy()
-
-    def clear_inactive_flows(self, idle_threshold: float = 30.0) -> int:
-        """Remove flows idle for more than idle_threshold seconds."""
-        now = time.time()
-        to_remove = [
-            idx for idx, rec in self.flow_records.items()
-            if rec.active and (now - rec.last_seen) > idle_threshold
-        ]
-        for idx in to_remove:
-            self.flow_records[idx].active = False
-        return len(to_remove)
-
-    def get_top_talkers(
-        self,
-        pkt_counters: Dict[int, int],
-        n: int = 10
-    ) -> List[Tuple[int, int]]:
-        """Return top-n flows by packet count."""
-        active = {
-            idx: cnt for idx, cnt in pkt_counters.items()
-            if cnt > 0
-        }
-        sorted_flows = sorted(
-            active.items(), key=lambda x: x[1], reverse=True
+        return SwitchWindow(
+            switch_id=self.switch_id, timestamp=timestamp, dt=dt,
+            slots=occupied, tuples=tuples, X=X, pkt_delta=delta,
+            flow_level=level[occupied], entropy=entropy,
+            n_tuple_changes=changed,
         )
-        return sorted_flows[:n]
-
-    def summary(
-        self,
-        pkt_counters  : Dict[int, int],
-        byte_counters : Dict[int, int],
-        timestamp     : float
-    ) -> Dict:
-        """Return a summary dict for logging."""
-        entropy = self.compute_entropy(pkt_counters)
-        dist    = self.compute_flow_distribution(pkt_counters)
-        top     = self.get_top_talkers(pkt_counters, 5)
-        return {
-            "timestamp"     : timestamp,
-            "entropy"       : entropy,
-            "n_active_flows": dist["n_active_flows"],
-            "mean_pkts"     : dist["mean_pkts"],
-            "std_pkts"      : dist["std_pkts"],
-            "max_pkts"      : dist["max_pkts"],
-            "gini"          : dist["gini"],
-            "top_talkers"   : top,
-        }

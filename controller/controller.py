@@ -2,21 +2,25 @@
 controller/controller.py
 Main controller entry point.
 Parses CLI args and starts the AdaptMon monitoring system.
+
+    python3 -m controller.controller --switches sw.json --out-dir results/<run> \
+        --train-until <epoch> --duration 120 [--dpi-ifaces 1:am_s1dpi,2:am_s2dpi]
 """
 
 import argparse
+import json
 import logging
 import os
-import sys
 import signal
+import subprocess
+import sys
 import time
-import json
 
 # Make sure local modules are importable
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
 
 from controller.monitor import AdaptMonController
-from controller.policy  import PolicyConfig
 from controller.utils   import setup_logging, ensure_dirs, get_timestamp_str
 
 logger = logging.getLogger(__name__)
@@ -26,79 +30,36 @@ DEFAULT_SWITCH_CONFIGS = [
     {"switch_id": 2, "thrift_port": 9091},
 ]
 
-DEFAULT_FORWARDING_RULES = [
-    # Switch 1 rules
-    {"switch_id": 1, "dst_ip": "10.0.1.1", "port": 1},
-    {"switch_id": 1, "dst_ip": "10.0.1.2", "port": 2},
-    {"switch_id": 1, "dst_ip": "10.0.2.1", "port": 3},
-    {"switch_id": 1, "dst_ip": "10.0.2.2", "port": 3},
-    # Switch 2 rules
-    {"switch_id": 2, "dst_ip": "10.0.2.1", "port": 1},
-    {"switch_id": 2, "dst_ip": "10.0.2.2", "port": 2},
-    {"switch_id": 2, "dst_ip": "10.0.1.1", "port": 3},
-    {"switch_id": 2, "dst_ip": "10.0.1.2", "port": 3},
-]
-
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description="AdaptMon: Adaptive Monitoring Controller"
     )
-    parser.add_argument(
-        "--switches", type=str, default=None,
-        help="JSON file with switch configs"
-    )
-    parser.add_argument(
-        "--forwarding", type=str, default=None,
-        help="JSON file with forwarding rules"
-    )
-    parser.add_argument(
-        "--poll-interval", type=float, default=1.0,
-        help="Register polling interval in seconds"
-    )
-    parser.add_argument(
-        "--log-dir", type=str, default="logs",
-        help="Directory for log files"
-    )
-    parser.add_argument(
-        "--run-id", type=str, default=None,
-        help="Experiment run identifier"
-    )
-    parser.add_argument(
-        "--duration", type=int, default=300,
-        help="Controller run duration in seconds (0 = infinite)"
-    )
-    parser.add_argument(
-        "--train-until", type=float, default=None,
-        help="Epoch time the benign warm-up ends (attack start): train the "
-             "detector once on samples before it, then freeze. "
-             "Omit for periodic retraining"
-    )
-    parser.add_argument(
-        "--flow-idle-polls", type=int, default=3,
-        help="Clear a flow register slot after its counter has not "
-             "changed for this many polls"
-    )
-    parser.add_argument(
-        "--contamination", type=float, default=0.05,
-        help="IsolationForest contamination parameter"
-    )
-    parser.add_argument(
-        "--normal-threshold", type=float, default=-0.10,
-        help="Score threshold for NORMAL level"
-    )
-    parser.add_argument(
-        "--monitor-threshold", type=float, default=-0.20,
-        help="Score threshold for MONITOR level"
-    )
-    parser.add_argument(
-        "--clone-threshold", type=float, default=-0.30,
-        help="Score threshold for CLONE level"
-    )
-    parser.add_argument(
-        "--verbose", action="store_true",
-        help="Enable debug logging"
-    )
+    parser.add_argument("--switches", type=str, default=None,
+                        help="JSON file with switch configs")
+    parser.add_argument("--forwarding", type=str, default=None,
+                        help="JSON file with forwarding rules (optional; the "
+                             "topology normally installs them)")
+    parser.add_argument("--poll-interval", type=float, default=1.0,
+                        help="Register polling interval in seconds")
+    parser.add_argument("--out-dir", type=str, default=None,
+                        help="Output directory (default logs/<run-id>)")
+    parser.add_argument("--run-id", type=str, default=None)
+    parser.add_argument("--duration", type=float, default=300,
+                        help="Controller run duration in seconds (0 = infinite)")
+    parser.add_argument("--train-until", type=float, default=None,
+                        help="Epoch time the benign warm-up ends: the detector "
+                             "is trained once on flow vectors before it")
+    parser.add_argument("--warmup", type=float, default=None,
+                        help="Alternative to --train-until: seconds from start")
+    parser.add_argument("--flow-idle-polls", type=int, default=3,
+                        help="Clear a flow register slot after its counter has "
+                             "not changed for this many polls")
+    parser.add_argument("--dpi-ifaces", type=str, default=None,
+                        help="Start controller/dpi.py on these CPU-port "
+                             "interfaces, e.g. 1:am_s1dpi,2:am_s2dpi")
+    parser.add_argument("--verbose", action="store_true",
+                        help="Enable debug logging")
     return parser.parse_args()
 
 
@@ -106,66 +67,66 @@ def main():
     args = parse_args()
 
     run_id  = args.run_id or get_timestamp_str()
-    log_dir = os.path.join(args.log_dir, run_id)
-
-    ensure_dirs([log_dir, "results"])
+    out_dir = args.out_dir or os.path.join("logs", run_id)
+    ensure_dirs([out_dir])
 
     setup_logging(
-        log_dir,
+        out_dir,
         log_file="controller.log",
         level=logging.DEBUG if args.verbose else logging.INFO
     )
+    logger.info(f"AdaptMon Controller starting (run_id={run_id}, out_dir={out_dir})")
 
-    logger.info(f"AdaptMon Controller starting (run_id={run_id})")
-
-    # Load switch configs
     if args.switches and os.path.exists(args.switches):
         with open(args.switches) as f:
             switch_configs = json.load(f)
     else:
         switch_configs = DEFAULT_SWITCH_CONFIGS
 
-    # Load forwarding rules
-    if args.forwarding and os.path.exists(args.forwarding):
-        with open(args.forwarding) as f:
-            forwarding_rules = json.load(f)
-    else:
-        forwarding_rules = DEFAULT_FORWARDING_RULES
+    train_until = args.train_until
+    if train_until is None and args.warmup is not None:
+        train_until = time.time() + args.warmup
 
-    # Build policy config
-    policy_cfg = PolicyConfig(
-        normal_threshold  = args.normal_threshold,
-        monitor_threshold = args.monitor_threshold,
-        clone_threshold   = args.clone_threshold,
-    )
+    # DPI sniffer on the CPU ports (separate process: own CPU/RSS figures)
+    dpi_proc = None
+    if args.dpi_ifaces:
+        dpi_proc = subprocess.Popen(
+            [sys.executable, "-m", "controller.dpi",
+             "--ifaces", args.dpi_ifaces,
+             "--alerts", os.path.join(out_dir, "alerts.jsonl"),
+             "--out-dir", out_dir],
+            cwd=ROOT,
+            stdout=open(os.path.join(out_dir, "dpi_out.log"), "w"),
+            stderr=subprocess.STDOUT,
+        )
+        logger.info(f"DPI started (pid={dpi_proc.pid}) on {args.dpi_ifaces}")
 
-    # Create controller
     controller = AdaptMonController(
-        switch_configs = switch_configs,
-        poll_interval  = args.poll_interval,
-        log_dir        = log_dir,
-        policy_config  = policy_cfg,
-        train_until    = args.train_until,
+        switch_configs  = switch_configs,
+        poll_interval   = args.poll_interval,
+        out_dir         = out_dir,
+        train_until     = train_until,
         flow_idle_polls = args.flow_idle_polls,
+        dpi_pid         = dpi_proc.pid if dpi_proc else None,
     )
 
-    # Signal handler for graceful shutdown
+    stopping = {"flag": False}
+
     def _sighandler(signum, frame):
         logger.info("Received signal, shutting down...")
-        controller.stop()
-        sys.exit(0)
+        stopping["flag"] = True
 
     signal.signal(signal.SIGINT,  _sighandler)
     signal.signal(signal.SIGTERM, _sighandler)
 
-    # Wait for switches
     logger.info("Waiting for switches to come up...")
     if not controller.wait_for_switches(timeout=60):
-        logger.error("Switches did not come up in time, proceeding anyway")
+        logger.error("Switches did not come up in time")
+        sys.exit(2)
 
-    # Install forwarding rules
-    logger.info("Installing base forwarding rules...")
-    controller.install_forwarding(forwarding_rules)
+    if args.forwarding and os.path.exists(args.forwarding):
+        with open(args.forwarding) as f:
+            controller.install_forwarding(json.load(f))
 
     # Clone session 100 -> CPU port (mirroring_add 100 255) on every switch
     mirroring = controller.dpm.install_mirroring_all()
@@ -175,38 +136,24 @@ def main():
         else:
             logger.error(f"S{sid}: mirroring session 100 could not be configured")
 
-    # Start monitoring
     controller.start()
-
-    # Run for specified duration
+    t_end = time.time() + args.duration if args.duration > 0 else float("inf")
     try:
-        if args.duration > 0:
-            logger.info(f"Running for {args.duration} seconds")
-            time.sleep(args.duration)
-            logger.info("Duration elapsed, stopping")
-        else:
-            logger.info("Running indefinitely (Ctrl+C to stop)")
-            while True:
-                time.sleep(10)
-                summary = controller.get_policy_summary()
-                logger.info(f"Policy summary: {summary}")
-    except KeyboardInterrupt:
-        logger.info("Interrupted")
+        while not stopping["flag"] and time.time() < t_end:
+            time.sleep(0.2)
+        logger.info("Duration elapsed, stopping" if not stopping["flag"] else "Stopping")
     finally:
         controller.stop()
-        logger.info("Controller terminated cleanly")
-
-        # Save final stats
-        stats = {
-            "run_id"     : run_id,
-            "policy"     : controller.get_policy_summary(),
-            "detectors"  : controller.get_detector_stats(),
-            "metrics"    : controller.get_metrics_paths(),
-        }
-        stats_path = os.path.join(log_dir, "final_stats.json")
-        with open(stats_path, "w") as f:
+        if dpi_proc is not None:
+            dpi_proc.send_signal(signal.SIGTERM)
+            try:
+                dpi_proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                dpi_proc.kill()
+        stats = {"run_id": run_id, **controller.summary()}
+        with open(os.path.join(out_dir, "final_stats.json"), "w") as f:
             json.dump(stats, f, indent=2, default=str)
-        logger.info(f"Final stats saved to {stats_path}")
+        logger.info("Controller terminated cleanly")
 
 
 if __name__ == "__main__":

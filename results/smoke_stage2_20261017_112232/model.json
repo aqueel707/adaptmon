@@ -1,0 +1,56 @@
+{
+  "trained": true,
+  "train_until": 1792216386.9552286,
+  "entropy_source": "flow_distribution",
+  "sklearn_version": "1.7.2",
+  "params": {
+    "n_estimators": 100,
+    "max_samples": 256,
+    "contamination": 0.05,
+    "random_state": 42
+  },
+  "features": [
+    "pkt_count",
+    "byte_count",
+    "duration_s",
+    "pkt_rate",
+    "mean_pkt_size",
+    "entropy"
+  ],
+  "log1p_features": [
+    "pkt_count",
+    "byte_count",
+    "duration_s",
+    "pkt_rate"
+  ],
+  "n_train": 363,
+  "max_samples_effective": 256,
+  "fit_seconds": 0.08103412699983892,
+  "warmup_score_min": -0.1502071787537661,
+  "warmup_score_std": 0.06511029649296343,
+  "warmup_score_mean": 0.13938803614497972,
+  "thresholds": {
+    "normal": -0.1502071787537661,
+    "monitor": -0.21531747524672953,
+    "clone": -0.28042777173969297,
+    "warmup_min": -0.1502071787537661,
+    "warmup_std": 0.06511029649296343,
+    "n_warmup": 363
+  },
+  "train_feature_min": [
+    1.0,
+    74.0,
+    0.0,
+    0.0,
+    74.0,
+    -0.0
+  ],
+  "train_feature_max": [
+    3.0,
+    222.0,
+    2.190797,
+    1.8680667689708719,
+    148.0,
+    2.321928094887362
+  ]
+}
