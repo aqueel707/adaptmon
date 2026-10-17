@@ -52,17 +52,23 @@ class FlowRecord:
             return 0.0
         return self.last_seen - self.first_seen
 
+    @staticmethod
+    def _counter_delta(counts: List[int]) -> int:
+        if len(counts) < 2:
+            return 0
+        # A drop means the controller reset the registers (flow aging)
+        # since the last poll; everything counted now arrived after it.
+        if counts[-1] < counts[-2]:
+            return counts[-1]
+        return counts[-1] - counts[-2]
+
     @property
     def pkt_delta(self) -> int:
-        if len(self.pkt_counts) < 2:
-            return 0
-        return max(0, self.pkt_counts[-1] - self.pkt_counts[-2])
+        return self._counter_delta(self.pkt_counts)
 
     @property
     def byte_delta(self) -> int:
-        if len(self.byte_counts) < 2:
-            return 0
-        return max(0, self.byte_counts[-1] - self.byte_counts[-2])
+        return self._counter_delta(self.byte_counts)
 
     @property
     def time_delta(self) -> float:
@@ -126,6 +132,9 @@ class FeatureExtractor:
             if pkt_val > 0:
                 rec = self._get_or_create(idx)
                 rec.update(timestamp, pkt_val, byte_val)
+            else:
+                # Empty slot (aged out): a later flow hashing here is new
+                self.flow_records.pop(idx, None)
         self.prev_timestamp = timestamp
 
     def compute_entropy(

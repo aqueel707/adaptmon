@@ -13,6 +13,7 @@ from typing import List, Optional, Tuple, Dict
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +32,40 @@ FEATURE_NAMES = [
 
 N_FEATURES = len(FEATURE_NAMES)
 
+# Count and rate features, unbounded and heavy-tailed under a flood:
+# log1p-compressed before scaling so benign values are not squashed into
+# a sliver of the range by the flood's extremes.
+LOG_FEATURES = [
+    FEATURE_NAMES.index(name) for name in (
+        "n_active_flows",
+        "mean_pps", "mean_bps", "max_pps", "max_bps", "std_pps", "std_bps",
+    )
+]
+
+
+# Floor on the warm-up std used for z-scores, so a feature that was
+# (nearly) constant during warm-up doesn't turn tiny changes into huge z
+def z_std_floor(mean: np.ndarray) -> np.ndarray:
+    return 0.05 * np.abs(mean) + 0.01
+
+
+def log_count_features(X: np.ndarray) -> np.ndarray:
+    """Apply log1p to the LOG_FEATURES columns (clipped at 0)."""
+    X = np.array(X, dtype=np.float64, copy=True)
+    X[:, LOG_FEATURES] = np.log1p(np.clip(X[:, LOG_FEATURES], 0.0, None))
+    return X
+
 
 class AnomalyDetector:
     """
     Online anomaly detection using IsolationForest.
-    Maintains a sliding window of feature vectors and
-    retrains periodically.
+
+    Two training modes:
+      * train_until set (experiments): buffer every sample whose timestamp
+        is before train_until (the benign warm-up), train exactly once on
+        that buffer when the first later sample arrives, then freeze. No
+        sample at or after train_until is ever used for training.
+      * train_until None (standalone): sliding window, periodic retraining.
     """
 
     def __init__(
@@ -46,12 +75,14 @@ class AnomalyDetector:
         contamination        : float = 0.05,
         retrain_interval     : int   = 50,
         min_samples_to_train : int   = 20,
+        train_until          : Optional[float] = None,
     ):
         self.window_size          = window_size
         self.n_estimators         = n_estimators
         self.contamination        = contamination
         self.retrain_interval     = retrain_interval
         self.min_samples_to_train = min_samples_to_train
+        self.train_until          = train_until
 
         self._buffer         : List[np.ndarray] = []
         self._scores         : List[float]       = []
@@ -60,11 +91,20 @@ class AnomalyDetector:
         self._is_trained     : bool              = False
         self._samples_since_retrain : int        = 0
         self._training_count        : int        = 0
+        self._warmup_failed         : bool       = False
+        # Frozen model's scores for its own warm-up samples (frozen mode)
+        self.warmup_scores          : Optional[np.ndarray] = None
+        # Per-feature warm-up mean/std after log1p, for z_max (frozen mode)
+        self._z_mean                : Optional[np.ndarray] = None
+        self._z_std                 : Optional[np.ndarray] = None
 
         self._build_pipeline()
 
     def _build_pipeline(self) -> None:
+        # The log step is part of the pipeline, so fit and every
+        # decision_function call apply the same transform.
         self._pipeline = Pipeline([
+            ("log",    FunctionTransformer(log_count_features)),
             ("scaler", StandardScaler()),
             ("iforest", IsolationForest(
                 n_estimators   = self.n_estimators,
@@ -83,7 +123,10 @@ class AnomalyDetector:
         """
         Ingest a new feature vector.
         Returns anomaly score if model is trained, else None.
-        Lower (more negative) score = more anomalous.
+        The score is IsolationForest.decision_function(): 0 is the
+        contamination boundary, negative = anomalous, and lower = more
+        anomalous. (Raw score_samples() sits around -0.45 even for benign
+        traffic, below every PolicyConfig threshold.)
         """
         if feature_vector.shape[0] != N_FEATURES:
             logger.warning(
@@ -94,6 +137,9 @@ class AnomalyDetector:
 
         # Replace NaN/Inf
         fv = np.nan_to_num(feature_vector, nan=0.0, posinf=1e6, neginf=-1e6)
+
+        if self.train_until is not None:
+            return self._ingest_frozen(fv, timestamp)
 
         self._buffer.append(fv)
         self._timestamps.append(timestamp)
@@ -118,6 +164,56 @@ class AnomalyDetector:
 
         return None
 
+    def _ingest_frozen(
+        self,
+        fv        : np.ndarray,
+        timestamp : float
+    ) -> Optional[float]:
+        """Warm-up-then-freeze mode (see class docstring)."""
+        if timestamp < self.train_until:
+            self._buffer.append(fv)
+            self._timestamps.append(timestamp)
+            return None
+
+        if not self._is_trained and not self._warmup_failed:
+            if len(self._buffer) >= self.min_samples_to_train:
+                self._retrain()
+                if self._is_trained:
+                    X = np.array(self._buffer, dtype=np.float64)
+                    self.warmup_scores = self._pipeline.decision_function(X)
+                    X_log = log_count_features(X)
+                    self._z_mean = X_log.mean(axis=0)
+                    self._z_std  = np.maximum(
+                        X_log.std(axis=0), z_std_floor(self._z_mean)
+                    )
+                logger.info("Model frozen after benign warm-up")
+            else:
+                # Never fall back to training on post-warm-up (attack) data
+                self._warmup_failed = True
+                logger.error(
+                    f"Warm-up produced only {len(self._buffer)} samples "
+                    f"(need {self.min_samples_to_train}); "
+                    f"detector stays untrained for this run"
+                )
+
+        if self._is_trained:
+            score = self._score(fv)
+            self._scores.append(score)
+            return score
+        return None
+
+    def z_max(self, feature_vector: np.ndarray) -> Optional[float]:
+        """
+        Largest per-feature |z| against the benign warm-up (log1p space).
+        Complements the IF score, which saturates on gross outliers.
+        None until the warm-up statistics exist (frozen mode only).
+        """
+        if self._z_mean is None:
+            return None
+        fv = np.nan_to_num(feature_vector, nan=0.0, posinf=1e6, neginf=-1e6)
+        x  = log_count_features(fv.reshape(1, -1))[0]
+        return float(np.max(np.abs(x - self._z_mean) / self._z_std))
+
     def _retrain(self) -> None:
         """Retrain the IsolationForest on the current buffer."""
         X = np.array(self._buffer, dtype=np.float64)
@@ -137,7 +233,7 @@ class AnomalyDetector:
         """Score a single feature vector."""
         try:
             X = fv.reshape(1, -1)
-            score = float(self._pipeline.score_samples(X)[0])
+            score = float(self._pipeline.decision_function(X)[0])
             return score
         except Exception as e:
             logger.warning(f"Scoring failed: {e}")
@@ -147,12 +243,12 @@ class AnomalyDetector:
         self,
         feature_matrix: np.ndarray
     ) -> np.ndarray:
-        """Score a batch of feature vectors."""
+        """Score a batch of feature vectors (decision_function scale)."""
         if not self._is_trained:
             return np.zeros(len(feature_matrix))
         X = np.nan_to_num(feature_matrix, nan=0.0, posinf=1e6, neginf=-1e6)
         try:
-            return self._pipeline.score_samples(X)
+            return self._pipeline.decision_function(X)
         except Exception as e:
             logger.warning(f"Batch scoring failed: {e}")
             return np.zeros(len(feature_matrix))
@@ -184,6 +280,9 @@ class AnomalyDetector:
 
     def is_trained(self) -> bool:
         return self._is_trained
+
+    def warmup_failed(self) -> bool:
+        return self._warmup_failed
 
     def save(self, path: str) -> None:
         """Persist model to disk."""

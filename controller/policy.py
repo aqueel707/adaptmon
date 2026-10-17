@@ -10,6 +10,8 @@ from enum import Enum, auto
 from typing import Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass, field
 
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,8 +25,8 @@ class MonitoringLevel(Enum):
 @dataclass
 class PolicyConfig:
     """Thresholds for monitoring level transitions."""
-    # Score thresholds (IsolationForest scores are negative for anomalies)
-    # Lower score = more anomalous
+    # Score thresholds on the IsolationForest decision_function() scale
+    # (0 = contamination boundary, negative = anomalous, lower = more anomalous)
     normal_threshold  : float = -0.10   # score > this => NORMAL
     monitor_threshold : float = -0.20   # score > this => MONITOR
     clone_threshold   : float = -0.30   # score > this => CLONE
@@ -41,6 +43,63 @@ class PolicyConfig:
     # Minimum flows to trigger DROP
     min_flows_for_drop : int = 5
 
+    # Fewer warm-up scores than this => keep the fixed thresholds above
+    min_warmup_for_thresholds : int = 15
+
+    # z_max (max per-feature |z| vs. the benign warm-up) escalation levels.
+    # Catches gross univariate outliers, where the IF score saturates.
+    z_monitor_threshold : float = 3.0    # z_max > this => at least MONITOR
+    z_clone_threshold   : float = 5.0    # z_max > this => at least CLONE
+    z_drop_threshold    : float = 10.0   # z_max > this => DROP
+
+
+@dataclass
+class Thresholds:
+    """Score boundaries for one switch (score > normal => NORMAL, etc.)."""
+    normal  : float
+    monitor : float
+    clone   : float
+    source  : str                     # "warmup" or "fallback"
+    warmup_min : Optional[float] = None
+    warmup_std : Optional[float] = None
+    n_warmup   : int             = 0
+
+    @classmethod
+    def fixed(cls, config: "PolicyConfig", n_warmup: int = 0) -> "Thresholds":
+        return cls(
+            normal   = config.normal_threshold,
+            monitor  = config.monitor_threshold,
+            clone    = config.clone_threshold,
+            source   = "fallback",
+            n_warmup = n_warmup,
+        )
+
+    @classmethod
+    def from_warmup(
+        cls,
+        warmup_scores : np.ndarray,
+        config        : "PolicyConfig"
+    ) -> "Thresholds":
+        """
+        NORMAL/MONITOR at the lowest score the frozen model gives any
+        benign warm-up window, then one and two warm-up standard
+        deviations below it for MONITOR/CLONE and CLONE/DROP.
+        """
+        n = len(warmup_scores)
+        if n < config.min_warmup_for_thresholds:
+            return cls.fixed(config, n_warmup=n)
+        lo  = float(np.min(warmup_scores))
+        std = float(np.std(warmup_scores))
+        return cls(
+            normal     = lo,
+            monitor    = lo - std,
+            clone      = lo - 2 * std,
+            source     = "warmup",
+            warmup_min = lo,
+            warmup_std = std,
+            n_warmup   = n,
+        )
+
 
 @dataclass
 class SwitchState:
@@ -53,6 +112,10 @@ class SwitchState:
     )
     level_since    : float           = field(default_factory=time.time)
     score_buffer   : List[float]     = field(default_factory=list)
+    z_buffer       : List[float]     = field(default_factory=list)
+    # Pre-hysteresis level each signal asked for on the last evaluation
+    last_if_level  : MonitoringLevel = MonitoringLevel.NORMAL
+    last_z_level   : MonitoringLevel = MonitoringLevel.NORMAL
     dropped_flows  : Set[str]        = field(default_factory=set)
     cloned_flows   : Set[str]        = field(default_factory=set)
     monitored_flows: Set[str]        = field(default_factory=set)
@@ -63,6 +126,15 @@ class SwitchState:
         self.last_score = score
         if len(self.score_buffer) > 10:
             self.score_buffer.pop(0)
+
+    def add_z(self, z_max: float) -> None:
+        self.z_buffer.append(z_max)
+        if len(self.z_buffer) > 10:
+            self.z_buffer.pop(0)
+
+    def mean_recent_z(self, n: int = 3) -> float:
+        recent = self.z_buffer[-n:]
+        return sum(recent) / len(recent) if recent else 0.0
 
     def mean_recent_score(self, n: int = 3) -> float:
         recent = self.score_buffer[-n:]
@@ -95,6 +167,14 @@ class PolicyEngine:
         self.config  = config or PolicyConfig()
         self.states  : Dict[int, SwitchState] = {}
         self._action_log : List[Dict] = []
+        self._thresholds : Dict[int, Thresholds] = {}
+
+    def set_thresholds(self, switch_id: int, thresholds: Thresholds) -> None:
+        self._thresholds[switch_id] = thresholds
+
+    def get_thresholds(self, switch_id: int) -> Thresholds:
+        """Per-switch thresholds if set, else the fixed PolicyConfig ones."""
+        return self._thresholds.get(switch_id) or Thresholds.fixed(self.config)
 
     def get_state(self, switch_id: int) -> SwitchState:
         if switch_id not in self.states:
@@ -106,9 +186,12 @@ class PolicyEngine:
         switch_id    : int,
         score        : float,
         n_active_flows: int = 0,
+        z_max        : Optional[float] = None,
     ) -> MonitoringLevel:
         """
         Evaluate anomaly score and return recommended monitoring level.
+        Hybrid: the IF score and z_max each map to a level (both smoothed
+        over the hysteresis window); the higher of the two wins.
         Uses hysteresis to avoid rapid transitions.
         """
         state = self.get_state(switch_id)
@@ -118,7 +201,19 @@ class PolicyEngine:
             n=self.config.hysteresis_window
         )
 
-        new_level = self._score_to_level(avg_score, n_active_flows)
+        if_level = self._score_to_level(
+            avg_score, n_active_flows, self.get_thresholds(switch_id)
+        )
+        z_level = MonitoringLevel.NORMAL
+        if z_max is not None:
+            state.add_z(z_max)
+            z_level = self._z_to_level(
+                state.mean_recent_z(n=self.config.hysteresis_window),
+                n_active_flows,
+            )
+        state.last_if_level = if_level
+        state.last_z_level  = z_level
+        new_level = max(if_level, z_level, key=lambda lv: lv.value)
         old_level = state.level
 
         # Only allow escalation immediately; de-escalation requires timeout
@@ -144,21 +239,38 @@ class PolicyEngine:
     def _score_to_level(
         self,
         score         : float,
-        n_active_flows: int
+        n_active_flows: int,
+        thresholds    : Thresholds
     ) -> MonitoringLevel:
         """Map anomaly score to monitoring level."""
-        cfg = self.config
-        if score > cfg.normal_threshold:
+        if score > thresholds.normal:
             return MonitoringLevel.NORMAL
-        elif score > cfg.monitor_threshold:
+        elif score > thresholds.monitor:
             return MonitoringLevel.MONITOR
-        elif score > cfg.clone_threshold:
+        elif score > thresholds.clone:
             return MonitoringLevel.CLONE
         else:
             # Only DROP if enough flows are active
+            if n_active_flows >= self.config.min_flows_for_drop:
+                return MonitoringLevel.DROP
+            return MonitoringLevel.CLONE
+
+    def _z_to_level(
+        self,
+        z_max         : float,
+        n_active_flows: int
+    ) -> MonitoringLevel:
+        """Map z_max to monitoring level (same DROP flow guard as IF)."""
+        cfg = self.config
+        if z_max > cfg.z_drop_threshold:
             if n_active_flows >= cfg.min_flows_for_drop:
                 return MonitoringLevel.DROP
             return MonitoringLevel.CLONE
+        elif z_max > cfg.z_clone_threshold:
+            return MonitoringLevel.CLONE
+        elif z_max > cfg.z_monitor_threshold:
+            return MonitoringLevel.MONITOR
+        return MonitoringLevel.NORMAL
 
     def evaluate_per_flow(
         self,

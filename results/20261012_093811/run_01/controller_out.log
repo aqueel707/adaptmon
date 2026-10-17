@@ -1,0 +1,22 @@
+2026-10-12 09:38:30 [INFO] controller.utils: Logging to results/20261012_093811/run_01/ctrl_logs/1/controller.log
+2026-10-12 09:38:30 [INFO] __main__: AdaptMon Controller starting (run_id=1)
+2026-10-12 09:38:31 [INFO] controller.dataplane: DataPlaneManager initialized with 2 switches
+2026-10-12 09:38:31 [INFO] __main__: Waiting for switches to come up...
+2026-10-12 09:38:31 [INFO] controller.dataplane: All switches are alive
+2026-10-12 09:38:31 [INFO] __main__: Installing base forwarding rules...
+2026-10-12 09:38:32 [INFO] controller.monitor: Starting AdaptMon controller (2 switches)
+2026-10-12 09:38:32 [INFO] controller.monitor: Monitor started for switch 1
+2026-10-12 09:38:32 [INFO] controller.monitor: Monitor started for switch 2
+2026-10-12 09:38:32 [INFO] __main__: Running for 120 seconds
+2026-10-12 09:39:02 [INFO] controller.model: Model retrained (count=1) on 30 samples
+2026-10-12 09:39:02 [INFO] controller.model: Model retrained (count=1) on 30 samples
+2026-10-12 09:39:35 [INFO] controller.model: Model retrained (count=2) on 60 samples
+2026-10-12 09:39:35 [INFO] controller.model: Model retrained (count=2) on 60 samples
+2026-10-12 09:40:05 [INFO] controller.model: Model retrained (count=3) on 90 samples
+2026-10-12 09:40:07 [INFO] controller.model: Model retrained (count=3) on 90 samples
+2026-10-12 09:40:32 [INFO] __main__: Duration elapsed, stopping
+2026-10-12 09:40:32 [INFO] controller.monitor: Stopping AdaptMon controller
+2026-10-12 09:40:33 [INFO] controller.monitor: Monitor stopped for switch 1
+2026-10-12 09:40:33 [INFO] controller.monitor: Monitor stopped for switch 2
+2026-10-12 09:40:33 [INFO] __main__: Controller terminated cleanly
+2026-10-12 09:40:33 [INFO] __main__: Final stats saved to results/20261012_093811/run_01/ctrl_logs/1/final_stats.json

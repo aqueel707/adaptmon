@@ -1,0 +1,45 @@
+{
+  "run_id": "2",
+  "policy": {
+    "1": {
+      "level": "DROP",
+      "last_score": -0.0003040546167197844,
+      "transitions": 3,
+      "dropped_flows": 67,
+      "cloned_flows": 3
+    },
+    "2": {
+      "level": "CLONE",
+      "last_score": 0.059026913801097036,
+      "transitions": 3,
+      "dropped_flows": 67,
+      "cloned_flows": 2
+    }
+  },
+  "detectors": {
+    "1": {
+      "is_trained": true,
+      "training_count": 1,
+      "buffer_size": 29,
+      "n_scores": 34,
+      "mean_score": 0.0014869034762935458,
+      "min_score": -0.069027605871119,
+      "max_score": 0.15206735451188835,
+      "std_score": 0.05483972746744673
+    },
+    "2": {
+      "is_trained": true,
+      "training_count": 1,
+      "buffer_size": 29,
+      "n_scores": 43,
+      "mean_score": -0.012359869606865479,
+      "min_score": -0.11967500330640557,
+      "max_score": 0.13324765504638125,
+      "std_score": 0.05950593723874009
+    }
+  },
+  "metrics": {
+    "1": "results/20261012_105548/run_02/ctrl_logs/2/switch_1_metrics.csv",
+    "2": "results/20261012_105548/run_02/ctrl_logs/2/switch_2_metrics.csv"
+  }
+}

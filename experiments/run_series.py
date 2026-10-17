@@ -28,6 +28,9 @@ P4_JSON  = os.path.join(P4_BUILD, "adaptmon.json")
 LOG_DIR  = os.path.join(ROOT, "logs")
 RESULTS  = os.path.join(ROOT, "results")
 
+# Seconds the run waits after launching the controller before continuing
+CTRL_STARTUP_S = 4
+
 EXPERIMENT_CONFIG = {
     "n_runs"         : 10,
     "run_duration"   : 120,
@@ -126,7 +129,22 @@ class RealExperimentRun:
         topo_cfg = os.path.join(self.run_dir, "topo_config.json")
         topo.write_config(topo_cfg)
 
-        # ---- 8. Start controller ----
+        # ---- 8. Start benign traffic ----
+        # Started before the controller so every warm-up sample the
+        # detector trains on contains normal traffic (not an idle network).
+        with open(topo_cfg) as f:
+            topo_info = json.load(f)
+
+        traffic = NsTrafficManager(topo_info["host_namespaces"])
+        traffic.start_normal_traffic(
+            duration=self.config["run_duration"] + CTRL_STARTUP_S
+        )
+
+        # ---- 9. Start controller ----
+        # The attack start is fixed as an absolute time up front and given
+        # to the controller as the end of the benign warm-up: the detector
+        # trains once on samples before it, then freezes.
+        attack_at = time.time() + CTRL_STARTUP_S + self.config["attack_start"]
         sw_cfg = [
             {"switch_id": 1, "thrift_port": 9090},
             {"switch_id": 2, "thrift_port": 9091},
@@ -145,6 +163,7 @@ class RealExperimentRun:
             "--log-dir",       ctrl_log_dir,
             "--run-id",        str(self.run_id),
             "--duration",      str(self.config["run_duration"]),
+            "--train-until",   str(attack_at),
         ]
         ctrl_stdout = os.path.join(self.run_dir, "controller_out.log")
         with open(ctrl_stdout, "w") as cf:
@@ -153,19 +172,26 @@ class RealExperimentRun:
             )
 
         # Give controller time to connect to switches
-        time.sleep(4)
+        time.sleep(CTRL_STARTUP_S)
 
-        # ---- 9. Start traffic ----
-        with open(topo_cfg) as f:
-            topo_info = json.load(f)
-
-        traffic = NsTrafficManager(topo_info["host_namespaces"])
-        traffic.start_normal_traffic(duration=self.config["run_duration"])
+        if ctrl_proc.poll() is not None:
+            logger.error(
+                f"Controller exited early (code {ctrl_proc.returncode}) "
+                f"— see {ctrl_stdout}"
+            )
+            traffic.stop_all()
+            topo.stop_switches()
+            topo.teardown()
+            result["duration"] = time.time() - t0
+            return result
 
         # ---- 10. Schedule attack ----
+        attack_window_path = os.path.join(self.run_dir, "attack_window.json")
+
         def _attack():
-            time.sleep(self.config["attack_start"])
+            time.sleep(max(0.0, attack_at - time.time()))
             logger.info("ATTACK START")
+            attack_start_ts = time.time()
             traffic.start_attack(
                 src_host  = "h1",
                 target_ip = self.config["target_ip"],
@@ -173,7 +199,11 @@ class RealExperimentRun:
                 rate      = self.config["attack_rate"],
             )
             time.sleep(self.config["attack_duration"])
+            traffic.stop_attacks()
             logger.info("ATTACK END")
+            # Epoch times, comparable to the controller CSV timestamps
+            with open(attack_window_path, "w") as f:
+                json.dump({"start": attack_start_ts, "end": time.time()}, f)
 
         atk = threading.Thread(target=_attack, daemon=True)
         atk.start()
@@ -189,9 +219,18 @@ class RealExperimentRun:
         traffic.stop_all()
         atk.join(timeout=5)
 
-        if ctrl_proc.poll() is None:
+        # The controller stops itself after --duration; give it time to
+        # flush its CSVs before escalating to SIGTERM / SIGKILL.
+        try:
+            ctrl_proc.wait(timeout=30)
+        except subprocess.TimeoutExpired:
             ctrl_proc.terminate()
-            ctrl_proc.wait(timeout=10)
+            try:
+                ctrl_proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                logger.warning("Controller did not exit, killing it")
+                ctrl_proc.kill()
+                ctrl_proc.wait()
 
         topo.stop_switches()
         topo.teardown()
@@ -204,8 +243,14 @@ class RealExperimentRun:
                         os.path.join(dirpath, fname)
                     )
 
-        result["status"]   = "completed"
         result["duration"] = time.time() - t0
+        if not result["metrics_files"]:
+            logger.error(
+                f"Run {self.run_id} produced no metrics CSVs "
+                f"— see {ctrl_stdout}"
+            )
+            return result
+        result["status"]   = "completed"
         logger.info(
             f"=== Run {self.run_id} complete "
             f"({result['duration']:.1f}s, "

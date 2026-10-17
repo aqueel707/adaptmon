@@ -1,0 +1,16 @@
+2026-10-12 09:27:37 [INFO] controller.utils: Logging to results/20261012_092716/run_01/ctrl_logs/1/controller.log
+2026-10-12 09:27:37 [INFO] __main__: AdaptMon Controller starting (run_id=1)
+2026-10-12 09:27:38 [INFO] controller.dataplane: DataPlaneManager initialized with 2 switches
+2026-10-12 09:27:38 [INFO] __main__: Waiting for switches to come up...
+2026-10-12 09:27:38 [INFO] controller.dataplane: All switches are alive
+2026-10-12 09:27:38 [INFO] __main__: Installing base forwarding rules...
+2026-10-12 09:27:39 [INFO] controller.monitor: Starting AdaptMon controller (2 switches)
+2026-10-12 09:27:39 [INFO] controller.monitor: Monitor started for switch 1
+2026-10-12 09:27:39 [INFO] controller.monitor: Monitor started for switch 2
+2026-10-12 09:27:39 [INFO] __main__: Running for 120 seconds
+2026-10-12 09:29:39 [INFO] __main__: Duration elapsed, stopping
+2026-10-12 09:29:39 [INFO] controller.monitor: Stopping AdaptMon controller
+2026-10-12 09:29:39 [INFO] __main__: Received signal, shutting down...
+2026-10-12 09:29:39 [INFO] controller.monitor: Stopping AdaptMon controller
+2026-10-12 09:29:42 [INFO] controller.monitor: Monitor stopped for switch 1
+2026-10-12 09:29:43 [INFO] controller.monitor: Monitor stopped for switch 2

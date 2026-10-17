@@ -1,0 +1,25 @@
+2026-10-12 09:30:13 [INFO] controller.utils: Logging to results/20261012_092716/run_02/ctrl_logs/2/controller.log
+2026-10-12 09:30:13 [INFO] __main__: AdaptMon Controller starting (run_id=2)
+2026-10-12 09:30:13 [INFO] controller.dataplane: DataPlaneManager initialized with 2 switches
+2026-10-12 09:30:13 [INFO] __main__: Waiting for switches to come up...
+2026-10-12 09:30:13 [INFO] controller.dataplane: All switches are alive
+2026-10-12 09:30:13 [INFO] __main__: Installing base forwarding rules...
+2026-10-12 09:30:14 [INFO] controller.monitor: Starting AdaptMon controller (2 switches)
+2026-10-12 09:30:14 [INFO] controller.monitor: Monitor started for switch 1
+2026-10-12 09:30:14 [INFO] controller.monitor: Monitor started for switch 2
+2026-10-12 09:30:14 [INFO] __main__: Running for 120 seconds
+2026-10-12 09:32:14 [INFO] __main__: Duration elapsed, stopping
+2026-10-12 09:32:14 [INFO] controller.monitor: Stopping AdaptMon controller
+2026-10-12 09:32:17 [INFO] __main__: Received signal, shutting down...
+2026-10-12 09:32:17 [INFO] controller.monitor: Stopping AdaptMon controller
+2026-10-12 09:32:27 [INFO] controller.monitor: Monitor stopped for switch 1
+2026-10-12 09:32:29 [ERROR] controller.monitor: Monitor loop error (sw=1): I/O operation on closed file.
+Traceback (most recent call last):
+  File "/home/adaptmon/Desktop/adaptmon_v12/adaptmon/controller/monitor.py", line 106, in _loop
+    self._poll_and_process(proc)
+  File "/home/adaptmon/Desktop/adaptmon_v12/adaptmon/controller/monitor.py", line 177, in _poll_and_process
+    self._csv_writer.writerow(row)
+  File "/usr/lib/python3.10/csv.py", line 154, in writerow
+    return self.writer.writerow(self._dict_to_list(rowdict))
+ValueError: I/O operation on closed file.
+2026-10-12 09:32:33 [INFO] controller.monitor: Monitor stopped for switch 2

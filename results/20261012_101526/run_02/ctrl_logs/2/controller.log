@@ -1,0 +1,33 @@
+2026-10-12 10:18:35 [INFO] controller.utils: Logging to results/20261012_101526/run_02/ctrl_logs/2/controller.log
+2026-10-12 10:18:35 [INFO] __main__: AdaptMon Controller starting (run_id=2)
+2026-10-12 10:18:35 [INFO] controller.dataplane: DataPlaneManager initialized with 2 switches
+2026-10-12 10:18:35 [INFO] __main__: Waiting for switches to come up...
+2026-10-12 10:18:36 [INFO] controller.dataplane: All switches are alive
+2026-10-12 10:18:36 [INFO] __main__: Installing base forwarding rules...
+2026-10-12 10:18:39 [INFO] controller.monitor: Starting AdaptMon controller (2 switches)
+2026-10-12 10:18:39 [INFO] controller.monitor: Monitor started for switch 1
+2026-10-12 10:18:39 [INFO] controller.monitor: Monitor started for switch 2
+2026-10-12 10:18:39 [INFO] __main__: Running for 120 seconds
+2026-10-12 10:19:07 [INFO] controller.model: Model retrained (count=1) on 23 samples
+2026-10-12 10:19:07 [INFO] controller.model: Model frozen after benign warm-up
+2026-10-12 10:19:09 [INFO] controller.model: Model retrained (count=1) on 24 samples
+2026-10-12 10:19:09 [INFO] controller.model: Model frozen after benign warm-up
+2026-10-12 10:19:13 [INFO] controller.monitor: SW2: 513 flows expired, reset flow registers
+2026-10-12 10:19:14 [INFO] controller.monitor: SW1: 576 flows expired, reset flow registers
+2026-10-12 10:19:26 [INFO] controller.monitor: SW2: 513 flows expired, reset flow registers
+2026-10-12 10:19:36 [INFO] controller.monitor: SW2: 200 flows expired, reset flow registers
+2026-10-12 10:19:44 [INFO] controller.monitor: SW1: 169 flows expired, reset flow registers
+2026-10-12 10:19:46 [INFO] controller.monitor: SW2: 188 flows expired, reset flow registers
+2026-10-12 10:19:50 [INFO] controller.monitor: SW1: 229 flows expired, reset flow registers
+2026-10-12 10:19:53 [INFO] controller.monitor: SW2: 144 flows expired, reset flow registers
+2026-10-12 10:20:02 [INFO] controller.monitor: SW2: 185 flows expired, reset flow registers
+2026-10-12 10:20:16 [INFO] controller.monitor: SW2: 614 flows expired, reset flow registers
+2026-10-12 10:20:23 [INFO] controller.monitor: SW2: 214 flows expired, reset flow registers
+2026-10-12 10:20:37 [INFO] controller.monitor: SW2: 498 flows expired, reset flow registers
+2026-10-12 10:20:38 [INFO] controller.monitor: SW1: 194 flows expired, reset flow registers
+2026-10-12 10:20:39 [INFO] __main__: Duration elapsed, stopping
+2026-10-12 10:20:39 [INFO] controller.monitor: Stopping AdaptMon controller
+2026-10-12 10:20:39 [INFO] controller.monitor: Monitor stopped for switch 1
+2026-10-12 10:20:39 [INFO] controller.monitor: Monitor stopped for switch 2
+2026-10-12 10:20:39 [INFO] __main__: Controller terminated cleanly
+2026-10-12 10:20:39 [INFO] __main__: Final stats saved to results/20261012_101526/run_02/ctrl_logs/2/final_stats.json

@@ -1,0 +1,66 @@
+{
+  "series_id": "20261012_101526",
+  "n_total": 5,
+  "n_completed": 5,
+  "n_failed": 0,
+  "all_metrics": [
+    "results/20261012_101526/run_01/ctrl_logs/1/switch_2_metrics.csv",
+    "results/20261012_101526/run_01/ctrl_logs/1/switch_1_metrics.csv",
+    "results/20261012_101526/run_02/ctrl_logs/2/switch_2_metrics.csv",
+    "results/20261012_101526/run_02/ctrl_logs/2/switch_1_metrics.csv",
+    "results/20261012_101526/run_03/ctrl_logs/3/switch_2_metrics.csv",
+    "results/20261012_101526/run_03/ctrl_logs/3/switch_1_metrics.csv",
+    "results/20261012_101526/run_04/ctrl_logs/4/switch_2_metrics.csv",
+    "results/20261012_101526/run_04/ctrl_logs/4/switch_1_metrics.csv",
+    "results/20261012_101526/run_05/ctrl_logs/5/switch_2_metrics.csv",
+    "results/20261012_101526/run_05/ctrl_logs/5/switch_1_metrics.csv"
+  ],
+  "series_dir": "results/20261012_101526",
+  "runs": [
+    {
+      "run_id": 1,
+      "status": "completed",
+      "metrics_files": [
+        "results/20261012_101526/run_01/ctrl_logs/1/switch_2_metrics.csv",
+        "results/20261012_101526/run_01/ctrl_logs/1/switch_1_metrics.csv"
+      ],
+      "duration": 151.71108055114746
+    },
+    {
+      "run_id": 2,
+      "status": "completed",
+      "metrics_files": [
+        "results/20261012_101526/run_02/ctrl_logs/2/switch_2_metrics.csv",
+        "results/20261012_101526/run_02/ctrl_logs/2/switch_1_metrics.csv"
+      ],
+      "duration": 153.98784852027893
+    },
+    {
+      "run_id": 3,
+      "status": "completed",
+      "metrics_files": [
+        "results/20261012_101526/run_03/ctrl_logs/3/switch_2_metrics.csv",
+        "results/20261012_101526/run_03/ctrl_logs/3/switch_1_metrics.csv"
+      ],
+      "duration": 154.6159086227417
+    },
+    {
+      "run_id": 4,
+      "status": "completed",
+      "metrics_files": [
+        "results/20261012_101526/run_04/ctrl_logs/4/switch_2_metrics.csv",
+        "results/20261012_101526/run_04/ctrl_logs/4/switch_1_metrics.csv"
+      ],
+      "duration": 142.81149101257324
+    },
+    {
+      "run_id": 5,
+      "status": "completed",
+      "metrics_files": [
+        "results/20261012_101526/run_05/ctrl_logs/5/switch_2_metrics.csv",
+        "results/20261012_101526/run_05/ctrl_logs/5/switch_1_metrics.csv"
+      ],
+      "duration": 143.8454008102417
+    }
+  ]
+}

@@ -328,6 +328,8 @@ def plot_overhead_breakdown(
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
+    plt.rcParams.update({'font.size': 10, 'font.family': 'sans-serif'})
+
     n_flows_list = sorted(
         overhead_data.get("register_poll", {}).keys()
     )
@@ -360,12 +362,11 @@ def plot_overhead_breakdown(
     ax.set_xticklabels([str(n) for n in n_flows_list])
     ax.set_xlabel("Number of Flows")
     ax.set_ylabel("Time (ms)")
-    ax.set_title("Controller Overhead Breakdown per Poll Cycle")
     ax.legend()
     ax.grid(axis="y", alpha=0.4)
 
     plt.tight_layout()
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=600, bbox_inches="tight", facecolor="white")
     plt.close()
     logger.info(f"Overhead breakdown saved to {output_path}")

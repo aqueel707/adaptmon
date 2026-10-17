@@ -15,6 +15,17 @@ from typing import List, Optional, Tuple, Dict
 logger = logging.getLogger(__name__)
 
 MAX_FLOWS = 4096
+
+# Per-slot flow state written by the P4 ingress for every IPv4 packet
+FLOW_REGISTERS = [
+    "pkt_counter", "byte_counter",
+    "flow_src_ip", "flow_dst_ip", "flow_src_port", "flow_dst_port",
+    "flow_protocol", "flow_active",
+]
+# Cleared per slot on expiry. The 5-tuple registers are left alone: the
+# next packet hashing to the slot overwrites them, and each register_write
+# costs ~0.5 ms through simple_switch_CLI.
+SLOT_CLEAR_REGISTERS = ["pkt_counter", "byte_counter", "flow_active"]
 THRIFT_BASE_PORT = 9090
 
 
@@ -91,24 +102,30 @@ class SwitchInterface:
         end: int
     ) -> Dict[int, int]:
         """Read a range of register cells efficiently."""
+        return self.read_registers([reg_name], start, end)[reg_name]
+
+    def read_registers(
+        self,
+        reg_names: List[str],
+        start: int,
+        end: int
+    ) -> Dict[str, Dict[int, int]]:
+        """
+        Read several whole register arrays in a single CLI invocation.
+        `register_read <name>` without an index dumps the entire array
+        ("pkt_counter= 0, 3, ..."), which is far cheaper than one
+        subprocess per batch of indexed reads.
+        """
+        cmds = "".join(f"register_read {r}\n" for r in reg_names)
+        out = self._cli(cmds, timeout=30)
         results = {}
-        # BMv2 CLI doesn't support bulk reads natively;
-        # we batch commands for efficiency
-        batch_size = 128
-        for batch_start in range(start, end, batch_size):
-            batch_end = min(batch_start + batch_size, end)
-            cmds = "\n".join(
-                f"register_read {reg_name} {i}"
-                for i in range(batch_start, batch_end)
-            ) + "\n"
-            out = self._cli(cmds, timeout=30)
-            for i in range(batch_start, batch_end):
-                pattern = rf"{reg_name}\[{i}\]\s*=\s*(\d+)"
-                m = re.search(pattern, out)
-                if m:
-                    results[i] = int(m.group(1))
-                else:
-                    results[i] = 0
+        for reg_name in reg_names:
+            m = re.search(rf"{reg_name}\s*=\s*([\d,\s]*\d)", out)
+            values = [int(v) for v in m.group(1).split(",")] if m else []
+            results[reg_name] = {
+                i: (values[i] if i < len(values) else 0)
+                for i in range(start, end)
+            }
         return results
 
     def read_all_pkt_counters(self) -> Dict[int, int]:
@@ -132,6 +149,22 @@ class SwitchInterface:
     def reset_register(self, reg_name: str, index: int) -> None:
         cmd = f"register_write {reg_name} {index} 0\n"
         self._cli(cmd)
+
+    def clear_flow_entries(self, indices: List[int]) -> None:
+        """Zero the counters and active bit at the given slots
+        (one CLI call)."""
+        if not indices:
+            return
+        cmds = "".join(
+            f"register_write {reg} {i} 0\n"
+            for i in indices for reg in SLOT_CLEAR_REGISTERS
+        )
+        self._cli(cmds, timeout=60)
+
+    def reset_flow_registers(self) -> None:
+        """Zero every slot of every flow register (one CLI call)."""
+        cmds = "".join(f"register_reset {reg}\n" for reg in FLOW_REGISTERS)
+        self._cli(cmds)
 
     def reset_all_counters(self) -> None:
         for reg in ["pkt_counter", "byte_counter"]:
@@ -221,7 +254,8 @@ class SwitchInterface:
     def is_alive(self) -> bool:
         """Check if the switch is responding."""
         out = self._cli("show_tables\n", timeout=5)
-        return len(out) > 10
+        # The CLI prints a multi-line error (exit code 0) when it cannot connect
+        return len(out) > 10 and "Could not connect" not in out
 
 
 class DataPlaneManager:
@@ -300,9 +334,8 @@ class DataPlaneManager:
         sw = self.get_switch(switch_id)
         if sw is None:
             return {}, {}
-        pkts  = sw.read_all_pkt_counters()
-        bytes_ = sw.read_all_byte_counters()
-        return pkts, bytes_
+        regs = sw.read_registers(["pkt_counter", "byte_counter"], 0, MAX_FLOWS)
+        return regs["pkt_counter"], regs["byte_counter"]
 
     def install_drop_rule(
         self,

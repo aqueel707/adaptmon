@@ -9,6 +9,7 @@ import time
 import signal
 import logging
 import random
+import shlex
 import threading
 import subprocess
 from typing import Dict, List, Optional
@@ -25,6 +26,13 @@ def _bg(ns: str, cmd: str) -> subprocess.Popen:
         stderr=subprocess.DEVNULL,
         preexec_fn=os.setsid,
     )
+
+
+def _py(script: str) -> str:
+    """Shell command running a multi-line Python script via -c.
+    The script must keep its newlines: block statements (while/try/for)
+    cannot be joined onto one line with semicolons."""
+    return f"python3 -c {shlex.quote(script)}"
 
 
 def _kill(proc: subprocess.Popen) -> None:
@@ -115,10 +123,7 @@ while True:
     def start(self) -> None:
         # Start listener in dst namespace
         ls = self.LISTENER_SCRIPT.format(port=self.port)
-        ls_oneline = "; ".join(
-            line.strip() for line in ls.strip().splitlines() if line.strip()
-        )
-        self._listener = _bg(self.dst_ns, f"python3 -c \"{ls_oneline}\"")
+        self._listener = _bg(self.dst_ns, _py(ls))
         time.sleep(0.3)   # give listener time to bind
 
         # Start sender in src namespace
@@ -127,10 +132,7 @@ while True:
             dst_port = self.port,
             duration = self.duration,
         )
-        ss_oneline = "; ".join(
-            line.strip() for line in ss.strip().splitlines() if line.strip()
-        )
-        self._sender = _bg(self.src_ns, f"python3 -c \"{ss_oneline}\"")
+        self._sender = _bg(self.src_ns, _py(ss))
 
     def stop(self) -> None:
         _kill(self._sender)
@@ -224,15 +226,19 @@ except PermissionError:
         # Try hping3 first
         rc, _, _ = _run_local(f"ip netns exec {self.src_ns} which hping3")
         if rc == 0:
-            count = self.rate * self.duration
+            # -i u<us> paces packets at self.rate (u200 = 5000 pps);
+            # --flood would ignore the rate and send as fast as possible
+            count    = self.rate * self.duration
+            interval = int(1_000_000 / self.rate)
             cmd = (
-                f"hping3 -S --flood -p {self.dst_port} "
+                f"hping3 -S -i u{interval} -p {self.dst_port} "
                 f"--rand-source --count {count} {self.dst_ip}"
             )
             self._proc = _bg(self.src_ns, cmd)
             logger.info(
                 f"Attack: hping3 SYN flood "
-                f"{self.dst_ip}:{self.dst_port} for {self.duration}s"
+                f"{self.dst_ip}:{self.dst_port} at {self.rate}pps "
+                f"(-i u{interval}) for {self.duration}s"
             )
             return
 
@@ -242,11 +248,7 @@ except PermissionError:
             dst_port = self.dst_port,
             duration = self.duration,
         )
-        oneline = "; ".join(
-            line.strip() for line in script.strip().splitlines()
-            if line.strip()
-        )
-        self._proc = _bg(self.src_ns, f"python3 -c \"{oneline}\"")
+        self._proc = _bg(self.src_ns, _py(script))
         logger.info(
             f"Attack: Python SYN flood "
             f"{self.dst_ip}:{self.dst_port} for {self.duration}s"
@@ -328,6 +330,15 @@ class NsTrafficManager:
         )
         attack.start()
         self._attacks.append(attack)
+
+    def stop_attacks(self) -> None:
+        """Stop attack traffic only. Required at the end of the attack
+        window: hping3 --flood --rand-source never reaches --count
+        (it counts replies, which go to the spoofed sources)."""
+        for a in self._attacks:
+            a.stop()
+        self._attacks.clear()
+        logger.info("Attack traffic stopped")
 
     def stop_all(self) -> None:
         for f in self._flows:

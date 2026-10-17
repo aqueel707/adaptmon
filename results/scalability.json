@@ -1,37 +1,37 @@
 {
   "100": {
     "n_flows": 100,
-    "processing_ms": 528.9115905761719,
+    "processing_ms": 1827.9697895050049,
     "cpu_delta_pct": 0.0,
-    "mem_delta_mb": 74.79296875,
-    "entropy": 6.367174703259241
+    "mem_delta_mb": 74.66796875,
+    "entropy": 6.327948876793285
   },
   "500": {
     "n_flows": 500,
-    "processing_ms": 77.86321640014648,
+    "processing_ms": 187.8674030303955,
     "cpu_delta_pct": 0.0,
-    "mem_delta_mb": 0.69140625,
-    "entropy": 8.685643738337273
+    "mem_delta_mb": 0.671875,
+    "entropy": 8.676368273745476
   },
   "1000": {
     "n_flows": 1000,
-    "processing_ms": 73.81057739257812,
+    "processing_ms": 215.39020538330078,
     "cpu_delta_pct": 0.0,
-    "mem_delta_mb": 0.375,
-    "entropy": 9.682725634976046
+    "mem_delta_mb": 0.33984375,
+    "entropy": 9.713754832820396
   },
   "2000": {
     "n_flows": 2000,
-    "processing_ms": 76.28417015075684,
+    "processing_ms": 225.93164443969727,
     "cpu_delta_pct": 0.0,
-    "mem_delta_mb": 0.4296875,
-    "entropy": 10.683392317936674
+    "mem_delta_mb": 0.53515625,
+    "entropy": 10.688661505856263
   },
   "4096": {
     "n_flows": 4096,
-    "processing_ms": 77.90517807006836,
+    "processing_ms": 267.3768997192383,
     "cpu_delta_pct": 0.0,
-    "mem_delta_mb": 0.69140625,
-    "entropy": 11.716482978447875
+    "mem_delta_mb": 0.65234375,
+    "entropy": 11.728626933529348
   }
 }

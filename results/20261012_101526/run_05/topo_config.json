@@ -1,0 +1,30 @@
+{
+  "switch_configs": [
+    {
+      "switch_id": 1,
+      "thrift_port": 9090
+    },
+    {
+      "switch_id": 2,
+      "thrift_port": 9091
+    }
+  ],
+  "host_namespaces": {
+    "h1": {
+      "ns": "adaptmon_h1",
+      "ip": "10.0.1.1"
+    },
+    "h2": {
+      "ns": "adaptmon_h2",
+      "ip": "10.0.1.2"
+    },
+    "h3": {
+      "ns": "adaptmon_h3",
+      "ip": "10.0.2.1"
+    },
+    "h4": {
+      "ns": "adaptmon_h4",
+      "ip": "10.0.2.2"
+    }
+  }
+}

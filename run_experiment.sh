@@ -37,6 +37,10 @@ while [[ $# -gt 0 ]]; do
             echo "  --mock            Synthetic data, no switches needed"
             echo "  --n-runs N        Runs (default 10)"
             echo "  --duration N      Seconds per run (default 120)"
+            echo "  --attack-start N  Seconds before attack starts (default 30)"
+            echo "  --attack-dur N    Attack duration in seconds (default 60)"
+            echo "  --attack-rate N   Attack rate in pps (default 5000)"
+            echo "  --verbose         Debug logging"
             exit 0 ;;
         *) shift ;;
     esac
@@ -53,6 +57,30 @@ $PY -m pip install -q --break-system-packages -r requirements.txt 2>/dev/null ||
 $PY -m pip install -q -r requirements.txt 2>/dev/null || true
 info "Python dependencies ready"
 mkdir -p logs results p4/build
+
+# ---- Real mode prerequisites ----
+if [ $MOCK -eq 0 ]; then
+    if ! command -v p4c &>/dev/null && ! command -v p4c-bm2-ss &>/dev/null; then
+        warn "No P4 compiler (p4c / p4c-bm2-ss) found — falling back to mock mode"
+        MOCK=1
+    elif ! command -v simple_switch &>/dev/null; then
+        warn "simple_switch not found — falling back to mock mode"
+        MOCK=1
+    fi
+fi
+
+# ---- Real mode needs root for network namespaces ----
+# Done before compiling so root-owned files in p4/build from earlier runs
+# cannot make the compile fail and silently force mock mode.
+if [ $MOCK -eq 0 ] && [ "$EUID" -ne 0 ]; then
+    warn "Real mode needs root for network namespaces."
+    info "Re-running with sudo (you will be prompted once)..."
+    echo ""
+    exec sudo -E bash "$0" \
+        --n-runs "$N_RUNS" --duration "$DURATION" \
+        --attack-start "$ATTACK_START" --attack-dur "$ATTACK_DUR" \
+        --attack-rate "$ATTACK_RATE" $VERBOSE
+fi
 
 # ---- P4 compilation ----
 section "P4 Compilation"
@@ -75,28 +103,12 @@ if [ $MOCK -eq 0 ]; then
         fi
     fi
     if [ $COMPILED -eq 0 ]; then
-        warn "P4 compilation failed — falling back to mock mode"
-        MOCK=1
+        err "P4 compilation failed — see p4/build/compile.log"
+        err "Fix the build, or pass --mock to run with synthetic data."
+        exit 1
     fi
-    if ! command -v simple_switch &>/dev/null; then
-        warn "simple_switch not found — falling back to mock mode"
-        MOCK=1
-    fi
-fi
-
-# ---- Real mode needs root for network namespaces ----
-if [ $MOCK -eq 0 ] && [ "$EUID" -ne 0 ]; then
-    warn "Real mode needs root for network namespaces."
-    info "Re-running with sudo (you will be prompted once)..."
-    echo ""
-    exec sudo -E \
-        N_RUNS="$N_RUNS" DURATION="$DURATION" \
-        ATTACK_START="$ATTACK_START" ATTACK_DUR="$ATTACK_DUR" \
-        ATTACK_RATE="$ATTACK_RATE" VERBOSE="$VERBOSE" \
-        bash "$0" \
-            --n-runs "$N_RUNS" --duration "$DURATION" \
-            --attack-start "$ATTACK_START" --attack-dur "$ATTACK_DUR" \
-            --attack-rate "$ATTACK_RATE" $VERBOSE
+else
+    info "Skipped (mock mode)"
 fi
 
 # ---- Summary ----
@@ -126,21 +138,25 @@ $PY run_experiment.py \
 CODE=$?
 ELAPSED=$(( $(date +%s) - START ))
 
+# Under sudo, hand generated files back to the invoking user so later
+# non-root runs (and p4c) can overwrite them.
+if [ -n "${SUDO_USER:-}" ]; then
+    chown -R "$SUDO_USER": results logs p4/build 2>/dev/null
+    find . -name __pycache__ -type d -exec chown -R "$SUDO_USER": {} + 2>/dev/null
+fi
+
 section "Done"
 info "Time: ${ELAPSED}s"
 if [ $CODE -eq 0 ]; then
     info "Status: SUCCESS"
     LATEST=$(ls -td results/*/ 2>/dev/null | head -1)
-    if [ -n "$LATEST" ]; then
-        echo ""
-        info "Results: $LATEST"
-        info "Graphs:"
-        find "$LATEST" -name "*.png" | sort | while read -r f; do
-            echo "    $f"
-        done
-        info "Report: ${LATEST}report.md"
-    fi
+    [ -n "$LATEST" ] && info "Series data: $LATEST"
+    info "Graphs:"
+    find results -maxdepth 1 -name "*.png" | sort | while read -r f; do
+        echo "    $f"
+    done
+    info "Report: results/report.md"
 else
-    err "Failed (exit=$CODE) — check logs/"
+    err "Failed (exit=$CODE) — check logs/ and results/<series>/run_*/controller_out.log"
 fi
 exit $CODE

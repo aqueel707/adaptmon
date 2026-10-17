@@ -17,6 +17,8 @@ from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 from typing import List, Optional, Dict, Tuple
 
+plt.rcParams.update({'font.size': 10, 'font.family': 'sans-serif'})
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
@@ -76,6 +78,8 @@ def plot_anomaly_scores(
 
     # ---- Upper: anomaly scores ----
     ax1 = axes[0]
+    ax1.text(-0.05, 1.05, '(a)', transform=ax1.transAxes,
+             fontsize=12, fontweight='bold')
     if "anomaly_score" in df.columns:
         scores = df["anomaly_score"].ffill()
         ax1.plot(
@@ -112,12 +116,13 @@ def plot_anomaly_scores(
         )
 
     ax1.set_ylabel("Anomaly Score")
-    ax1.set_title("Anomaly Scores Over Time")
     ax1.legend(loc="lower left", fontsize=8)
     ax1.set_ylim(bottom=min(-0.5, scores.min() * 1.1) if "anomaly_score" in df.columns else -0.5)
 
     # ---- Lower: monitoring level ----
     ax2 = axes[1]
+    ax2.text(-0.05, 1.05, '(b)', transform=ax2.transAxes,
+             fontsize=12, fontweight='bold')
     if "monitoring_level" in df.columns:
         levels = df["monitoring_level"].fillna(0).astype(int)
         # Background color by level
@@ -151,11 +156,10 @@ def plot_anomaly_scores(
 
     ax2.set_xlabel("Time (seconds)")
     ax2.set_ylabel("Monitoring Level")
-    ax2.set_title("Monitoring Level Transitions")
 
     plt.tight_layout()
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=600, bbox_inches="tight", facecolor="white")
     plt.close()
     logger.info(f"Saved: {output_path}")
 
@@ -172,6 +176,8 @@ def plot_monitoring_levels(
 
     # ---- Left: level over time ----
     ax1 = axes[0]
+    ax1.text(-0.05, 1.05, '(a)', transform=ax1.transAxes,
+             fontsize=12, fontweight='bold')
     if "monitoring_level" in df.columns and "timestamp" in df.columns:
         if pd.api.types.is_datetime64_any_dtype(df["timestamp"]):
             t0 = df["timestamp"].min()
@@ -185,7 +191,6 @@ def plot_monitoring_levels(
         ax1.set_yticklabels(["NORMAL", "MONITOR", "CLONE", "DROP"])
         ax1.set_xlabel("Time (seconds)")
         ax1.set_ylabel("Monitoring Level")
-        ax1.set_title("Monitoring Level Timeline")
 
         for lvl, color in LEVEL_COLORS.items():
             mask = levels == lvl
@@ -198,6 +203,8 @@ def plot_monitoring_levels(
 
     # ---- Right: time distribution per level ----
     ax2 = axes[1]
+    ax2.text(-0.05, 1.05, '(b)', transform=ax2.transAxes,
+             fontsize=12, fontweight='bold')
     if "monitoring_level" in df.columns:
         counts = df["monitoring_level"].fillna(0).astype(int).value_counts().sort_index()
         labels = [LEVEL_NAMES.get(i, str(i)) for i in counts.index]
@@ -214,10 +221,9 @@ def plot_monitoring_levels(
             )
         ax2.set_xlabel("Monitoring Level")
         ax2.set_ylabel("Time Fraction (%)")
-        ax2.set_title("Time Distribution Across Levels")
 
     plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=600, bbox_inches="tight", facecolor="white")
     plt.close()
     logger.info(f"Saved: {output_path}")
 
@@ -234,6 +240,8 @@ def plot_controller_cpu_usage(
 
     # ---- Left: CPU over time for each run ----
     ax1 = axes[0]
+    ax1.text(-0.05, 1.05, '(a)', transform=ax1.transAxes,
+             fontsize=12, fontweight='bold')
     max_len = 0
     all_cpu = []
 
@@ -271,11 +279,12 @@ def plot_controller_cpu_usage(
 
     ax1.set_xlabel("Sample Index")
     ax1.set_ylabel("CPU Usage (%)")
-    ax1.set_title(f"Controller CPU Usage ({len(dfs)} runs)")
     ax1.legend(fontsize=8)
 
     # ---- Right: CPU distribution ----
     ax2 = axes[1]
+    ax2.text(-0.05, 1.05, '(b)', transform=ax2.transAxes,
+             fontsize=12, fontweight='bold')
     all_vals = []
     for df in dfs:
         if "controller_cpu_pct" in df.columns:
@@ -301,11 +310,10 @@ def plot_controller_cpu_usage(
         )
         ax2.set_xlabel("CPU Usage (%)")
         ax2.set_ylabel("Frequency")
-        ax2.set_title("CPU Usage Distribution")
         ax2.legend()
 
     plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=600, bbox_inches="tight", facecolor="white")
     plt.close()
     logger.info(f"Saved: {output_path}")
 
@@ -328,21 +336,23 @@ def plot_flow_distribution(
 
     # ---- Active flows ----
     ax1 = axes[0]
+    ax1.text(-0.05, 1.05, '(a)', transform=ax1.transAxes,
+             fontsize=12, fontweight='bold')
     if "n_active_flows" in df.columns:
         flows = df["n_active_flows"].fillna(0)
         ax1.plot(elapsed, flows, color="#2ecc71", linewidth=1.5)
         ax1.fill_between(elapsed, flows, alpha=0.2, color="#2ecc71")
         ax1.set_ylabel("Active Flows")
-        ax1.set_title("Active Flow Count Over Time")
 
     # ---- Entropy ----
     ax2 = axes[1]
+    ax2.text(-0.05, 1.05, '(b)', transform=ax2.transAxes,
+             fontsize=12, fontweight='bold')
     if "entropy" in df.columns:
         entropy = df["entropy"].fillna(0)
         ax2.plot(elapsed, entropy, color="#3498db", linewidth=1.5)
         ax2.fill_between(elapsed, entropy, alpha=0.2, color="#3498db")
         ax2.set_ylabel("Entropy (bits)")
-        ax2.set_title("Flow Entropy Over Time")
 
         # Annotate drops
         entropy_min_idx = entropy.idxmin()
@@ -359,17 +369,18 @@ def plot_flow_distribution(
 
     # ---- Gini coefficient ----
     ax3 = axes[2]
+    ax3.text(-0.05, 1.05, '(c)', transform=ax3.transAxes,
+             fontsize=12, fontweight='bold')
     if "gini" in df.columns:
         gini = df["gini"].fillna(0)
         ax3.plot(elapsed, gini, color="#e74c3c", linewidth=1.5)
         ax3.fill_between(elapsed, gini, alpha=0.2, color="#e74c3c")
         ax3.set_ylabel("Gini Coefficient")
-        ax3.set_title("Flow Distribution Gini (higher = more skewed)")
         ax3.set_ylim(0, 1)
 
     ax3.set_xlabel("Time (seconds)")
     plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=600, bbox_inches="tight", facecolor="white")
     plt.close()
     logger.info(f"Saved: {output_path}")
 
@@ -382,14 +393,14 @@ def plot_scalability_curve(
     Plot controller overhead vs. number of flows (scalability curve).
     """
     _apply_style()
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    fig, ax1 = plt.subplots(figsize=(10, 6))
 
     n_flows_list  = sorted(scalability_data.keys())
     proc_ms_list  = [scalability_data[n]["processing_ms"] for n in n_flows_list]
-    cpu_list      = [scalability_data[n].get("cpu_delta_pct", 0) for n in n_flows_list]
 
     # ---- Processing time ----
-    ax1 = axes[0]
+    # (CPU-delta panel removed: cpu_delta_pct in scalability.json is always 0
+    # because both psutil samples are taken while the process is idle.)
     ax1.plot(n_flows_list, proc_ms_list, "o-", color="#3498db",
              linewidth=2, markersize=6)
     ax1.fill_between(n_flows_list, proc_ms_list, alpha=0.2, color="#3498db")
@@ -408,23 +419,14 @@ def plot_scalability_curve(
 
     ax1.set_xlabel("Number of Flows")
     ax1.set_ylabel("Processing Time (ms)")
-    ax1.set_title("Controller Processing Overhead vs. Flow Count")
     ax1.set_xscale("log")
 
-    # ---- CPU usage ----
-    ax2 = axes[1]
-    ax2.bar(
-        [str(n) for n in n_flows_list], cpu_list,
-        color="#e74c3c", edgecolor="white", alpha=0.8
-    )
-    ax2.set_xlabel("Number of Flows")
-    ax2.set_ylabel("CPU Delta (%)")
-    ax2.set_title("CPU Overhead vs. Flow Count")
-
     plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=600, bbox_inches="tight", facecolor="white")
+    svg_path = os.path.splitext(output_path)[0] + ".svg"
+    plt.savefig(svg_path, format="svg", bbox_inches="tight", facecolor="white")
     plt.close()
-    logger.info(f"Saved: {output_path}")
+    logger.info(f"Saved: {output_path}, {svg_path}")
 
 
 def plot_entropy_distribution(
@@ -463,6 +465,8 @@ def plot_entropy_distribution(
 
     # ---- Left: histogram ----
     ax1 = axes[0]
+    ax1.text(-0.05, 1.05, '(a)', transform=ax1.transAxes,
+             fontsize=12, fontweight='bold')
     bins = np.linspace(
         min(
             min(all_normal_entropy) if all_normal_entropy else 0,
@@ -490,11 +494,12 @@ def plot_entropy_distribution(
 
     ax1.set_xlabel("Entropy (bits)")
     ax1.set_ylabel("Density")
-    ax1.set_title("Entropy Distribution: Normal vs. Attack")
     ax1.legend()
 
     # ---- Right: box plot ----
     ax2 = axes[1]
+    ax2.text(-0.05, 1.05, '(b)', transform=ax2.transAxes,
+             fontsize=12, fontweight='bold')
     data_to_plot = []
     labels_plot  = []
 
@@ -518,7 +523,6 @@ def plot_entropy_distribution(
             patch.set_alpha(0.7)
 
     ax2.set_ylabel("Entropy (bits)")
-    ax2.set_title("Entropy Box Plot: Normal vs. Attack")
 
     # Add means annotation
     for i, (data, label) in enumerate(zip(data_to_plot, labels_plot)):
@@ -531,7 +535,7 @@ def plot_entropy_distribution(
         )
 
     plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=600, bbox_inches="tight", facecolor="white")
     plt.close()
     logger.info(f"Saved: {output_path}")
 
@@ -541,10 +545,13 @@ def generate_all_plots(
     series_dir      : str,
     attack_start_s  : float = 30.0,
     attack_end_s    : float = 90.0,
+    allow_synthetic : bool  = False,
 ) -> List[str]:
     """
     Generate all required plots for an experiment series.
     Returns list of generated file paths.
+    Raises RuntimeError if the series has no metrics CSVs, unless
+    allow_synthetic is set (then demo data is plotted instead).
     """
     import json
     generated = []
@@ -556,6 +563,11 @@ def generate_all_plots(
 
     dfs = load_all_series_csvs(series_dir)
     if not dfs:
+        if not allow_synthetic:
+            raise RuntimeError(
+                f"No metrics CSVs found in {series_dir}; refusing to plot "
+                "synthetic data (pass allow_synthetic=True for a demo)"
+            )
         logger.warning(
             f"No metrics CSVs found in {series_dir}. "
             "Generating synthetic data for demonstration."
@@ -612,6 +624,8 @@ def generate_all_plots(
             with open(scalability_json) as f:
                 scalability_data = json.load(f)
             scalability_data = {int(k): v for k, v in scalability_data.items()}
+        elif not allow_synthetic:
+            raise RuntimeError(f"{scalability_json} not found")
         else:
             scalability_data = _generate_synthetic_scalability()
         plot_scalability_curve(scalability_data, p5)

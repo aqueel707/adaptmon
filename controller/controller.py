@@ -69,6 +69,17 @@ def parse_args():
         help="Controller run duration in seconds (0 = infinite)"
     )
     parser.add_argument(
+        "--train-until", type=float, default=None,
+        help="Epoch time the benign warm-up ends (attack start): train the "
+             "detector once on samples before it, then freeze. "
+             "Omit for periodic retraining"
+    )
+    parser.add_argument(
+        "--flow-idle-polls", type=int, default=3,
+        help="Clear a flow register slot after its counter has not "
+             "changed for this many polls"
+    )
+    parser.add_argument(
         "--contamination", type=float, default=0.05,
         help="IsolationForest contamination parameter"
     )
@@ -134,6 +145,8 @@ def main():
         poll_interval  = args.poll_interval,
         log_dir        = log_dir,
         policy_config  = policy_cfg,
+        train_until    = args.train_until,
+        flow_idle_polls = args.flow_idle_polls,
     )
 
     # Signal handler for graceful shutdown
@@ -182,7 +195,6 @@ def main():
             "detectors"  : controller.get_detector_stats(),
             "metrics"    : controller.get_metrics_paths(),
         }
-        import json
         stats_path = os.path.join(log_dir, "final_stats.json")
         with open(stats_path, "w") as f:
             json.dump(stats, f, indent=2, default=str)

@@ -118,6 +118,18 @@ def run_full_experiment(
     )
     summary = series.run()
     series_dir = summary["series_dir"]
+    if summary["n_completed"] == 0:
+        logger.error(
+            f"All {summary['n_total']} runs failed — no data to analyse. "
+            f"Check controller_out.log files in {series_dir}"
+        )
+        sys.exit(1)
+    if summary["n_failed"]:
+        logger.warning(
+            f"{summary['n_failed']}/{summary['n_total']} runs failed; "
+            "analysing the remaining runs only"
+        )
+    errors = []
 
     # 3. Scalability experiment
     logger.info("Step 3: Running scalability benchmark...")
@@ -148,16 +160,20 @@ def run_full_experiment(
             series_dir     = series_dir,
             attack_start_s = float(attack_start),
             attack_end_s   = float(attack_start + attack_dur),
+            allow_synthetic = mock_mode,
         )
         for p in generated:
             logger.info(f"  Generated: {p}")
     except Exception as e:
         logger.error(f"Plot generation failed: {e}")
+        errors.append("plots")
 
     # 6. Generate report
     logger.info("Step 6: Generating report...")
     try:
         dfs = load_all_series_csvs(series_dir)
+        if not dfs and not mock_mode:
+            raise RuntimeError(f"No metrics CSVs found in {series_dir}")
         if not dfs:
             from analysis.plots import _generate_synthetic_df
             dfs = [
@@ -174,6 +190,7 @@ def run_full_experiment(
         logger.info(f"  Report: {report_path}")
     except Exception as e:
         logger.error(f"Report generation failed: {e}")
+        errors.append("report")
 
     logger.info("=" * 60)
     logger.info(f"Experiment complete. Results at: {exp_results}")
@@ -187,6 +204,9 @@ def run_full_experiment(
             size = os.path.getsize(fpath)
             logger.info(f"  {fname} ({size:,} bytes)")
 
+    if errors:
+        logger.error(f"Failed steps: {', '.join(errors)}")
+        sys.exit(1)
     return exp_results
 
 
@@ -277,12 +297,16 @@ def main():
             sys.exit(1)
         exp_results = args.results_dir
         ensure_dirs([exp_results])
-        generated = generate_all_plots(
-            results_dir    = exp_results,
-            series_dir     = args.series_dir,
-            attack_start_s = float(args.attack_start),
-            attack_end_s   = float(args.attack_start + args.attack_dur),
-        )
+        try:
+            generated = generate_all_plots(
+                results_dir    = exp_results,
+                series_dir     = args.series_dir,
+                attack_start_s = float(args.attack_start),
+                attack_end_s   = float(args.attack_start + args.attack_dur),
+            )
+        except RuntimeError as e:
+            logger.error(str(e))
+            sys.exit(1)
         print(f"Generated {len(generated)} plots in {exp_results}")
         return
 

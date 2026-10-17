@@ -1,0 +1,167 @@
+2026-10-12 11:06:18 [INFO] controller.utils: Logging to results/20261012_105548/run_05/ctrl_logs/5/controller.log
+2026-10-12 11:06:18 [INFO] __main__: AdaptMon Controller starting (run_id=5)
+2026-10-12 11:06:18 [INFO] controller.dataplane: DataPlaneManager initialized with 2 switches
+2026-10-12 11:06:18 [INFO] __main__: Waiting for switches to come up...
+2026-10-12 11:06:18 [INFO] controller.dataplane: All switches are alive
+2026-10-12 11:06:18 [INFO] __main__: Installing base forwarding rules...
+2026-10-12 11:06:19 [INFO] controller.monitor: Thresholds: derived per switch from the benign warm-up; fallback if warm-up < 15 samples: NORMAL > -0.1, MONITOR > -0.2, CLONE > -0.3
+2026-10-12 11:06:19 [INFO] controller.monitor: z_max escalation (vs. warm-up, log1p space): MONITOR > 3.0, CLONE > 5.0, DROP > 10.0
+2026-10-12 11:06:19 [INFO] controller.monitor: Starting AdaptMon controller (2 switches)
+2026-10-12 11:06:19 [INFO] controller.monitor: Monitor started for switch 1
+2026-10-12 11:06:19 [INFO] controller.monitor: Monitor started for switch 2
+2026-10-12 11:06:19 [INFO] __main__: Running for 120 seconds
+2026-10-12 11:06:52 [INFO] controller.model: Model retrained (count=1) on 30 samples
+2026-10-12 11:06:52 [INFO] controller.model: Model frozen after benign warm-up
+2026-10-12 11:06:52 [INFO] controller.monitor: SW1 thresholds (warmup, n_warmup=30): NORMAL > -0.0091, MONITOR > -0.0942, CLONE > -0.1794, else DROP
+2026-10-12 11:06:52 [INFO] controller.policy: Switch 1: NORMAL -> CLONE (score=0.2206)
+2026-10-12 11:06:52 [INFO] controller.model: Model retrained (count=1) on 30 samples
+2026-10-12 11:06:52 [INFO] controller.model: Model frozen after benign warm-up
+2026-10-12 11:06:52 [INFO] controller.monitor: SW2 thresholds (warmup, n_warmup=30): NORMAL > -0.0698, MONITOR > -0.1430, CLONE > -0.2162, else DROP
+2026-10-12 11:06:53 [INFO] controller.policy: Switch 2: NORMAL -> DROP (score=-0.1046)
+2026-10-12 11:06:54 [INFO] controller.monitor: DROP rule installed: 244.3.208.82 -> 10.0.2.1
+2026-10-12 11:06:54 [INFO] controller.monitor: DROP rule installed: 7.91.89.58 -> 10.0.2.1
+2026-10-12 11:06:54 [INFO] controller.policy: Switch 1: CLONE -> DROP (score=-0.0654)
+2026-10-12 11:06:55 [INFO] controller.monitor: DROP rule installed: 237.244.52.151 -> 10.0.2.1
+2026-10-12 11:06:55 [INFO] controller.monitor: DROP rule installed: 5.29.146.69 -> 10.0.2.1
+2026-10-12 11:06:56 [INFO] controller.monitor: DROP rule installed: 46.56.0.97 -> 10.0.2.1
+2026-10-12 11:06:56 [INFO] controller.monitor: DROP rule installed: 65.166.105.36 -> 10.0.2.1
+2026-10-12 11:06:57 [INFO] controller.monitor: DROP rule installed: 138.1.174.138 -> 10.0.2.1
+2026-10-12 11:06:57 [INFO] controller.monitor: DROP rule installed: 83.167.149.251 -> 10.0.2.1
+2026-10-12 11:06:58 [INFO] controller.monitor: DROP rule installed: 22.20.254.22 -> 10.0.2.1
+2026-10-12 11:06:58 [INFO] controller.monitor: DROP rule installed: 174.63.167.169 -> 10.0.2.1
+2026-10-12 11:06:58 [INFO] controller.monitor: DROP rule installed: 149.70.133.165 -> 10.0.2.1
+2026-10-12 11:06:59 [INFO] controller.monitor: DROP rule installed: 149.70.133.165 -> 10.0.2.1
+2026-10-12 11:07:00 [INFO] controller.monitor: DROP rule installed: 174.63.167.169 -> 10.0.2.1
+2026-10-12 11:07:00 [INFO] controller.monitor: DROP rule installed: 118.151.69.11 -> 10.0.2.1
+2026-10-12 11:07:01 [INFO] controller.monitor: DROP rule installed: 49.218.158.114 -> 10.0.2.1
+2026-10-12 11:07:01 [INFO] controller.monitor: DROP rule installed: 226.201.95.58 -> 10.0.2.1
+2026-10-12 11:07:01 [INFO] controller.monitor: DROP rule installed: 138.34.53.209 -> 10.0.2.1
+2026-10-12 11:07:02 [INFO] controller.monitor: DROP rule installed: 63.49.36.233 -> 10.0.2.1
+2026-10-12 11:07:02 [INFO] controller.monitor: DROP rule installed: 71.105.11.171 -> 10.0.2.1
+2026-10-12 11:07:03 [INFO] controller.monitor: DROP rule installed: 129.49.179.235 -> 10.0.2.1
+2026-10-12 11:07:03 [INFO] controller.monitor: DROP rule installed: 254.118.132.220 -> 10.0.2.1
+2026-10-12 11:07:04 [INFO] controller.monitor: DROP rule installed: 211.176.129.159 -> 10.0.2.1
+2026-10-12 11:07:05 [INFO] controller.monitor: DROP rule installed: 179.111.26.177 -> 10.0.2.1
+2026-10-12 11:07:05 [INFO] controller.monitor: DROP rule installed: 211.233.36.156 -> 10.0.2.1
+2026-10-12 11:07:06 [INFO] controller.monitor: DROP rule installed: 71.105.11.171 -> 10.0.2.1
+2026-10-12 11:07:06 [INFO] controller.monitor: DROP rule installed: 159.100.17.88 -> 10.0.2.1
+2026-10-12 11:07:06 [INFO] controller.monitor: DROP rule installed: 211.233.36.156 -> 10.0.2.1
+2026-10-12 11:07:07 [INFO] controller.monitor: DROP rule installed: 179.103.115.115 -> 10.0.2.1
+2026-10-12 11:07:07 [INFO] controller.monitor: DROP rule installed: 165.3.170.165 -> 10.0.2.1
+2026-10-12 11:07:07 [INFO] controller.monitor: DROP rule installed: 254.118.132.220 -> 10.0.2.1
+2026-10-12 11:07:07 [INFO] controller.monitor: SW1: 135 flows expired, reset flow registers
+2026-10-12 11:07:08 [INFO] controller.monitor: DROP rule installed: 48.67.182.236 -> 10.0.2.1
+2026-10-12 11:07:09 [INFO] controller.monitor: DROP rule installed: 182.103.218.141 -> 10.0.2.1
+2026-10-12 11:07:09 [INFO] controller.monitor: DROP rule installed: 67.69.189.251 -> 10.0.2.1
+2026-10-12 11:07:10 [INFO] controller.monitor: DROP rule installed: 179.103.115.115 -> 10.0.2.1
+2026-10-12 11:07:10 [INFO] controller.monitor: SW2: 165 flows expired, reset flow registers
+2026-10-12 11:07:11 [INFO] controller.monitor: DROP rule installed: 208.171.71.213 -> 10.0.2.1
+2026-10-12 11:07:11 [INFO] controller.monitor: DROP rule installed: 213.201.130.53 -> 10.0.2.1
+2026-10-12 11:07:11 [INFO] controller.monitor: DROP rule installed: 208.171.71.213 -> 10.0.2.1
+2026-10-12 11:07:12 [INFO] controller.monitor: DROP rule installed: 10.0.1.2 -> 10.0.2.2
+2026-10-12 11:07:13 [INFO] controller.monitor: DROP rule installed: 100.78.177.53 -> 10.0.2.1
+2026-10-12 11:07:14 [INFO] controller.monitor: DROP rule installed: 5.247.63.30 -> 10.0.2.1
+2026-10-12 11:07:14 [INFO] controller.monitor: DROP rule installed: 91.244.183.182 -> 10.0.2.1
+2026-10-12 11:07:14 [INFO] controller.monitor: DROP rule installed: 122.92.20.65 -> 10.0.2.1
+2026-10-12 11:07:15 [INFO] controller.monitor: DROP rule installed: 181.208.236.22 -> 10.0.2.1
+2026-10-12 11:07:15 [INFO] controller.monitor: DROP rule installed: 200.34.49.88 -> 10.0.2.1
+2026-10-12 11:07:16 [INFO] controller.monitor: DROP rule installed: 52.32.91.191 -> 10.0.2.1
+2026-10-12 11:07:16 [INFO] controller.monitor: DROP rule installed: 67.129.194.156 -> 10.0.2.1
+2026-10-12 11:07:17 [INFO] controller.monitor: DROP rule installed: 5.247.63.30 -> 10.0.2.1
+2026-10-12 11:07:17 [INFO] controller.monitor: DROP rule installed: 57.244.129.201 -> 10.0.2.1
+2026-10-12 11:07:17 [INFO] controller.monitor: DROP rule installed: 155.125.132.133 -> 10.0.2.1
+2026-10-12 11:07:18 [INFO] controller.monitor: DROP rule installed: 137.133.115.31 -> 10.0.2.1
+2026-10-12 11:07:18 [INFO] controller.monitor: DROP rule installed: 32.53.5.159 -> 10.0.2.1
+2026-10-12 11:07:18 [INFO] controller.monitor: DROP rule installed: 95.67.78.150 -> 10.0.2.1
+2026-10-12 11:07:19 [INFO] controller.monitor: DROP rule installed: 0.12.41.83 -> 10.0.2.1
+2026-10-12 11:07:19 [INFO] controller.monitor: DROP rule installed: 237.242.59.12 -> 10.0.2.1
+2026-10-12 11:07:20 [INFO] controller.monitor: DROP rule installed: 12.26.17.56 -> 10.0.2.1
+2026-10-12 11:07:20 [INFO] controller.monitor: DROP rule installed: 137.133.115.31 -> 10.0.2.1
+2026-10-12 11:07:20 [INFO] controller.monitor: DROP rule installed: 240.136.183.68 -> 10.0.2.1
+2026-10-12 11:07:20 [INFO] controller.monitor: DROP rule installed: 103.59.194.151 -> 10.0.2.1
+2026-10-12 11:07:21 [INFO] controller.monitor: DROP rule installed: 183.242.53.169 -> 10.0.2.1
+2026-10-12 11:07:21 [INFO] controller.monitor: DROP rule installed: 220.125.179.20 -> 10.0.2.1
+2026-10-12 11:07:21 [INFO] controller.monitor: DROP rule installed: 146.176.103.22 -> 10.0.2.1
+2026-10-12 11:07:22 [INFO] controller.monitor: DROP rule installed: 138.77.87.105 -> 10.0.2.1
+2026-10-12 11:07:22 [INFO] controller.monitor: SW1: 142 flows expired, reset flow registers
+2026-10-12 11:07:22 [INFO] controller.monitor: DROP rule installed: 53.132.136.189 -> 10.0.2.1
+2026-10-12 11:07:23 [INFO] controller.monitor: DROP rule installed: 103.59.194.151 -> 10.0.2.1
+2026-10-12 11:07:23 [INFO] controller.monitor: DROP rule installed: 183.242.53.169 -> 10.0.2.1
+2026-10-12 11:07:25 [INFO] controller.monitor: DROP rule installed: 10.0.1.1 -> 10.0.1.2
+2026-10-12 11:07:26 [INFO] controller.monitor: DROP rule installed: 133.95.200.224 -> 10.0.2.1
+2026-10-12 11:07:26 [INFO] controller.monitor: DROP rule installed: 230.204.77.53 -> 10.0.2.1
+2026-10-12 11:07:26 [INFO] controller.monitor: DROP rule installed: 137.17.8.209 -> 10.0.2.1
+2026-10-12 11:07:26 [INFO] controller.monitor: DROP rule installed: 46.213.56.136 -> 10.0.2.1
+2026-10-12 11:07:27 [INFO] controller.monitor: SW2: 383 flows expired, reset flow registers
+2026-10-12 11:07:27 [INFO] controller.monitor: DROP rule installed: 138.1.33.211 -> 10.0.2.1
+2026-10-12 11:07:28 [INFO] controller.monitor: DROP rule installed: 63.254.86.230 -> 10.0.2.1
+2026-10-12 11:07:29 [INFO] controller.monitor: DROP rule installed: 103.7.189.125 -> 10.0.2.1
+2026-10-12 11:07:29 [INFO] controller.monitor: DROP rule installed: 201.48.177.82 -> 10.0.2.1
+2026-10-12 11:07:29 [INFO] controller.monitor: DROP rule installed: 201.48.177.82 -> 10.0.2.1
+2026-10-12 11:07:29 [INFO] controller.monitor: DROP rule installed: 116.237.114.8 -> 10.0.2.1
+2026-10-12 11:07:30 [INFO] controller.monitor: DROP rule installed: 78.156.181.56 -> 10.0.2.1
+2026-10-12 11:07:30 [INFO] controller.monitor: DROP rule installed: 159.169.95.220 -> 10.0.2.1
+2026-10-12 11:07:30 [INFO] controller.monitor: DROP rule installed: 67.87.179.116 -> 10.0.2.1
+2026-10-12 11:07:31 [INFO] controller.monitor: DROP rule installed: 66.162.204.159 -> 10.0.2.1
+2026-10-12 11:07:32 [INFO] controller.monitor: DROP rule installed: 179.0.202.158 -> 10.0.2.1
+2026-10-12 11:07:32 [INFO] controller.monitor: DROP rule installed: 122.95.3.170 -> 10.0.2.1
+2026-10-12 11:07:32 [INFO] controller.monitor: DROP rule installed: 242.169.215.5 -> 10.0.2.1
+2026-10-12 11:07:32 [INFO] controller.monitor: DROP rule installed: 66.162.204.159 -> 10.0.2.1
+2026-10-12 11:07:33 [INFO] controller.monitor: DROP rule installed: 211.156.97.134 -> 10.0.2.1
+2026-10-12 11:07:33 [INFO] controller.monitor: DROP rule installed: 91.240.78.178 -> 10.0.2.1
+2026-10-12 11:07:33 [INFO] controller.monitor: DROP rule installed: 56.136.87.17 -> 10.0.2.1
+2026-10-12 11:07:34 [INFO] controller.monitor: DROP rule installed: 97.185.194.87 -> 10.0.2.1
+2026-10-12 11:07:34 [INFO] controller.monitor: SW1: 160 flows expired, reset flow registers
+2026-10-12 11:07:34 [INFO] controller.monitor: DROP rule installed: 182.115.84.159 -> 10.0.2.1
+2026-10-12 11:07:35 [INFO] controller.monitor: DROP rule installed: 3.138.181.34 -> 10.0.2.1
+2026-10-12 11:07:36 [INFO] controller.monitor: DROP rule installed: 176.177.100.190 -> 10.0.2.1
+2026-10-12 11:07:36 [INFO] controller.monitor: DROP rule installed: 132.67.122.203 -> 10.0.2.1
+2026-10-12 11:07:36 [INFO] controller.monitor: DROP rule installed: 92.17.238.182 -> 10.0.2.1
+2026-10-12 11:07:37 [INFO] controller.monitor: DROP rule installed: 7.169.33.233 -> 10.0.2.1
+2026-10-12 11:07:37 [INFO] controller.monitor: DROP rule installed: 203.7.57.33 -> 10.0.2.1
+2026-10-12 11:07:37 [INFO] controller.monitor: DROP rule installed: 89.109.201.105 -> 10.0.2.1
+2026-10-12 11:07:37 [INFO] controller.monitor: SW1: 194 flows expired, reset flow registers
+2026-10-12 11:07:38 [INFO] controller.monitor: DROP rule installed: 71.7.203.141 -> 10.0.2.1
+2026-10-12 11:07:39 [INFO] controller.monitor: DROP rule installed: 128.176.141.65 -> 10.0.2.1
+2026-10-12 11:07:39 [INFO] controller.monitor: SW2: 275 flows expired, reset flow registers
+2026-10-12 11:07:41 [INFO] controller.monitor: DROP rule installed: 123.170.52.7 -> 10.0.2.1
+2026-10-12 11:07:41 [INFO] controller.monitor: DROP rule installed: 190.208.92.147 -> 10.0.2.1
+2026-10-12 11:07:41 [INFO] controller.monitor: DROP rule installed: 177.41.130.49 -> 10.0.2.1
+2026-10-12 11:07:42 [INFO] controller.monitor: DROP rule installed: 127.163.89.12 -> 10.0.2.1
+2026-10-12 11:07:43 [INFO] controller.monitor: DROP rule installed: 176.95.246.42 -> 10.0.2.1
+2026-10-12 11:07:44 [INFO] controller.monitor: DROP rule installed: 207.211.101.49 -> 10.0.2.1
+2026-10-12 11:07:44 [INFO] controller.monitor: DROP rule installed: 246.229.211.77 -> 10.0.2.1
+2026-10-12 11:07:44 [INFO] controller.monitor: DROP rule installed: 178.171.26.68 -> 10.0.2.1
+2026-10-12 11:07:45 [INFO] controller.monitor: DROP rule installed: 30.114.169.120 -> 10.0.2.1
+2026-10-12 11:07:45 [INFO] controller.monitor: DROP rule installed: 178.171.26.68 -> 10.0.2.1
+2026-10-12 11:07:45 [INFO] controller.monitor: DROP rule installed: 12.128.147.103 -> 10.0.2.1
+2026-10-12 11:07:46 [INFO] controller.monitor: DROP rule installed: 92.20.182.216 -> 10.0.2.1
+2026-10-12 11:07:47 [INFO] controller.monitor: DROP rule installed: 140.220.33.189 -> 10.0.2.1
+2026-10-12 11:07:47 [INFO] controller.monitor: DROP rule installed: 137.171.123.127 -> 10.0.2.1
+2026-10-12 11:07:48 [INFO] controller.monitor: DROP rule installed: 183.149.197.242 -> 10.0.2.1
+2026-10-12 11:07:49 [INFO] controller.monitor: DROP rule installed: 87.89.15.162 -> 10.0.2.1
+2026-10-12 11:07:49 [INFO] controller.monitor: DROP rule installed: 137.167.67.220 -> 10.0.2.1
+2026-10-12 11:07:50 [INFO] controller.monitor: DROP rule installed: 178.137.194.170 -> 10.0.2.1
+2026-10-12 11:07:51 [INFO] controller.monitor: DROP rule installed: 185.67.237.53 -> 10.0.2.1
+2026-10-12 11:07:51 [INFO] controller.monitor: DROP rule installed: 58.166.137.110 -> 10.0.2.1
+2026-10-12 11:07:51 [INFO] controller.monitor: DROP rule installed: 83.218.149.0 -> 10.0.2.1
+2026-10-12 11:07:51 [INFO] controller.monitor: DROP rule installed: 87.89.15.162 -> 10.0.2.1
+2026-10-12 11:07:52 [INFO] controller.monitor: DROP rule installed: 83.127.169.228 -> 10.0.2.1
+2026-10-12 11:07:52 [INFO] controller.monitor: DROP rule installed: 83.218.149.0 -> 10.0.2.1
+2026-10-12 11:07:52 [INFO] controller.monitor: DROP rule installed: 120.129.11.21 -> 10.0.2.1
+2026-10-12 11:07:52 [INFO] controller.monitor: DROP rule installed: 58.166.137.110 -> 10.0.2.1
+2026-10-12 11:07:53 [INFO] controller.monitor: DROP rule installed: 226.6.212.68 -> 10.0.2.1
+2026-10-12 11:07:53 [INFO] controller.monitor: DROP rule installed: 10.0.1.1 -> 10.0.2.1
+2026-10-12 11:07:54 [INFO] controller.monitor: DROP rule installed: 120.129.11.21 -> 10.0.2.1
+2026-10-12 11:07:54 [INFO] controller.monitor: DROP rule installed: 10.0.1.1 -> 10.0.2.1
+2026-10-12 11:07:54 [INFO] controller.monitor: SW2: 154 flows expired, reset flow registers
+2026-10-12 11:07:55 [INFO] controller.monitor: DROP rule installed: 242.138.20.120 -> 10.0.2.1
+2026-10-12 11:07:55 [INFO] controller.monitor: SW1: 521 flows expired, reset flow registers
+2026-10-12 11:07:56 [INFO] controller.policy: Switch 2: DROP -> CLONE (score=-0.0879)
+2026-10-12 11:08:01 [INFO] controller.policy: Switch 1: DROP -> MONITOR (score=-0.0487)
+2026-10-12 11:08:19 [INFO] __main__: Duration elapsed, stopping
+2026-10-12 11:08:19 [INFO] controller.monitor: Stopping AdaptMon controller
+2026-10-12 11:08:19 [INFO] controller.monitor: Monitor stopped for switch 1
+2026-10-12 11:08:19 [INFO] controller.monitor: Monitor stopped for switch 2
+2026-10-12 11:08:19 [INFO] __main__: Controller terminated cleanly
+2026-10-12 11:08:19 [INFO] __main__: Final stats saved to results/20261012_105548/run_05/ctrl_logs/5/final_stats.json
