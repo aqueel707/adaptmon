@@ -1,0 +1,173 @@
+{
+  "checks": {
+    "monitor_started_logged": true,
+    "decision_a_b_c_logged": true,
+    "z_score_trigger_removed_logged": true,
+    "mirroring_configured_logged": true,
+    "dpi_started_logged": true,
+    "flow_model_trained_once": true,
+    "trained_once_per_successful_model": true,
+    "flow_model_trained_on_warmup_vectors_only": true,
+    "no_scores_during_warmup": true,
+    "flow_level_register_matches_controller": true,
+    "udp_spike_never_reaches_drop_no_dpi_rule_for_udp": true
+  },
+  "mismatches": [],
+  "flow_model": {
+    "n_train": 11474,
+    "thresholds": {
+      "monitor": 1.0457468766801592e-17,
+      "clone": -0.05045910100250173,
+      "warmup_min": -0.1319736996082741,
+      "warmup_p1": -0.05045910100250173,
+      "warmup_p5": 1.0457468766801592e-17,
+      "warmup_p10": 0.03551225698411689,
+      "warmup_mean": 0.13061637574592105,
+      "warmup_std": 0.06399926409426437,
+      "n_warmup": 11474
+    },
+    "fit_seconds": 1.4345281679998152
+  },
+  "host_pair_model": {
+    "n_train": 212,
+    "thresholds": {
+      "monitor": 3.599551212651875e-17,
+      "clone": -0.1740915269524428,
+      "warmup_min": -0.18686336172645557,
+      "warmup_p1": -0.1740915269524428,
+      "warmup_p5": 3.599551212651875e-17,
+      "warmup_p10": 0.03873683614709487,
+      "warmup_mean": 0.11631638458575572,
+      "warmup_std": 0.06320849564923839,
+      "n_warmup": 212
+    },
+    "fit_seconds": 0.7517724659992382
+  },
+  "n_windows": 38,
+  "n_pair_rows": 417,
+  "max_level_per_flow_hist": {
+    "0": 4376,
+    "1": 101,
+    "2": 12
+  },
+  "max_level_per_pair_hist": {
+    "0": 4,
+    "1": 6
+  },
+  "entropy_source_counts": {
+    "payload_sampled": 9491,
+    "flow_distribution": 14212
+  },
+  "spike_flow_max_level": 2,
+  "spike_flow_reached_drop": false,
+  "spike_flow_scores": [
+    [
+      "23",
+      "2",
+      "-0.096684",
+      "2",
+      "0"
+    ],
+    [
+      "24",
+      "1",
+      "-0.107713",
+      "2",
+      "0"
+    ],
+    [
+      "24",
+      "2",
+      "-0.112095",
+      "2",
+      "2"
+    ],
+    [
+      "25",
+      "1",
+      "-0.121425",
+      "2",
+      "2"
+    ],
+    [
+      "25",
+      "2",
+      "-0.122878",
+      "2",
+      "2"
+    ],
+    [
+      "26",
+      "1",
+      "-0.126694",
+      "2",
+      "2"
+    ],
+    [
+      "26",
+      "2",
+      "-0.126694",
+      "2",
+      "2"
+    ],
+    [
+      "27",
+      "1",
+      "-0.131583",
+      "2",
+      "2"
+    ],
+    [
+      "27",
+      "2",
+      "-0.131583",
+      "2",
+      "2"
+    ],
+    [
+      "28",
+      "1",
+      "-0.101742",
+      "2",
+      "2"
+    ],
+    [
+      "28",
+      "2",
+      "-0.101742",
+      "2",
+      "2"
+    ],
+    [
+      "29",
+      "1",
+      "-0.101742",
+      "2",
+      "2"
+    ],
+    [
+      "29",
+      "2",
+      "-0.101742",
+      "2",
+      "2"
+    ],
+    [
+      "30",
+      "1",
+      "-0.101742",
+      "2",
+      "2"
+    ],
+    [
+      "30",
+      "2",
+      "-0.101742",
+      "2",
+      "2"
+    ]
+  ],
+  "poll_ms_mean": 1427.6791054472644,
+  "poll_ms_max": 4299.736650998966,
+  "forced_drops_total": 0
+}

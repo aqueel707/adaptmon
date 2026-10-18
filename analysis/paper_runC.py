@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """
-analysis/paper_runC.py — every paper number and figure from Run C
-(results/paper_run_C, 5 seeded runs), plus the separate latency-only
-benchmark (results/latency_bench_runC) for per-poll latency at fixed
-active-flow counts, which Run C (<= 80 active flows) does not reach.
+analysis/paper_runC.py — every paper number and figure from one 5-run
+series (by default Run C, results/paper_run_C), plus the separate
+latency-only benchmark (results/latency_bench_runC) for per-poll latency at
+fixed active-flow counts, which the series itself (<= 80 active flows) does
+not reach.
 
-    python3 -m analysis.paper_runC
+    python3 -m analysis.paper_runC                       # Run C -> paper/runC
+    python3 -m analysis.paper_runD                       # Run D -> paper/runD
+    python3 -m analysis.paper_runC --series results/<s> --out paper/<x> --name "Run X"
 
-Writes paper/runC/PAPER_NUMBERS.md (each number with its source file),
-paper/runC/numbers.json, and fig_*.pdf + fig_*.png.
+Writes <out>/PAPER_NUMBERS.md (each number with its source file),
+<out>/numbers.json, and fig_*.pdf + fig_*.png. What a DPI confirmation does
+(CLONE in Run C, DROP from Run D on) is read from each run's model.json
+(data_plane.dpi_confirmation_action); for DROP series, item 10 reports the
+drops.
 """
 
 import glob
@@ -29,25 +35,36 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from analysis import evaluate as ev                               # noqa: E402
-from analysis.replay import replay_levels, estimate_clones, CLONE  # noqa: E402
+from analysis.replay import replay_levels, estimate_clones, CLONE, DROP  # noqa: E402
 
-SERIES = "results/paper_run_C"
+SERIES = "results/paper_run_C"   # set by configure()
+RUN = "Run C"
+DPI_ACTION = "CLONE"             # set in main() from model.json
 BENCH_FALLBACK = "results/latency_bench_runC"
 
 
 def pick_bench():
     """$ADAPTMON_BENCH, else the newest complete results/latency_bench_idle_* run
-    (scripts/run_latency_idle.sh), else the contended-host run."""
+    (scripts/run_latency_idle.sh) not marked superseded in
+    experiments/seeds_used.json, else the contended-host run."""
     if os.environ.get("ADAPTMON_BENCH"):
         return os.environ["ADAPTMON_BENCH"]
+    reg = json.load(open(os.path.join(ROOT, "experiments", "seeds_used.json")))["seeds"]
+    superseded = {v["series"] for v in reg.values() if v.get("superseded_reason")}
     idle = [d for d in sorted(glob.glob(os.path.join(ROOT, "results", "latency_bench_idle_*")))
             if os.path.exists(os.path.join(d, "bench_config.json"))
-            and os.path.exists(os.path.join(d, "ctrl", "windows.csv"))]
+            and os.path.exists(os.path.join(d, "ctrl", "windows.csv"))
+            and rel(d) not in superseded]
     return rel(idle[-1]) if idle else BENCH_FALLBACK
 
 
 BENCH = BENCH_FALLBACK    # set in main()
 OUT = "paper/runC"
+
+
+def configure(series, out, name):
+    global SERIES, OUT, RUN
+    SERIES, OUT, RUN = series, out, name
 LEVELS = ["NORMAL", "MONITOR", "CLONE", "DROP"]
 CLASSES = ["sqli", "null_scan", "syn_scan", "rate_spike"]
 TRIGGERS = ["IF-flow", "IF-pair", "DPI-head", "DPI-sample"]
@@ -101,7 +118,7 @@ def pct(x, nd=1):
 
 
 # --------------------------------------------------------------------------
-# Load Run C
+# Load the series
 # --------------------------------------------------------------------------
 
 def load_runs():
@@ -140,10 +157,17 @@ def host_paragraph(bench):
                 "absolute numbers should come from `scripts/run_latency_idle.sh` on an idle "
                 "host.")
     h = json.load(open(path))
+    lim = h.get("idle_check", {}).get("load_1min_max", 0.5)
+    ides = h.get("ide_processes_running") or []
+    ide_s = ("no IDE process" if not ides else
+             "IDE check overridden: " + ", ".join(ides) + " running, using "
+             + ", ".join(f"{k} {v:.0f}%" for k, v in h.get("ide_cpu_pct_before", {}).items())
+             + " of a core in a 5 s sample before the run — absolute per-poll times include "
+             "that background load")
     return (f"**Host** (`{bench}/host_info.json`, recorded by `scripts/run_latency_idle.sh`): "
             f"{h.get('cpu_model', '?')}, {h.get('cores', '?')} cores, kernel "
             f"{h.get('kernel', '?')}; 1-min load average {h.get('load_before', '?')} before "
-            f"the run (idle check: < 0.5, no IDE process) and {h.get('load_after', '?')} "
+            f"the run (idle check: < {lim}; {ide_s}) and {h.get('load_after', '?')} "
             f"after. The benchmark itself (2 bmv2 switches, controller, DPI, sender) is the "
             f"load during the run.")
 
@@ -151,8 +175,9 @@ def host_paragraph(bench):
 def host_caption(bench):
     if os.path.exists(os.path.join(ROOT, bench, "host_info.json")):
         h = json.load(open(os.path.join(ROOT, bench, "host_info.json")))
-        return (f"Host: {h.get('cpu_model', '?')}, {h.get('cores', '?')} cores, idle before "
-                f"the run (load {h.get('load_before', '?')}). Hollow = not steady state.")
+        ide = " with the IDE open" if h.get("ide_processes_running") else ""
+        return (f"Host: {h.get('cpu_model', '?')}, {h.get('cores', '?')} cores{ide}, load "
+                f"{h.get('load_before', '?')} before the run. Hollow = not steady state.")
     return ("3-vCPU desktop host shared with the GUI/IDE: absolute values vary ~3x with "
             "background load (see PAPER_NUMBERS.md, item 1). Hollow = not steady state.")
 
@@ -171,8 +196,8 @@ def item1_latency(runs, md):
         cap = ev.capacity(bw, bstats)
         settle = cfg["settle_s"]
         bw = bw.assign(pps=(bw.s1_fwd.diff() + bw.s1_cloned.diff()) / bw.ts.diff())
-        md += [f"**Latency-only benchmark, not Run C** (`{BENCH}`, seed {cfg['seed']}, "
-               f"registered as `latency-bench` in `experiments/seeds_used.json`). Run C never "
+        md += [f"**Latency-only benchmark, not {RUN}** (`{BENCH}`, seed {cfg['seed']}, "
+               f"registered as `latency-bench` in `experiments/seeds_used.json`). {RUN} never "
                f"exceeds {int(max(r['w'].n_flows_total.max() for r in runs))} active flows per "
                f"poll, so the tiers below come from `experiments/latency_bench.py`: the same "
                f"controller + DPI + head cloning (N = {cfg['head_clone_n']}) on real bmv2, "
@@ -276,16 +301,38 @@ def item1_latency(runs, md):
         NUM["latency_bench"] = {"seed": cfg["seed"], "tiers": rows, "capacity": cap}
     else:
         md += ["_Benchmark results not found — run `experiments/latency_bench.py`._"]
-    # Run C's own, as reference
+    # the series' own, as reference
     allw = pd.concat([r["w"][r["w"].phase == "scored"] for r in runs])
     rc = {c: {"mean": float(allw[c].mean()), "p95": float(np.percentile(allw[c], 95))}
           for c, _ in cols}
-    md += ["", f"For reference, **Run C itself** (all 5 runs, {len(allw)} scored polls, "
+    md += ["", f"For reference, **{RUN} itself** (all 5 runs, {len(allw)} scored polls, "
            f"active flows per poll median {allw.n_flows_total.median():.0f}, max "
            f"{allw.n_flows_total.max():.0f}; `{SERIES}/run_0N/ctrl/windows.csv`): "
            + "; ".join(f"{lbl} {rc[c]['mean']:.1f} / {rc[c]['p95']:.1f} ms" for c, lbl in cols)
            + " (mean / P95).", ""]
-    NUM["latency_runC"] = rc
+    bench_model = os.path.join(ROOT, BENCH, "ctrl", "model.json")
+    bench_prefix = (os.path.exists(bench_model) and "dpi_confirmation_action"
+                    not in json.load(open(bench_model)).get("data_plane", {}))
+    if os.path.exists(bench_model) and (DPI_ACTION == "DROP") == bench_prefix:
+        ab = sorted(glob.glob(os.path.join(ROOT, "results", "reg_read_ab_*", "report.json")))
+        ab_s = "not measured"
+        if ab:
+            a = json.load(open(ab[-1]))
+            sm = a["summary"]
+            ab_s = (f"{sm['with_drop_pkts']['median_ms']:.0f} vs "
+                    f"{sm['without_drop_pkts']['median_ms']:.0f} ms median per read on a live "
+                    f"s1, paired difference {a['paired_diff_ms_median']:+.1f} ms "
+                    f"(`{rel(os.path.dirname(ab[-1]))}/report.json`, "
+                    "`experiments/reg_read_ab.py`)")
+        which = ("before the DROP change (Run D), which reads one register array fewer per "
+                 f"poll than {RUN}'s" if bench_prefix else
+                 f"after the DROP change (Run D), which reads one register array more per poll "
+                 f"than {RUN}'s")
+        md += [f"**{RUN} vs the benchmark:** the latency-only benchmark ran the controller "
+               f"{which} (`drop_pkts`, `controller/dataplane.py` FLOW_REGISTERS). "
+               f"That array's cost: {ab_s}. {RUN}'s own per-poll times are in the paragraph "
+               "above.", ""]
+    NUM[f"latency_{os.path.basename(OUT)}"] = rc
     if rows:
         fig, ax = plt.subplots(figsize=(5.4, 3.2))
         steady = [r for r in rows if r["steady_state"]]
@@ -374,7 +421,7 @@ def item2_level_share(runs, md):
         md.append(line(f"switch {s}", *v))
     md.append(line("host pairs (pair-polls)", pairs, n_p))
     if overall["DROP"]["n"] == 0:
-        md += ["", "DROP never occurred in Run C: it needs a second DPI confirmation on a flow "
+        md += ["", f"DROP never occurred in {RUN}: it needs a second DPI confirmation on a flow "
                "already at CLONE, and DPI confirms each (flow, class) once "
                "(`controller/dpi.py` `_confirm`); every confirmation therefore arrived with "
                "the flow below CLONE and force-cloned it (`forced_clone` in alerts.jsonl, "
@@ -548,16 +595,33 @@ def item4_scores(runs, md):
 # 5. Per-class detection by trigger
 # --------------------------------------------------------------------------
 
+def _with_other(rbt):
+    """recall_by_trigger with every trigger outside TRIGGERS (DPI-level,
+    DPI-drop, unattributed) folded into one "other" entry."""
+    out = {t: v for t, v in rbt.items() if t in TRIGGERS}
+    rest = [v for t, v in rbt.items() if t not in TRIGGERS and t != "none"]
+    if rest:
+        k, n = sum(v["k"] for v in rest), rest[0]["n"]
+        out["other"] = {"k": k, "n": n, "rate": k / n, "from": sorted(
+            t for t in rbt if t not in TRIGGERS and t != "none")}
+    return out
+
+
 def item5_trigger_bars(metrics, md):
-    pc = metrics["per_attack_class"]
+    pc = {c: {**v, "recall_by_trigger": _with_other(v["recall_by_trigger"])}
+          for c, v in metrics["per_attack_class"].items()}
+    b_all = _with_other(metrics["benign"]["false_positives_by_trigger"])
+    trig = TRIGGERS + (["other"] if any("other" in v["recall_by_trigger"] for v in pc.values())
+                       or "other" in b_all else [])
+    colors = CAT + [NEUTRAL]
     fig, (ax, ax2) = plt.subplots(1, 2, figsize=(7.4, 3.0),
                                   gridspec_kw={"width_ratios": [4, 1.3]})
     x = np.arange(len(CLASSES))
     bottom = np.zeros(len(CLASSES))
-    for i, t in enumerate(TRIGGERS):
+    for i, t in enumerate(trig):
         vals = np.array([pc[c]["recall_by_trigger"].get(t, {}).get("rate", 0.0) for c in CLASSES])
         lbl = t if vals.any() else f"{t} (0 in every class)"
-        ax.bar(x, vals, bottom=bottom, width=0.6, color=CAT[i], label=lbl,
+        ax.bar(x, vals, bottom=bottom, width=0.6, color=colors[i], label=lbl,
                edgecolor=SURF, linewidth=1.0)
         bottom += vals
     tot = np.array([pc[c]["detected_recall"] for c in CLASSES])
@@ -574,11 +638,11 @@ def item5_trigger_bars(metrics, md):
     ax.set_ylabel("detection rate (recall)")
     ax.set_title("Attack flows detected, by trigger", loc="left")
     ax.legend(fontsize=7, ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.12))
-    b = metrics["benign"]["false_positives_by_trigger"]
+    b = b_all
     bottom = 0.0
-    for i, t in enumerate(TRIGGERS):
+    for i, t in enumerate(trig):
         v = b.get(t, {}).get("rate", 0.0)
-        ax2.bar([0], [v], bottom=bottom, width=0.6, color=CAT[i], edgecolor=SURF, linewidth=1.0)
+        ax2.bar([0], [v], bottom=bottom, width=0.6, color=colors[i], edgecolor=SURF, linewidth=1.0)
         bottom += v
     o = metrics["overall"]
     ax2.errorbar([0], [o["fpr"]], yerr=[[o["fpr"] - o["fpr_ci95"][0]], [o["fpr_ci95"][1] - o["fpr"]]],
@@ -597,17 +661,25 @@ def item5_trigger_bars(metrics, md):
            "class's ground-truth flows detected via that trigger; whisker = Clopper-Pearson "
            "95% CI of the class total. Separate panel (own axis) for benign false positives. "
            f"Source: `{SERIES}/metrics.json` (`analysis/evaluate.py`).", "",
-           "| class | n | " + " | ".join(TRIGGERS) + " | total [95% CI] |",
-           "|---|---|" + "---|" * len(TRIGGERS) + "---|"]
+           "| class | n | " + " | ".join(trig) + " | total [95% CI] |",
+           "|---|---|" + "---|" * len(trig) + "---|"]
     for c in CLASSES:
         rbt = pc[c]["recall_by_trigger"]
         md.append(f"| {c} | {pc[c]['n']} | " + " | ".join(
-            f"{rbt[t]['k']} ({pct(rbt[t]['rate'])})" if t in rbt else "0" for t in TRIGGERS)
+            f"{rbt[t]['k']} ({pct(rbt[t]['rate'])})" if t in rbt else "0" for t in trig)
             + f" | {pc[c]['detected_clone_or_above']} ({pct(pc[c]['detected_recall'])}) "
             f"[{pct(pc[c]['detected_recall_ci95'][0])}, {pct(pc[c]['detected_recall_ci95'][1])}] |")
     md.append(f"| benign (FP) | {metrics['benign']['n']} | " + " | ".join(
-        f"{b[t]['k']} ({pct(b[t]['rate'])})" if t in b else "0" for t in TRIGGERS)
+        f"{b[t]['k']} ({pct(b[t]['rate'])})" if t in b else "0" for t in trig)
         + f" | {o['fp']} ({pct(o['fpr'])}) [{pct(o['fpr_ci95'][0])}, {pct(o['fpr_ci95'][1])}] |")
+    others = sorted({t for v in list(pc.values()) + [{"recall_by_trigger": b}]
+                     for t in v["recall_by_trigger"].get("other", {}).get("from", [])})
+    if others:
+        md += ["", "\"other\" = " + ", ".join(others) + " (`analysis/evaluate.py` "
+               "module docstring)."]
+    md += ["", "Trigger = what first put the flow at >= CLONE (`escalated_by` on its first "
+           "such row in flow_windows.csv, else its host pair's); a later forced DROP does "
+           "not re-attribute it."]
     md.append("")
     return md
 
@@ -754,20 +826,22 @@ def item7_ablation(runs, metrics, md):
            for k in ("IF only", "DPI-head only", "full system")}
     validation, kinds_all = [], Counter()
     cons = Counter()
+    fp_trig, if_trig = Counter(), Counter()    # full-system triggers, see the text
     for r in runs:
         gt, fw, pw, w = r["gt"], r["fw"], r["pw"], r["w"]
         actual = (gt.label == "attack").to_numpy()
         tot = ev.run_totals(w)
         lf, lp = replay_levels(fw, pw, w, "LOG")
         est_full = estimate_clones(fw, pw, lf, lp, head_n, True)
-        validation.append({"run": r["name"], "est": est_full, "actual": tot})
+        validation.append({"run": r["name"], "est": est_full, "actual": tot,
+                           "measured_dropped": tot["dropped"]})
         scen = {}
         ifl, ipl = replay_levels(fw, pw, w, "IF")
         scen["IF only"] = (_detect(gt, fw, pw, ifl, ipl),
                            estimate_clones(fw, pw, ifl, ipl, 0, True))
         ff, pf, kinds = _dpi_head_forces(r)
         kinds_all.update(kinds)
-        dfl, dpl = replay_levels(fw, pw, w, "DPI", ff, pf)
+        dfl, dpl = replay_levels(fw, pw, w, "DPI", ff, pf, dpi_action=DPI_ACTION)
         scen["DPI-head only"] = (_detect(gt, fw, pw, dfl, dpl),
                                  estimate_clones(fw, pw, dfl, dpl, head_n, False))
         full_det = gt.predicted_attack.to_numpy()
@@ -781,6 +855,9 @@ def item7_ablation(runs, metrics, md):
         cons["dpi_fp"] += int((dd & ben).sum())
         cons["dpi_fp_also_full"] += int((dd & ben & full_det).sum())
         cons["dpi_new_tp"] += int((dd & ~ben & ~full_det).sum())
+        trig = gt.trigger.to_numpy()
+        fp_trig.update(trig[dd & ben & full_det])
+        if_trig.update(trig[scen["IF only"][0] & ~ben])
         for k, (det, cl) in scen.items():
             c = res[k]
             run_tp = int((actual & det).sum()); run_fn = int((actual & ~det).sum())
@@ -802,11 +879,17 @@ def item7_ablation(runs, metrics, md):
                   "per_class": {k2: {"detected": c["per_class"][k2], "n": c["n_class"][k2]}
                                 for k2 in c["n_class"]}}
     err = [(v["est"]["cloned"] - v["actual"]["cloned"]) / v["actual"]["cloned"] for v in validation]
+    err_fwd = [abs(v["est"]["forwarded"] - v["actual"]["forwarded"]) / v["actual"]["forwarded"]
+               for v in validation]
+    drops_est = sum(v["est"]["dropped"] for v in validation)
+    drops_meas = sum(v["measured_dropped"] or 0 for v in validation)
     NUM["ablation"] = out
     NUM["ablation_consistency"] = dict(cons)
+    NUM["ablation_full_trigger_of_dpi_fp"] = dict(fp_trig)
+    NUM["ablation_full_trigger_of_if_only_tp"] = dict(if_trig)
     NUM["ablation_estimator_validation"] = validation
-    md += ["## 7. Ablation on Run C logs", "",
-           "Computed offline from Run C's logs — no new runs (`analysis/replay.py`, applied "
+    md += [f"## 7. Ablation on {RUN} logs", "",
+           f"Computed offline from {RUN}'s logs — no new runs (`analysis/replay.py`, applied "
            "per run, pooled over the 5). Detection uses the same definition as the full "
            "evaluation (flow level, or its host pair while active, >= CLONE).", "",
            "- **(a) IF only** — the logged per-window raw IF levels (flow and host-pair "
@@ -816,8 +899,11 @@ def item7_ablation(runs, metrics, md):
            "feature, Decision C).",
            "- **(b) DPI-head only** — no IF: raw level NORMAL every window; each logged DPI "
            "confirmation attributable to a flow-head clone (clone_reason 4, or 3 under a "
-           "host-clone rule that a DPI-head escalation installed) force-clones the flow, and "
-           "for syn/null scans its host pair, at the poll that processes it, then "
+           "host rule that a DPI-head escalation installed) "
+           + ("forces the flow, and for syn/null scans its host pair, to DROP (the "
+              f"controller's own action in {RUN})" if DPI_ACTION == "DROP" else
+              "force-clones the flow, and for syn/null scans its host pair")
+           + ", at the poll that processes it, then "
            "de-escalates by the same hysteresis; head clones kept (N = "
            f"{head_n}); no sampling. Confirmations used: "
            + ", ".join(f"reason {k[0]} {'kept' if k[1] else 'dropped'}: {v}"
@@ -840,10 +926,11 @@ def item7_ablation(runs, metrics, md):
            "come from " + ", ".join(
                f"{k2} {v['detected']}/{v['n']}" for k2, v in sorted(if_cls.items()))
            + " (`per_class` in `numbers.json` → ablation): the flow model catches the rate "
-           "spike, and the host-pair model catches some scan probes (in the full system "
-           "most of those probes are credited to DPI-head instead, because a DPI-head "
-           "escalation fires first and the trigger attribution takes the flow's own "
-           "escalation before its host pair's). SQLi is never caught without DPI "
+           "spike, and the host-pair model catches some scan probes. In the full system "
+           "these " + str(sum(if_trig.values())) + " flows are credited to "
+           + ", ".join(f"{t} {n}" for t, n in if_trig.most_common())
+           + " (the trigger is whatever first put the flow at >= CLONE, so a DPI-head "
+           "escalation that comes first takes the credit). SQLi is never caught without DPI "
            f"({io['per_class'].get('sqli', {}).get('detected', 0)}/"
            f"{io['per_class'].get('sqli', {}).get('n', 0)}).",
            "", "**What IF adds on top of DPI-head** (full system − DPI-head only; "
@@ -869,15 +956,34 @@ def item7_ablation(runs, metrics, md):
            f"{pct(NUM.get('replay_agreement_flows', float('nan')), 2)} of flow rows and "
            f"{pct(NUM.get('replay_agreement_pairs', float('nan')), 2)} of pair rows, and replaying "
            f"the logged levels reproduces the full system's per-flow detections exactly. "
-           f"Every benign flow (b) flags is also flagged by the full system "
-           f"({NUM['ablation_consistency']['dpi_fp_also_full']} of "
-           f"{NUM['ablation_consistency']['dpi_fp']}; there they were credited to IF-flow, "
-           f"which takes precedence in the trigger attribution), and (b) detects no attack "
-           f"flow the full system missed ({NUM['ablation_consistency']['dpi_new_tp']}).",
+           f"Of the {NUM['ablation_consistency']['dpi_fp']} benign flows (b) flags, "
+           f"{NUM['ablation_consistency']['dpi_fp_also_full']} are also flagged by the full "
+           f"system (credited there to "
+           + ", ".join(f"{t} {n}" for t, n in fp_trig.most_common()) + ")"
+           + ("" if NUM["ablation_consistency"]["dpi_fp"] ==
+              NUM["ablation_consistency"]["dpi_fp_also_full"] else
+              "; the rest were flagged only in the replay, whose de-escalation and timing "
+              "differ from the logged run's")
+           + ", and (b) detects "
+           + ("no attack flow the full system missed" if not NUM["ablation_consistency"]
+              ["dpi_new_tp"] else f"{NUM['ablation_consistency']['dpi_new_tp']} attack "
+              "flows the full system missed") + ".",
            f"- *Inspection estimate:* the clone estimator, run on the full system's logged "
            f"levels, matches the measured data-plane counters to within "
            f"{min(err) * 100:+.1f}% to {max(err) * 100:+.1f}% of total clones per run "
-           f"(forwarded packets within 0.03%); (a) and (b) use the same estimator.",
+           f"(forwarded packets within {max(err_fwd) * 100:.2f}%"
+           + (f"; dropped packets {drops_est} estimated vs {drops_meas} measured over the "
+              f"{len(validation)} runs" if DPI_ACTION == "DROP" else "")
+           + ")"
+           + ("; it overestimates drops because it treats a rule as in force from the start "
+              "of the next poll window, while the controller installs it at the end of the "
+              "poll that decided it (up to a few hundred ms later) — chiefly a source drop "
+              "landing as a benign iperf3 flow starts, most of whose first-window packets "
+              "pass before the rule is in place" if DPI_ACTION == "DROP" and drops_est >
+              1.2 * drops_meas else "")
+           + "; (a) and (b) use the same estimator."
+           + (" In (a) nothing is dropped (the IF never sets DROP), so packets the full "
+              "system dropped count as forwarded there." if DPI_ACTION == "DROP" else ""),
            "- *Not captured:* the traffic, the IF scores and DPI's own decisions are the "
            "logged ones. With a different clone stream DPI could decide differently — e.g. "
            "without sampled iperf3 clones, its syn-scan ratio rule (suppressed by them in "
@@ -920,7 +1026,11 @@ def item8_spread(runs, metrics, md):
         rows.append({"run": r["name"], "seed": r["seed"], "tpr": m["overall"]["tpr"],
                      "fpr": m["overall"]["fpr"],
                      "insp_pkts": m["inspection"]["inspection_reduction_packets"],
-                     "insp_bytes": m["inspection"]["inspection_reduction_bytes"]})
+                     "insp_bytes": m["inspection"]["inspection_reduction_bytes"],
+                     "by_reason": {k: v["share_of_forwarded_packets"] for k, v in
+                                   (m["inspection"]["clones_by_reason"] or {}).items()},
+                     "spikes": f"{m['per_attack_class']['rate_spike']['detected_clone_or_above']}/"
+                               f"{m['per_attack_class']['rate_spike']['n']}"})
     df = pd.DataFrame(rows)
     agg = {c: {"mean": float(df[c].mean()), "std": float(df[c].std(ddof=1)),
                "min": float(df[c].min()), "max": float(df[c].max())}
@@ -947,10 +1057,14 @@ def item8_spread(runs, metrics, md):
     md += ["", f"**Inspection reduction across the 5 seeds:** packets {pct(ip['mean'])} ± "
            f"{pct(ip['std'])} (min {pct(ip['min'])}, max {pct(ip['max'])}); bytes "
            f"{pct(ib['mean'])} ± {pct(ib['std'])} (min {pct(ib['min'])}, max "
-           f"{pct(ib['max'])}). The packet figure varies most because it is dominated by "
-           "level clones of flows held at CLONE — chiefly the rate spike when caught while "
-           "still sending, which happened in a different number of cycles per seed "
-           "(section 5 / RESULTS.md). The pooled value in the headline "
+           f"{pct(ib['max'])}). Per run, clones by reason as a share of forwarded packets "
+           "(level / host-pair / sampling / head) and rate spikes caught: "
+           + "; ".join(
+               f"{x['run']} " + " / ".join(pct(x['by_reason'].get(k, float('nan')))
+                                           for k in ("level", "hostpair", "sample", "head"))
+               + f", spikes {x['spikes']}" for x in rows)
+           + " (`metrics.json` → per_run → inspection → clones_by_reason). The pooled value "
+           "in the headline "
            f"({pct(NUM['spread'].get('pooled_insp_pkts', float('nan')))}) weights runs by "
            "their traffic; the mean here weights each seed equally."]
     md.append("")
@@ -1082,6 +1196,20 @@ def item9_params(runs, md):
          f"{cfg['rate_spike_s']} s, 64-byte payload; measured {np.median(spike_rates):.0f} "
          "pkt/s median on s1", f"`run_config.json`; {code_ref('traffic/paper_traffic.py', r'payload_size: int = 64')}"),
     ]
+    if DPI_ACTION == "DROP":     # Run D on; cites the current code
+        p[3:3] = [
+            ("DPI confirmation action", (
+                "DROP: the flow's 5-tuple drop rule, plus a source-IP drop rule for syn/null "
+                "scans (a dropped packet is still cloned to DPI)"),
+             f"`{SERIES}/run_0N/ctrl/model.json` → data_plane; "
+             f"{code_ref('controller/monitor.py', r'force_drop[(]key[)]')}"),
+            ("Drop rule removal", "after K_DOWN = 3 scored windows below DROP (the IF never "
+             "sets DROP, so a forced DROP dwells 3 scored windows unless confirmed again), or "
+             "when the flow's slot ages out (3 idle polls), whichever comes first; a source "
+             "drop after its host pair's K_DOWN windows",
+             f"{code_ref('controller/policy.py', r'^K_DOWN')}, "
+             f"{code_ref('controller/monitor.py', r'sw.delete_drop_rule[(]st.rule_handle[)]')}"),
+        ]
     md += ["### System and traffic", "", "| parameter | value | source |", "|---|---|---|"]
     for k, v, s in p:
         md.append(f"| {k} | {v} | {s} |")
@@ -1090,24 +1218,215 @@ def item9_params(runs, md):
     return md
 
 
-def main():
-    global BENCH
+# --------------------------------------------------------------------------
+# 10. Drops (series where a DPI confirmation forces DROP)
+# --------------------------------------------------------------------------
+
+def _drop_episodes(r):
+    """Consecutive polls a flow slot (per switch) or a host pair spent at
+    DROP, and how each episode ended: "dwell" = the level fell below DROP
+    while the slot was still occupied (K_DOWN windows, controller/policy.py),
+    "slot aged" = the slot had no row at the next poll (cleared after 3 idle
+    polls, which also deletes the rule), "run end"."""
+    last_w = int(r["w"].window.max())
+    cls = dict(zip(r["gt"].key, r["gt"].attack_class.fillna("benign")))
+    out = []
+    for kind, df, keys in (("flow", r["fw"], ["switch", "key"]),
+                           ("source", r["pw"], ["switch", "src", "dst"])):
+        for k, g in df.sort_values("window").groupby(keys):
+            wins, lv = g.window.to_numpy(), g.level.to_numpy()
+            i = 0
+            while i < len(g):
+                if lv[i] < DROP:
+                    i += 1
+                    continue
+                j = i
+                while j + 1 < len(g) and lv[j + 1] >= DROP and wins[j + 1] == wins[j] + 1:
+                    j += 1
+                if j + 1 < len(g) and wins[j + 1] == wins[j] + 1:
+                    end = "dwell"
+                elif wins[j] >= last_w:
+                    end = "run end"
+                else:
+                    end = "slot aged"
+                out.append({"kind": kind, "class": cls.get(k[1], "not in ground truth")
+                            if kind == "flow" else "host pair",
+                            "polls": int(wins[j] - wins[i] + 1), "end": end})
+                i = j + 1
+    return out
+
+
+def item10_drops(runs, metrics, md):
+    pc, b = metrics["per_attack_class"], metrics["benign"]
+    da = metrics["drop_accounting"]
+    md += [f"## 10. Drops ({RUN}: DPI confirmation → DROP)", "",
+           "Per ground-truth flow, from the switch's own per-slot drop counter (`drop_pkts` in "
+           f"`{SERIES}/run_0N/ctrl/flow_windows.csv`, a P4 register incremented for every "
+           "packet the 5-tuple or source drop rule discarded; `p4/adaptmon.p4`), summed over "
+           "both switches and over slot re-occupations; packets seen = the slot packet counter, "
+           "max over switches. **Time to drop** = first poll at which a drop applied to the "
+           "flow (its own level DROP, or a host pair of its source at DROP) minus the first "
+           "packet — per phase (one class in one cycle, the primary figure: from the phase's "
+           "first packet to the first drop on any of its flows; 0 when a source drop from an "
+           "earlier phase was still in force) and per flow (secondary). **Delivered after "
+           "drop** = packets of a dropped flow still forwarded (by every switch on its path) "
+           "in polls wholly after its drop was installed, i.e. after the dwell or slot aging "
+           f"lifted the rule. All pooled over the {len(runs)} runs; definitions in "
+           f"`analysis/evaluate.py` (module docstring). Source: `{SERIES}/metrics.json`.", "",
+           "| class | flows | flows with a dropped packet | packets dropped / seen | "
+           "delivered after drop (flows) | phases with a drop | time to drop per phase, "
+           "median / P95 / max (s) | per flow, median / P95 (s) |",
+           "|---|---|---|---|---|---|---|---|"]
+    rows = {}
+    for c in CLASSES:
+        d, t = pc[c]["packet_drops"], pc[c]["time_to_drop"]
+        ph, fl = t["per_phase_s"], t["per_flow_s"]
+        rows[c] = {"packet_drops": d, "time_to_drop": t}
+        ph_s = (f"{ph['median']:.2f} / {ph['p95']:.2f} / {ph['max']:.2f}" if ph.get("n")
+                else "—")
+        fl_s = f"{fl['median']:.2f} / {fl['p95']:.2f}" if fl.get("n") else "—"
+        in_force = t["n_phases_drop_in_force_at_start"]
+        md.append(f"| {c} | {pc[c]['n']} | {d['flows_with_dropped_packets']} | "
+                  f"{d['packets_dropped']:,} / {d['packets_seen']:,} "
+                  f"({pct(d['dropped_share'])}) | {d['packets_delivered_after_drop']:,} "
+                  f"({d['flows_with_delivery_after_drop']}) | {t['n_phases_dropped']} / "
+                  f"{t['n_phases']}" + (f" ({in_force} already in force)" if in_force else "")
+                  + f" | {ph_s} | {fl_s} |")
+    bd = b["packet_drops"]
+    md.append(f"| **benign** | {b['n']} | {bd['flows_with_dropped_packets']} | "
+              f"{bd['packets_dropped']:,} / {bd['packets_seen']:,} ({pct(bd['dropped_share'], 2)}) "
+              "| — | — | — | — |")
+    md += ["", f"**Benign packets wrongly dropped:** {bd['packets_dropped']:,} of "
+           f"{bd['packets_seen']:,} benign packets seen, in {bd['flows_with_dropped_packets']} of "
+           f"{b['n']} benign flows (flows whose own level reached DROP: {b['n_dropped']})."
+           + (" A source drop for a scan discards everything from that host, but in this "
+              "schedule benign traffic runs only in each cycle's benign phase, before its "
+              "attack phases (`experiments/paper_run.py` `run_cycle`), so a source drop could "
+              "overlap it only at the start of the next cycle; this result therefore does not "
+              "show what a source drop costs a host that carries benign traffic at the same "
+              "time." if bd["packets_dropped"] == 0 else
+              " A source drop for a scan discards everything from that host: benign flows of "
+              "the scanning host active while it was in force are dropped too."),
+           "", f"**Accounting:** the switches' own cumulative drop counters (`drop_counter`, "
+           f"`windows.csv` s1/s2_dropped, final values) total {da['switch_dropped_packets']:,} "
+           f"packets ({da['switch_dropped_bytes']:,} bytes); the per-flow sums above attribute "
+           f"{da['attributed_attack']:,} to attack flows and {da['attributed_benign']:,} to "
+           f"benign flows ({pct(da['attributed_share'])} of the switch total)"
+           + (". The rest are packets dropped after a flow's last poll (the slot was cleared "
+              "before the next read) or in flows not in ground truth." if
+              da["attributed_attack"] + da["attributed_benign"] < da["switch_dropped_packets"]
+              else "."), ""]
+    # classes whose phases got a drop that came after their flows had ended
+    late = []
+    for c in CLASSES:
+        d, t = pc[c]["packet_drops"], pc[c]["time_to_drop"]
+        if t["n_phases_dropped"] and d["packets_seen"] and d["dropped_share"] < 0.05:
+            g = pd.concat([r["gt"][r["gt"].attack_class == c] for r in runs])
+            late.append(f"{c} (flow duration median {(g.end_ts - g.start_ts).median():.2f} s, "
+                        f"first packet → drop median {t['per_flow_s']['median']:.2f} s; "
+                        f"{pct(d['dropped_share'])} of its packets dropped)")
+    if late:
+        md += ["**Drop after the fact:** " + "; ".join(late) + ". Each of these flows is one "
+               "short connection or probe that had ended before its confirmation was acted on "
+               "at the next poll, so its 5-tuple drop rule had nothing left to drop; and a "
+               "5-tuple rule does not match the next connection or probe (a new source port). "
+               "Only a source drop (syn/null scans) catches later flows.", ""]
+    NUM["drop_after_the_fact"] = late
+    eps = [dict(e, run=r["name"]) for r in runs for e in _drop_episodes(r)]
+    ep = pd.DataFrame(eps)
+    md += ["**How long a DROP lasted** (per switch; flow slots in `flow_windows.csv`, "
+           "source drops as host pairs in `pair_windows.csv`):", "",
+           "| population | DROP episodes | polls at DROP, median (min–max) | ended by dwell | "
+           "ended by slot aging | still at DROP at run end |", "|---|---|---|---|---|---|"]
+    ep_sum = {}
+    if len(ep):
+        for name, g in ep.groupby("class"):
+            ends = g.end.value_counts()
+            ep_sum[name] = {"n": int(len(g)), "polls_median": float(g.polls.median()),
+                            "polls_min": int(g.polls.min()), "polls_max": int(g.polls.max()),
+                            **{e: int(ends.get(e, 0)) for e in ("dwell", "slot aged", "run end")}}
+            v = ep_sum[name]
+            md.append(f"| {name} | {v['n']} | {v['polls_median']:.0f} ({v['polls_min']}–"
+                      f"{v['polls_max']}) | {v['dwell']} | {v['slot aged']} | {v['run end']} |")
+    md += ["", "A forced DROP is lifted after K_DOWN = 3 scored windows below DROP (every "
+           "occupied slot is scored each poll and the IF never sets DROP), or earlier if the "
+           "slot ages out — the removal logic is the same as before the change. A TCP flow "
+           "that keeps retransmitting after the rule is lifted gets through: that is the "
+           "\"delivered after drop\" column (on a real switch: `tests/smoke_drop.py`, whose "
+           "report records the retransmission delivered once aging lifted the rule).", ""]
+    NUM["drops"] = {"per_class": rows, "benign": bd, "accounting": da, "episodes": ep_sum,
+                    "attack": {"packet_drops": metrics["attack_packet_drops"],
+                               "time_to_drop": metrics["attack_time_to_drop"]}}
+
+    # figure: time to drop per phase, by class
+    fig, ax = plt.subplots(figsize=(5.4, 3.0))
+    rng = np.random.default_rng(0)
+    ymax = 0.0
+    for i, c in enumerate(CLASSES):
+        vals = []
+        for r in runs:
+            g = r["gt"][r["gt"].attack_class == c]
+            ph = g.groupby("phase").agg(start=("start_ts", "min"), drop=("drop_ts", "min"))
+            vals += np.maximum(0.0, (ph["drop"] - ph["start"]).dropna()).tolist()
+        n_ph = sum(r["gt"][r["gt"].attack_class == c].phase.nunique() for r in runs)
+        if vals:
+            ax.scatter(i + rng.uniform(-0.18, 0.18, len(vals)), vals, s=14, color=CAT[i],
+                       edgecolors=SURF, linewidths=0.8, zorder=3)
+            ax.hlines(np.median(vals), i - 0.28, i + 0.28, color=INK, lw=1.6, zorder=4)
+            ymax = max(ymax, max(vals))
+        ax.text(i, -0.08, f"{len(vals)}/{n_ph} phases", transform=ax.get_xaxis_transform(),
+                ha="center", va="top", fontsize=7, color=INK2)
+    ax.set_xticks(range(len(CLASSES)))
+    ax.set_xticklabels(CLASSES)
+    ax.tick_params(axis="x", pad=14)
+    ax.set_ylim(0, max(1.0, ymax * 1.15))
+    ax.set_ylabel("first packet → drop (s)")
+    ax.set_title("Time to drop, per attack phase (bar = median)", loc="left")
+    save(fig, "fig_time_to_drop")
+    md += ["`fig_time_to_drop.pdf/.png` — one dot per attack phase that got a drop (all "
+           f"{len(runs)} runs); bar = median; below each class, phases with a drop / all "
+           "phases.", ""]
+    return md
+
+
+def main(argv=None):
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--series", default=SERIES)
+    ap.add_argument("--out", default=OUT)
+    ap.add_argument("--name", default=RUN, help='e.g. "Run D"')
+    a = ap.parse_args(argv)
+    configure(a.series, a.out, a.name)
+    global BENCH, DPI_ACTION
     BENCH = pick_bench()
     os.makedirs(os.path.join(ROOT, OUT), exist_ok=True)
     runs = load_runs()
+    actions = {r["model"]["data_plane"].get("dpi_confirmation_action", "CLONE").split()[0]
+               for r in runs}
+    assert len(actions) == 1, f"mixed DPI confirmation actions in {SERIES}: {actions}"
+    DPI_ACTION = actions.pop()
     metrics = ev.evaluate_series(os.path.join(ROOT, SERIES))
     replay_agreement(runs)
     seeds = ", ".join(f"{r['name']} {r['seed']}" for r in runs)
-    md = ["# Run C — paper numbers", "",
-          f"Generated by `analysis/paper_runC.py` from **Run C only** (`{SERIES}`, 5 runs, "
-          f"seeds {seeds}; 1,310 ground-truth flows) — except item 1's latency tiers, which "
-          f"come from a separate, labelled latency-only benchmark (`{BENCH}`). Every number "
-          f"names its source. Definitions as in `RESULTS.md` / `analysis/evaluate.py`; "
-          "CIs are Clopper-Pearson 95%.", "",
-          f"Headline (for orientation; `{SERIES}/metrics.json`): flow-level TPR "
-          f"{fmt(metrics['overall']['tpr'])}, FPR {fmt(metrics['overall']['fpr'])}, inspection "
-          f"reduction {pct(metrics['inspection']['inspection_reduction_packets'])} packets / "
-          f"{pct(metrics['inspection']['inspection_reduction_bytes'])} bytes.", ""]
+    n_gt = sum(len(r["gt"]) for r in runs)
+    md = [f"# {RUN} — paper numbers", "",
+          f"Generated by `analysis/paper_runC.py` from **{RUN} only** (`{SERIES}`, {len(runs)} "
+          f"runs, seeds {seeds}; {n_gt:,} ground-truth flows) — except item 1's latency tiers, "
+          f"which come from a separate, labelled latency-only benchmark (`{BENCH}`). Every "
+          f"number names its source. Definitions as in `RESULTS.md` / `analysis/evaluate.py`; "
+          "CIs are Clopper-Pearson 95%.", ""]
+    if DPI_ACTION == "DROP":
+        md += [f"**What changed from Run C:** only the action on a DPI confirmation — a "
+               "confirmation on a head, sampled or level clone now forces the flow straight to "
+               "DROP (5-tuple drop rule) and, for syn/null scans, its source IP (source drop "
+               "rule); Run C force-cloned it instead. IF thresholds, head N, sampling, "
+               "hysteresis and traffic are unchanged (item 9; `model.json` → data_plane → "
+               "`dpi_confirmation_action`). Drop metrics: item 10.", ""]
+    md += [f"Headline (for orientation; `{SERIES}/metrics.json`): flow-level TPR "
+           f"{fmt(metrics['overall']['tpr'])}, FPR {fmt(metrics['overall']['fpr'])}, inspection "
+           f"reduction {pct(metrics['inspection']['inspection_reduction_packets'])} packets / "
+           f"{pct(metrics['inspection']['inspection_reduction_bytes'])} bytes.", ""]
     md = item1_latency(runs, md)
     md = item2_level_share(runs, md)
     md = item3_window_confusion(runs, md)
@@ -1117,6 +1436,8 @@ def main():
     md = item7_ablation(runs, metrics, md)
     md = item8_spread(runs, metrics, md)
     md = item9_params(runs, md)
+    if DPI_ACTION == "DROP":
+        md = item10_drops(runs, metrics, md)
     with open(os.path.join(ROOT, OUT, "PAPER_NUMBERS.md"), "w") as f:
         f.write("\n".join(md) + "\n")
     with open(os.path.join(ROOT, OUT, "numbers.json"), "w") as f:

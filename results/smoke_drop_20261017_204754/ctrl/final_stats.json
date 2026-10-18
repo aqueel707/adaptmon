@@ -1,0 +1,18 @@
+{
+  "run_id": "20261017_204803",
+  "windows": 18,
+  "head_clone_n": 3,
+  "head_clone_n_readback": {
+    "1": 3,
+    "2": 3
+  },
+  "trained": false,
+  "pair_trained": false,
+  "flow_train_info": {},
+  "pair_train_info": {},
+  "flows_tracked": 4,
+  "pairs_tracked": 8,
+  "forced_drops": 2,
+  "pending_confirmations": 0,
+  "alerts_written": 2
+}

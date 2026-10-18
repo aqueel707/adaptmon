@@ -1,0 +1,14 @@
+Starting Nmap 7.80 ( https://nmap.org ) at 2026-10-17 20:50 IST
+Nmap scan report for 10.0.2.1
+Host is up (0.016s latency).
+
+PORT     STATE  SERVICE
+21/tcp   closed ftp
+22/tcp   closed ssh
+25/tcp   closed smtp
+80/tcp   closed http
+443/tcp  closed https
+8080/tcp closed http-proxy
+MAC Address: 00:00:00:02:00:01 (Xerox)
+
+Nmap done: 1 IP address (1 host up) scanned in 0.13 seconds

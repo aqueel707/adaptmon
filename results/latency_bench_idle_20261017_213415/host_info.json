@@ -1,0 +1,24 @@
+{
+  "seed": 401137017,
+  "cpu_model": "11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz",
+  "cores": 3,
+  "kernel": "6.8.0-138-generic",
+  "os": "Ubuntu 22.04.5 LTS",
+  "mem_total_kb": 6187036,
+  "python": "3.10.12",
+  "simple_switch": "1.15.0-6c7c93e5",
+  "loadavg_before": "0.41 0.91 1.46 4/671 62910",
+  "load_before": 0.41,
+  "idle_check": {
+    "load_1min_max": 3.0,
+    "ide_processes_checked": true
+  },
+  "ide_processes_running": [
+    "codium"
+  ],
+  "ide_cpu_pct_before": {
+    "codium": 19.4
+  },
+  "loadavg_after": "0.00 0.00 0.14 2/686 63437",
+  "load_after": 0.0
+}

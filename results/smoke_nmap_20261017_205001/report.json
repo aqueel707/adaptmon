@@ -1,0 +1,26 @@
+{
+  "checks": {
+    "nmap_syn_scan_ran": true,
+    "nmap_null_scan_ran": true,
+    "syn_scan_confirmed_for_all_ports": true,
+    "null_scan_confirmed_for_all_ports": true,
+    "all_confirmed_alerts_from_h1": true
+  },
+  "n_alerts": 12,
+  "syn_dports_confirmed": [
+    21,
+    22,
+    25,
+    80,
+    443,
+    8080
+  ],
+  "null_dports_confirmed": [
+    21,
+    22,
+    25,
+    80,
+    443,
+    8080
+  ]
+}

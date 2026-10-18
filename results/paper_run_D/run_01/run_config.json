@@ -1,0 +1,237 @@
+{
+  "seed": 946499367,
+  "n_cycles": 8,
+  "head_clone_n": 3,
+  "rate_spike_pps": 1000,
+  "rate_spike_s": 5,
+  "warmup_s": 30,
+  "phase_gap_s": 1.5,
+  "sqli_gap_s": 0.1,
+  "nmap_max_rate": 500,
+  "schedule": {
+    "seed": 946499367,
+    "warmup": {
+      "iperf_mbps": 1.57,
+      "http_interval": 1.5,
+      "http_seed": 1645159443
+    },
+    "cycles": [
+      {
+        "scan_ports": [
+          33,
+          300,
+          359,
+          383,
+          428,
+          502,
+          818,
+          831
+        ],
+        "order": [
+          "spike",
+          "syn",
+          "null",
+          "sqli"
+        ],
+        "benign_s": 8.74,
+        "iperf_mbps": 2.92,
+        "http_seed": 1930899818,
+        "sqli_order": [
+          1,
+          2,
+          3,
+          0
+        ]
+      },
+      {
+        "scan_ports": [
+          44,
+          119,
+          123,
+          230,
+          322,
+          704,
+          767,
+          940
+        ],
+        "order": [
+          "null",
+          "sqli",
+          "syn",
+          "spike"
+        ],
+        "benign_s": 8.46,
+        "iperf_mbps": 2.55,
+        "http_seed": 256283758,
+        "sqli_order": [
+          1,
+          3,
+          0,
+          2
+        ]
+      },
+      {
+        "scan_ports": [
+          181,
+          283,
+          284,
+          360,
+          421,
+          835,
+          870,
+          971
+        ],
+        "order": [
+          "syn",
+          "null",
+          "sqli",
+          "spike"
+        ],
+        "benign_s": 9.55,
+        "iperf_mbps": 1.59,
+        "http_seed": 1733711935,
+        "sqli_order": [
+          2,
+          0,
+          1,
+          3
+        ]
+      },
+      {
+        "scan_ports": [
+          84,
+          143,
+          327,
+          430,
+          525,
+          581,
+          957,
+          974
+        ],
+        "order": [
+          "spike",
+          "sqli",
+          "null",
+          "syn"
+        ],
+        "benign_s": 7.12,
+        "iperf_mbps": 1.1,
+        "http_seed": 1496464490,
+        "sqli_order": [
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      {
+        "scan_ports": [
+          154,
+          188,
+          241,
+          484,
+          600,
+          681,
+          685,
+          1001
+        ],
+        "order": [
+          "sqli",
+          "syn",
+          "spike",
+          "null"
+        ],
+        "benign_s": 8.68,
+        "iperf_mbps": 1.28,
+        "http_seed": 941349321,
+        "sqli_order": [
+          2,
+          1,
+          3,
+          0
+        ]
+      },
+      {
+        "scan_ports": [
+          351,
+          411,
+          537,
+          547,
+          600,
+          632,
+          672,
+          730
+        ],
+        "order": [
+          "sqli",
+          "syn",
+          "null",
+          "spike"
+        ],
+        "benign_s": 8.73,
+        "iperf_mbps": 1.58,
+        "http_seed": 1457161725,
+        "sqli_order": [
+          2,
+          3,
+          1,
+          0
+        ]
+      },
+      {
+        "scan_ports": [
+          119,
+          149,
+          385,
+          411,
+          453,
+          627,
+          703,
+          864
+        ],
+        "order": [
+          "spike",
+          "sqli",
+          "syn",
+          "null"
+        ],
+        "benign_s": 6.59,
+        "iperf_mbps": 1.66,
+        "http_seed": 516344829,
+        "sqli_order": [
+          1,
+          0,
+          2,
+          3
+        ]
+      },
+      {
+        "scan_ports": [
+          23,
+          188,
+          358,
+          485,
+          573,
+          665,
+          769,
+          853
+        ],
+        "order": [
+          "spike",
+          "null",
+          "sqli",
+          "syn"
+        ],
+        "benign_s": 6.7,
+        "iperf_mbps": 2.1,
+        "http_seed": 1203534720,
+        "sqli_order": [
+          2,
+          1,
+          0,
+          3
+        ]
+      }
+    ]
+  }
+}

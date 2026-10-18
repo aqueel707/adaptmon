@@ -8,9 +8,11 @@ ablation in analysis/paper_runC.py. Nothing here re-runs the network:
     controller's own hysteresis code), in the controller's own per-poll
     order (score update, then DPI force, then the row is written).
       mode "IF":  raw IF levels only, DPI forces ignored
-      mode "DPI": raw level NORMAL every window (no IF); force_clone (or
-                  force_drop on a flow already at CLONE) at the poll that
-                  processes each given confirmation
+      mode "DPI": raw level NORMAL every window (no IF); at the poll that
+                  processes each given confirmation, the controller's own
+                  action for it: dpi_action "CLONE" (Run C: force_clone, or
+                  force_drop on a flow already at CLONE) or "DROP" (Run D on:
+                  force_drop on the flow, and on the pair for a scan)
       mode "LOG": the logged levels, untouched (for estimator validation)
   * estimate_clones(): how many packets the P4 clone rule
     (p4/adaptmon.p4) would have sent to the CPU port given per-window
@@ -18,7 +20,10 @@ ablation in analysis/paper_runC.py. Nothing here re-runs the network:
     host-clone rule for the source was in place (it overrides the reason
     in P4), else level clones if the slot's level (written at the previous
     poll) was >= CLONE, else the flow's first N packets (head), else
-    1-in-64 / 1-in-8 sampling.
+    1-in-64 / 1-in-8 sampling. A packet is dropped instead of forwarded
+    if the slot's level was DROP (5-tuple drop rule) or a host-drop rule
+    for the source was in place (any of its pairs at DROP); p4/adaptmon.p4
+    clones a dropped packet exactly as it would a forwarded one.
 
 Limits, stated wherever these numbers are reported: the traffic and the
 IF scores are the logged ones; DPI's own behaviour (which confirmations
@@ -50,13 +55,14 @@ def _poll_of(windows: pd.DataFrame, ts: float) -> int:
 
 def replay_levels(fw: pd.DataFrame, pw: pd.DataFrame, windows: pd.DataFrame, mode: str,
                   flow_forces: List[Tuple[int, tuple, float]] = (),
-                  pair_forces: List[Tuple[int, str, str, float]] = ()
-                  ) -> Tuple[np.ndarray, np.ndarray]:
+                  pair_forces: List[Tuple[int, str, str, float]] = (),
+                  dpi_action: str = "CLONE") -> Tuple[np.ndarray, np.ndarray]:
     """
     Returns (flow_levels, pair_levels) aligned with fw / pw rows.
     flow_forces: (switch, five_tuple, alert_ts); pair_forces: (switch, src,
     dst, alert_ts) -- only used in mode "DPI".
     """
+    assert dpi_action in ("CLONE", "DROP")
     if mode == "LOG":
         return fw["level"].to_numpy(), pw["level"].to_numpy()
 
@@ -93,7 +99,7 @@ def replay_levels(fw: pd.DataFrame, pw: pd.DataFrame, windows: pd.DataFrame, mod
                 while pending and pending[0] <= r.window:
                     if r.window - pending[0] <= CONFIRMATION_RETRY_WINDOWS:
                         st = pol.state(key)
-                        if st.level >= CLONE:
+                        if dpi_action == "DROP" or st.level >= CLONE:
                             pol.force_drop(key)
                         else:
                             pol.force_clone(key)
@@ -122,36 +128,41 @@ def replay_levels(fw: pd.DataFrame, pw: pd.DataFrame, windows: pd.DataFrame, mod
                     pending.pop(0)
                     fired = True
                 if fired:
-                    ppol.force_clone(key)
+                    if dpi_action == "DROP":
+                        ppol.force_drop(key)
+                    else:
+                        ppol.force_clone(key)
             pair_out[i] = int(ppol.state(key).level)
     return flow_out, pair_out
 
 
 def estimate_clones(fw: pd.DataFrame, pw: pd.DataFrame, flow_levels: np.ndarray,
                     pair_levels: np.ndarray, head_n: int, sampling: bool) -> Dict[str, int]:
-    """Packets forwarded and cloned (by reason) the P4 rule would produce,
-    summed over every flow row (all windows, both switches)."""
+    """Packets forwarded, dropped and cloned (by reason) the P4 rules would
+    produce, summed over every flow row (all windows, both switches)."""
     fw = fw.assign(rlvl=flow_levels)
     pw = pw.assign(rlvl=pair_levels)
-    # Host-clone rule active for (switch, src) after poll w: any of its
-    # pairs at >= CLONE after that poll (levels persist between rows)
-    rule_after: Dict[Tuple[int, str], List[Tuple[int, bool]]] = defaultdict(list)
+    # Host rule for (switch, src) after poll w, from the highest level of
+    # any of its pairs after that poll (levels persist between rows): a
+    # host-clone rule at >= CLONE, a host-drop rule (which also clones) at
+    # DROP
+    rule_after: Dict[Tuple[int, str], List[Tuple[int, int]]] = defaultdict(list)
     for (sw, src), g in pw.sort_values("window").groupby(["switch", "src"]):
         last = {}
         for r in g.itertuples(index=False):
             last[r.dst] = r.rlvl
-            rule_after[(sw, src)].append((r.window, any(v >= CLONE for v in last.values())))
+            rule_after[(sw, src)].append((r.window, max(last.values())))
 
-    def rule_active(sw, src, w):
+    def src_level(sw, src, w):
         ev = rule_after.get((sw, src))
         if not ev:
-            return False
+            return 0
         ws = [e[0] for e in ev]
         i = np.searchsorted(ws, w, side="right") - 1
-        return bool(ev[i][1]) if i >= 0 else False
+        return int(ev[i][1]) if i >= 0 else 0
 
-    tot = {"forwarded": 0, "clone_level": 0, "clone_hostpair": 0, "clone_head": 0,
-           "clone_sample": 0}
+    tot = {"forwarded": 0, "dropped": 0, "clone_level": 0, "clone_hostpair": 0,
+           "clone_head": 0, "clone_sample": 0}
     fws = fw.sort_values(["switch", "slot", "window"])
     for (sw, slot), g in fws.groupby(["switch", "slot"], sort=False):
         prev_lvl, prev_w, prev_tup = 0, None, None
@@ -162,10 +173,12 @@ def estimate_clones(fw: pd.DataFrame, pw: pd.DataFrame, flow_levels: np.ndarray,
             d = max(int(r.pkt_delta), 0)
             pc = int(r.pkt_count)
             lo = max(pc - d, 0)
-            tot["forwarded"] += d
+            src_lvl = src_level(sw, r.src, r.window - 1)
+            dropped = prev_lvl >= DROP or src_lvl >= DROP
+            tot["dropped" if dropped else "forwarded"] += d
             # p4/adaptmon.p4 applies host_clone_table after the level/head/
             # sampling decision, overriding the reason: host-pair first
-            if rule_active(sw, r.src, r.window - 1):
+            if src_lvl >= CLONE:
                 tot["clone_hostpair"] += d
             elif prev_lvl >= CLONE:
                 tot["clone_level"] += d

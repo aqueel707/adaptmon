@@ -71,6 +71,62 @@
       "run": "run_01",
       "registered": "2026-10-17T19:39:20",
       "superseded_reason": "measured in-session on a 3-vCPU desktop VM shared with the GUI and the IDE (~3x slower per poll than an earlier attempt at the same 100-flow load); its 4096-flow tier was not steady state (polls overran 1 s, the switch handled 58% of offered traffic)"
+    },
+    "1812250808": {
+      "purpose": "dev",
+      "series": "results/dev_pilot_drop",
+      "run": "run_01",
+      "registered": "2026-10-17T20:59:53"
+    },
+    "946499367": {
+      "purpose": "final",
+      "series": "results/paper_run_D",
+      "run": "run_01",
+      "registered": "2026-10-17T21:10:05"
+    },
+    "2739760": {
+      "purpose": "final",
+      "series": "results/paper_run_D",
+      "run": "run_02",
+      "registered": "2026-10-17T21:10:05"
+    },
+    "316816928": {
+      "purpose": "final",
+      "series": "results/paper_run_D",
+      "run": "run_03",
+      "registered": "2026-10-17T21:10:05"
+    },
+    "2069580603": {
+      "purpose": "final",
+      "series": "results/paper_run_D",
+      "run": "run_04",
+      "registered": "2026-10-17T21:10:05"
+    },
+    "836140236": {
+      "purpose": "final",
+      "series": "results/paper_run_D",
+      "run": "run_05",
+      "registered": "2026-10-17T21:10:05"
+    },
+    "401137017": {
+      "purpose": "latency-bench",
+      "series": "results/latency_bench_idle_20261017_213415",
+      "run": "run_01",
+      "registered": "2026-10-17T21:34:21",
+      "superseded_reason": "interrupted: the VM was paused from ~21:39:18 to ~22:10:55 (no journal entries, controller and sender both resumed at once, load average decayed to 0), 25 s into the 500-flow tier; tiers 1000/2000/4096 have no polls and 500 has 3, so the run is not used"
+    },
+    "1344816742": {
+      "purpose": "latency-bench",
+      "series": "results/latency_bench_idle_20261017_221539",
+      "run": "run_01",
+      "registered": "2026-10-17T22:15:46",
+      "superseded_reason": "interrupted: the VM was paused from ~22:21:49 to ~23:53:11 (5,482 s with no poll, no journal entries) during the 1000-flow tier; 2000/4096 have no polls, so the run is not used. Both interrupted attempts paused 5-6 min after start, matching the desktop's 300 s idle timeout"
+    },
+    "1944184449": {
+      "purpose": "latency-bench",
+      "series": "results/latency_bench_idle_20261018_102424",
+      "run": "run_01",
+      "registered": "2026-10-18T10:24:31"
     }
   }
 }

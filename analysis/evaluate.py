@@ -14,7 +14,10 @@ unique 5-tuple (src, dst, proto, sport, dport) -- see its module docstring
 inferring identity from timestamps:
 
   * flow_windows.csv rows matching a tuple -> that flow's own per-flow
-    verdict is the max 'level' any row reached. A tuple with no matching
+    verdict is the max 'level' any row reached; its trigger is the
+    escalated_by of the first row at >= CLONE (what detected it -- a later
+    forced DROP on a flow the IF already had at CLONE does not re-attribute
+    the detection). A tuple with no matching
     rows was never active during a 1 Hz register poll (too short-lived --
     this is itself a real property of the pipeline, not excluded from the
     confusion matrix).
@@ -38,6 +41,29 @@ Clopper-Pearson 95% CIs, recall split by trigger (each with its own CI),
 benign false positives split by trigger, DPI confirmation recall, benign
 DROP rate, detection latency, plus run-level inspection reduction,
 data-plane load (capacity) and controller/DPI resource use.
+
+Drop metrics (runs whose flow_windows.csv has the per-slot drop_pkts
+register, i.e. Run D on; None for earlier runs):
+  * packets dropped per flow = sum over switches of the flow's drop_pkts,
+    each switch's series summed over slot occupancies (the register restarts
+    at 0 when a slot is aged and the flow re-occupies it); packets per flow
+    likewise from pkt_count, max over switches (a packet dropped on the
+    first hop never reaches the second). Polls are 1 Hz, so packets dropped
+    after a flow's last poll before its slot was cleared are not seen: the
+    per-flow sums are cross-checked against the switches' own cumulative
+    drop counters ("attributed_share").
+  * benign packets wrongly dropped = the same sum over benign flows (a
+    source-IP drop rule for a scan also hits that host's benign flows).
+  * delivered after drop = packets of a dropped flow that a switch still
+    forwarded in polls wholly after the drop was installed (the rule was
+    lifted by the K_DOWN dwell or by slot aging), min over its switches.
+  * time to drop = first poll at which a drop applied to the flow (its own
+    level DROP, or a pair with its source IP at DROP within +/- one poll of
+    its lifetime) minus its first packet; per phase (one attack class in
+    one cycle, the primary figure) = first drop on any of the phase's flows
+    minus the phase's first packet (0 when a source drop from an earlier
+    phase was still in force; counted separately). The rule is installed
+    at the end of that poll, a few ms later.
 
 Data-plane counters in windows.csv are CUMULATIVE since the controller
 reset them at start (controller/monitor.py) -- a run's totals are its last
@@ -76,6 +102,12 @@ CAPACITY_BUDGET_PPS = 2500
 TRIGGERS = ["IF-flow", "IF-pair", "DPI-head", "DPI-sample", "DPI-drop", "DPI-level",
             "unattributed"]
 CLONE_REASON_COLS = ["head", "sample", "level", "hostpair"]
+
+# One attack phase = one class in one cycle; experiments/paper_run.py's
+# _SportAllocator gives each (generator, cycle) its own BLOCK of sports
+PHASE_SPORT_BASES = {"sqli": 56000, "syn_scan": 57000, "null_scan": 60000,
+                     "rate_spike": 63000}
+PHASE_SPORT_BLOCK = 20
 
 
 def _key(src, dst, proto, sport, dport) -> str:
@@ -174,7 +206,8 @@ def run_totals(windows_df: pd.DataFrame) -> Dict:
         return int(sum(last[c] for c in cols))
 
     out = {"forwarded": total("fwd"), "cloned": total("cloned"),
-           "forwarded_bytes": total("fwd_bytes"), "cloned_bytes": total("cloned_bytes")}
+           "forwarded_bytes": total("fwd_bytes"), "cloned_bytes": total("cloned_bytes"),
+           "dropped": total("dropped"), "dropped_bytes": total("dropped_bytes")}
     for r in CLONE_REASON_COLS:
         out[f"clone_{r}"] = total(f"clone_{r}")
         out[f"clone_{r}_bytes"] = total(f"clone_{r}_bytes")
@@ -194,6 +227,10 @@ def inspection(totals: List[Dict]) -> Dict:
         "inspection_reduction_packets": 1 - cl / fwd if fwd else float("nan"),
         "forwarded_bytes": fwd_b, "cloned_bytes": cl_b,
         "inspection_reduction_bytes": (1 - cl_b / fwd_b) if fwd_b else None,
+        # secondary, once the data plane drops: per packet entering the switch
+        "dropped_packets": s("dropped"),
+        "inspection_reduction_packets_incl_dropped":
+            (1 - cl / (fwd + s("dropped"))) if fwd and s("dropped") is not None else None,
         "per_run_reduction_packets": [1 - t["cloned"] / t["forwarded"] for t in totals
                                       if t["forwarded"]],
     }
@@ -283,6 +320,76 @@ def _trigger_bucket(t: str) -> str:
     return "unattributed"
 
 
+def _increments(fw: pd.DataFrame, col: str) -> pd.Series:
+    """Per row: the increase of a per-slot cumulative register since the
+    flow's previous row on that switch -- a drop in value means the slot was
+    cleared and re-occupied, so that row's value counts from 0 again."""
+    f = fw.sort_values(["key", "switch", "ts"], kind="stable")
+    d = f.groupby(["key", "switch"])[col].diff()
+    return pd.Series(np.where(d.isna() | (d < 0), f[col], d), index=f.index).reindex(fw.index)
+
+
+def _occupancy_sum(fw: pd.DataFrame, col: str) -> pd.Series:
+    """Per (key, switch): total of a per-slot cumulative register over the
+    flow's slot occupancies."""
+    return _increments(fw, col).groupby([fw["key"], fw["switch"]]).sum()
+
+
+def _join_drops(gt: pd.DataFrame, fw: pd.DataFrame, pw: pd.DataFrame) -> pd.DataFrame:
+    """Attach pkts_total, pkts_dropped and drop_ts (see the module docstring);
+    NaN for runs recorded before the drop_pkts register existed."""
+    if "drop_pkts" not in fw.columns:
+        for c in ("pkts_total", "pkts_dropped", "drop_ts", "drop_latency_s",
+                  "pkts_delivered_after_drop"):
+            gt[c] = np.nan
+        return gt
+    pkts = _occupancy_sum(fw, "pkt_count").groupby(level="key").max().rename("pkts_total")
+    dropped = _occupancy_sum(fw, "drop_pkts").groupby(level="key").sum().rename("pkts_dropped")
+    flow_drop = fw[fw["level"] >= DROP].groupby("key")["ts"].min().rename("flow_drop_ts")
+    gt = gt.merge(pkts, left_on="key", right_index=True, how="left") \
+           .merge(dropped, left_on="key", right_index=True, how="left") \
+           .merge(flow_drop, left_on="key", right_index=True, how="left")
+    gt["pkts_dropped"] = gt["pkts_dropped"].fillna(0).astype(int)
+
+    src_drops = {src: np.sort(g["ts"].to_numpy())
+                 for src, g in pw[pw["level"] >= DROP].groupby("src")}
+
+    def _src_drop(row) -> float:
+        ts = src_drops.get(row["src"])
+        if ts is None:
+            return np.nan
+        hit = ts[(ts >= row["start_ts"] - PAIR_MATCH_SLACK_S)
+                 & (ts <= row["end_ts"] + PAIR_MATCH_SLACK_S)]
+        return float(hit[0]) if len(hit) else np.nan
+
+    gt["drop_ts"] = np.fmin(gt["flow_drop_ts"], gt.apply(_src_drop, axis=1))
+    # a source drop already in force when the flow started drops it at once
+    gt["drop_latency_s"] = np.maximum(0.0, gt["drop_ts"] - gt["start_ts"])
+
+    # Delivered after the drop: packets a switch still forwarded in polls
+    # wholly after the drop was installed (rows from drop_ts + 1.5 polls on),
+    # i.e. once the dwell or slot aging lifted the rule; min over the
+    # switches that saw the flow, since a delivered packet crossed them all
+    fwd_inc = _increments(fw, "pkt_count") - _increments(fw, "drop_pkts")
+    dts = fw["key"].map(gt.set_index("key")["drop_ts"])
+    after = fwd_inc[fw["ts"] > dts + PAIR_MATCH_SLACK_S]
+    per_sw = after.groupby([fw["key"], fw["switch"]]).sum().clip(lower=0)
+    seen = fw[fw["key"].isin(per_sw.index.get_level_values(0))].groupby("key")["switch"].nunique()
+    n_sw = per_sw.groupby(level="key").size()
+    # a switch with no row after the drop forwarded nothing more of the flow
+    leak = per_sw.groupby(level="key").min().where(n_sw >= seen.reindex(n_sw.index), 0)
+    gt["pkts_delivered_after_drop"] = np.where(
+        gt["drop_ts"].notna(), gt["key"].map(leak).fillna(0), np.nan)
+    return gt.drop(columns="flow_drop_ts")
+
+
+def _phase_id(row) -> Optional[str]:
+    base = PHASE_SPORT_BASES.get(row["attack_class"])
+    if row["label"] != "attack" or base is None:
+        return None
+    return f"{row['run']}|{row['attack_class']}|{(int(row['sport']) - base) // PHASE_SPORT_BLOCK}"
+
+
 def join_run(run_dir: str) -> pd.DataFrame:
     """
     One row per ground-truth flow, with its detection verdict, trigger,
@@ -290,16 +397,18 @@ def join_run(run_dir: str) -> pd.DataFrame:
     docstring for the definitions).
     """
     gt = load_ground_truth(run_dir)
+    gt["run"] = os.path.basename(os.path.normpath(run_dir))
+    gt["phase"] = gt.apply(_phase_id, axis=1)
     fw = load_flow_windows(run_dir)
     pw = load_pair_windows(run_dir)
     confirmed = load_confirmed_alerts(run_dir)
 
-    # Flow-level: level and trigger at the row where this flow peaked, and
-    # the first time it was at >= CLONE
-    peak_idx = fw.groupby("key")["level"].idxmax()
-    flow_peak = fw.loc[peak_idx, ["key", "level", "escalated_by"]].rename(
-        columns={"level": "flow_max_level", "escalated_by": "flow_trigger"})
-    first_clone = fw[fw["level"] >= CLONE].groupby("key")["ts"].min().rename("flow_detect_ts")
+    # Flow-level: the level this flow peaked at; the time and trigger of its
+    # first row at >= CLONE
+    flow_peak = fw.groupby("key")["level"].max().rename("flow_max_level")
+    first_clone = (fw[fw["level"] >= CLONE].sort_values("ts", kind="stable")
+                   .drop_duplicates("key")[["key", "ts", "escalated_by"]]
+                   .rename(columns={"ts": "flow_detect_ts", "escalated_by": "flow_trigger"}))
     gt = gt.merge(flow_peak, on="key", how="left").merge(first_clone, on="key", how="left")
     gt["observed"] = gt["flow_max_level"].notna()
     gt["flow_max_level"] = gt["flow_max_level"].fillna(MonitoringLevel.NORMAL.value).astype(int)
@@ -324,6 +433,7 @@ def join_run(run_dir: str) -> pd.DataFrame:
                           "pair_detect_ts": np.nan})
 
     gt = pd.concat([gt, gt.apply(_pair_hit, axis=1)], axis=1)
+    gt = _join_drops(gt, fw, pw)
 
     flow_det = gt["flow_max_level"] >= CLONE
     gt["predicted_attack"] = flow_det | gt["pair_detected"]
@@ -370,6 +480,38 @@ def _by_trigger(g: pd.DataFrame) -> Dict:
             if (g["trigger"] == t).any()}
 
 
+def _has_drop_data(df: pd.DataFrame) -> bool:
+    return "pkts_total" in df and df["pkts_total"].notna().any()
+
+
+def _packet_drops(g: pd.DataFrame) -> Optional[Dict]:
+    """Packets dropped / seen over a set of flows (None before Run D)."""
+    if not _has_drop_data(g):
+        return None
+    total, dropped = int(g["pkts_total"].fillna(0).sum()), int(g["pkts_dropped"].sum())
+    after = g["pkts_delivered_after_drop"]
+    return {"flows_with_dropped_packets": int((g["pkts_dropped"] > 0).sum()),
+            "packets_dropped": dropped, "packets_seen": total,
+            "dropped_share": dropped / total if total else float("nan"),
+            "packets_delivered_after_drop": int(after.fillna(0).sum()),
+            "flows_with_delivery_after_drop": int((after > 0).sum())}
+
+
+def _time_to_drop(g: pd.DataFrame) -> Optional[Dict]:
+    """Per phase (primary) and per flow (secondary); see the module docstring."""
+    if not _has_drop_data(g):
+        return None
+    ph = g[g["phase"].notna()].groupby("phase").agg(
+        start=("start_ts", "min"), drop=("drop_ts", "min"))
+    # a source drop still in force from an earlier phase of the same host
+    # (e.g. a null scan's, when the syn scan follows) drops it at once
+    return {"n_phases": int(len(ph)), "n_phases_dropped": int(ph["drop"].notna().sum()),
+            "n_phases_drop_in_force_at_start": int((ph["drop"] < ph["start"]).sum()),
+            "per_phase_s": _dist(np.maximum(0.0, ph["drop"] - ph["start"])),
+            "n_flows_dropped": int(g["drop_ts"].notna().sum()),
+            "per_flow_s": _dist(g["drop_latency_s"])}
+
+
 def evaluate(df: pd.DataFrame) -> Dict:
     out = {"n_flows": len(df), "overall": _confusion(df)}
 
@@ -380,6 +522,7 @@ def evaluate(df: pd.DataFrame) -> Dict:
         "false_positives_by_trigger": _by_trigger(benign),
         "n_dropped": int(benign["blocked"].sum()),
         "drop_rate": float(benign["blocked"].mean()) if len(benign) else float("nan"),
+        "packet_drops": _packet_drops(benign),
     }
 
     per_class = {}
@@ -402,13 +545,29 @@ def evaluate(df: pd.DataFrame) -> Dict:
             "dpi_confirmed_recall_ci95": conf["ci95"],
             "dpi_latency_s": _dist(g["dpi_latency_s"]),
             "dropped": int(g["blocked"].sum()),
+            "packet_drops": _packet_drops(g),
+            "time_to_drop": _time_to_drop(g),
         }
     out["per_attack_class"] = per_class
     attacks = df[df["label"] == "attack"]
+    out["attack_packet_drops"] = _packet_drops(attacks)
+    out["attack_time_to_drop"] = _time_to_drop(attacks)
     out["detect_latency_s_by_trigger"] = {
         t: _dist(attacks.loc[attacks["trigger"] == t, "detect_latency_s"])
         for t in TRIGGERS if (attacks["trigger"] == t).any()}
     return out
+
+
+def drop_accounting(df: pd.DataFrame, totals: List[Dict]) -> Optional[Dict]:
+    """The switches' own cumulative drop counters vs the per-flow sums."""
+    if not _has_drop_data(df) or any(t.get("dropped") is None for t in totals):
+        return None
+    sw = sum(t["dropped"] for t in totals)
+    att = int(df.loc[df["label"] == "attack", "pkts_dropped"].sum())
+    ben = int(df.loc[df["label"] == "benign", "pkts_dropped"].sum())
+    return {"switch_dropped_packets": sw, "attributed_attack": att, "attributed_benign": ben,
+            "attributed_share": (att + ben) / sw if sw else float("nan"),
+            "switch_dropped_bytes": sum(t["dropped_bytes"] or 0 for t in totals)}
 
 
 def _run_level(run_dir: str) -> Dict:
@@ -422,6 +581,7 @@ def evaluate_run(run_dir: str) -> Dict:
     rl = _run_level(run_dir)
     result = evaluate(df)
     result["inspection"] = inspection([rl["totals"]])
+    result["drop_accounting"] = drop_accounting(df, [rl["totals"]])
     result["capacity"] = rl["capacity"]
     result["resources"] = rl["resources"]
     result["run_dir"] = run_dir
@@ -444,9 +604,12 @@ def evaluate_series(series_dir: str) -> Dict:
         dfs.append(df)
         run_levels.append(rl)
         per_run[name] = {**evaluate(df), "inspection": inspection([rl["totals"]]),
+                         "drop_accounting": drop_accounting(df, [rl["totals"]]),
                          "capacity": rl["capacity"], "resources": rl["resources"]}
-    result = evaluate(pd.concat(dfs, ignore_index=True))
+    pooled = pd.concat(dfs, ignore_index=True)
+    result = evaluate(pooled)
     result["inspection"] = inspection([rl["totals"] for rl in run_levels])
+    result["drop_accounting"] = drop_accounting(pooled, [rl["totals"] for rl in run_levels])
     result["capacity"] = {
         "budget_pps": CAPACITY_BUDGET_PPS,
         "max_pps": max(rl["capacity"]["max_pps"] for rl in run_levels),
@@ -503,6 +666,20 @@ def main():
               if insp["inspection_reduction_bytes"] is not None else "")
     print(f"inspection reduction: packets {insp['inspection_reduction_packets']:.1%}{byte_s} "
           f"({insp['cloned_packets']} cloned / {insp['forwarded_packets']} forwarded)")
+    if result.get("drop_accounting"):
+        da, bd = result["drop_accounting"], b["packet_drops"]
+        print(f"drops: switches {da['switch_dropped_packets']} pkts; attack flows "
+              f"{da['attributed_attack']}, benign flows {da['attributed_benign']} "
+              f"({bd['flows_with_dropped_packets']} benign flows hit); "
+              f"attributed {da['attributed_share']:.1%}")
+        for cls, m in result["per_attack_class"].items():
+            pd_, td = m["packet_drops"], m["time_to_drop"]
+            ph = td["per_phase_s"]
+            ph_s = f", median {ph['median']:.2f}s" if ph.get("n") else ""
+            print(f"  {cls}: dropped {pd_['packets_dropped']}/{pd_['packets_seen']} pkts "
+                  f"({pd_['dropped_share']:.1%}), delivered after drop "
+                  f"{pd_['packets_delivered_after_drop']}; phases dropped "
+                  f"{td['n_phases_dropped']}/{td['n_phases']}{ph_s} to drop")
     cap = result["capacity"]
     print(f"capacity: max {cap['max_pps']:.0f} pkt/s/switch, "
           f"{cap['windows_over_budget']} windows > {cap['budget_pps']}, "

@@ -1006,6 +1006,10 @@ register<bit<32>>(4096) head_pkts;
 /* N, written by the controller at startup (--head-clone-n). 0 = disabled,
  * which is also what a switch no controller has configured does. */
 register<bit<32>>(1) head_clone_n;
+/* Packets of the slot's current flow that the data plane dropped (5-tuple
+ * drop rule or source-IP drop rule); reset on a new flow like head_pkts.
+ * Measurement only -- read by the controller, never used to decide. */
+register<bit<32>>(4096) drop_pkts;
 
 /* ========== PARSER ========== */
 parser AdaptMonParser(
@@ -1106,6 +1110,14 @@ control AdaptMonIngress(
         meta.clone_reason = 3;
     }
 
+    /* A DPI-confirmed scan from this source: drop every packet from it (and
+     * still clone it, as for a flow at DROP, so DPI keeps seeing it) */
+    action do_host_drop() {
+        meta.do_drop = 1;
+        meta.do_clone = 1;
+        meta.clone_reason = 3;
+    }
+
     action nop() {}
 
     /* ---- tables ---- */
@@ -1148,6 +1160,20 @@ control AdaptMonIngress(
         }
         actions = {
             do_force_clone;
+            nop;
+        }
+        size = 256;
+        default_action = nop();
+    }
+
+    /* Installed when a DPI confirmation of a scan class forces the host
+     * pair to DROP: every packet from the source IP is dropped */
+    table host_drop_table {
+        key = {
+            hdr.ipv4.srcAddr: exact;
+        }
+        actions = {
+            do_host_drop;
             nop;
         }
         size = 256;
@@ -1230,9 +1256,10 @@ control AdaptMonIngress(
             flow_src_port.read(old_sport, meta.flow_index);
             flow_dst_port.read(old_dport, meta.flow_index);
             bit<32> head_val;
-            if (pkt_val == 0 || old_src != hdr.ipv4.srcAddr
+            bool new_flow = pkt_val == 0 || old_src != hdr.ipv4.srcAddr
                     || old_dst != hdr.ipv4.dstAddr || old_proto != hdr.ipv4.protocol
-                    || old_sport != meta.l4_sport || old_dport != meta.l4_dport) {
+                    || old_sport != meta.l4_sport || old_dport != meta.l4_dport;
+            if (new_flow) {
                 head_val = 1;
             } else {
                 head_pkts.read(head_val, meta.flow_index);
@@ -1294,10 +1321,21 @@ control AdaptMonIngress(
             /* Host-pair escalation (Decision B): clone every packet from
              * this source IP regardless of its own flow's level/sampling */
             host_clone_table.apply();
+            host_drop_table.apply();
 
             /* A DROP flow is still forwarded to egress, so its clone is made
              * there; egress then discards the original */
             drop_table.apply();
+
+            bit<32> drop_val = 0;
+            if (!new_flow) {
+                drop_pkts.read(drop_val, meta.flow_index);
+            }
+            if (meta.do_drop == 1) {
+                drop_val = drop_val + 1;
+            }
+            drop_pkts.write(meta.flow_index, drop_val);
+
             ipv4_forward.apply();
         } // end ipv4.isValid
     } // end apply

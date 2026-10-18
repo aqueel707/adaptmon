@@ -34,14 +34,14 @@ FLOW_REGISTERS = [
     "pkt_counter", "byte_counter",
     "flow_src_ip", "flow_dst_ip", "flow_src_port", "flow_dst_port",
     "flow_protocol", "flow_first_ts", "flow_last_ts", "flow_level",
-    "flow_syn_pkts",
+    "flow_syn_pkts", "drop_pkts",
 ]
 # Zeroed per slot on expiry. pkt_counter == 0 makes the next packet that
 # hashes to the slot restart flow_first_ts; the 5-tuple registers are
 # overwritten by that packet. flow_level is reset so a new flow does not
 # inherit the old one's level.
 SLOT_CLEAR_REGISTERS = ["pkt_counter", "byte_counter", "flow_active", "flow_level",
-                        "flow_syn_pkts"]
+                        "flow_syn_pkts", "drop_pkts"]
 DP_COUNTERS = {
     "forwarded": "AdaptMonEgress.fwd_counter",
     "cloned"   : "AdaptMonEgress.clone_counter",
@@ -277,6 +277,27 @@ class SwitchInterface:
 
     def count_host_clone_rules(self) -> int:
         out = self._cli("table_num_entries AdaptMonIngress.host_clone_table\n")
+        m = re.search(r"(\d+)\s*$", out.strip())
+        return int(m.group(1)) if m else -1
+
+    def add_host_drop_rule(self, src_ip: str) -> Optional[int]:
+        """Drop (and clone) every packet from src_ip: a DPI-confirmed scan source."""
+        out = self._cli(
+            f"table_add AdaptMonIngress.host_drop_table "
+            f"AdaptMonIngress.do_host_drop {src_ip} => \n"
+        )
+        m = re.search(r"added with handle (\d+)", out)
+        if not m:
+            logger.warning(f"S{self.switch_id} host-drop rule not added for "
+                           f"{src_ip}: {out.strip()[-200:]}")
+        return int(m.group(1)) if m else None
+
+    def delete_host_drop_rule(self, handle: int) -> bool:
+        out = self._cli(f"table_delete AdaptMonIngress.host_drop_table {handle}\n")
+        return "Error" not in out and "Invalid" not in out
+
+    def count_host_drop_rules(self) -> int:
+        out = self._cli("table_num_entries AdaptMonIngress.host_drop_table\n")
         m = re.search(r"(\d+)\s*$", out.strip())
         return int(m.group(1)) if m else -1
 

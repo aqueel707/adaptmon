@@ -17,8 +17,10 @@
         ["old_sport_0", 16, false],
         ["old_dport_0", 16, false],
         ["head_val_0", 32, false],
+        ["new_flow_0", 1, false],
         ["head_n_0", 32, false],
         ["syn_val_0", 32, false],
+        ["drop_val_0", 32, false],
         ["tmp_4", 32, false],
         ["metadata_t.flow_index", 32, false],
         ["metadata_t.flow_level", 2, false],
@@ -29,7 +31,7 @@
         ["metadata_t.do_clone", 1, false],
         ["metadata_t.l4_sport", 16, false],
         ["metadata_t.l4_dport", 16, false],
-        ["_padding_0", 4, false]
+        ["_padding_0", 3, false]
       ]
     },
     {
@@ -354,7 +356,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 496,
+        "line" : 534,
         "column" : 8,
         "source_fragment" : "AdaptMonDeparser"
       },
@@ -369,7 +371,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 432,
+        "line" : 470,
         "column" : 46,
         "source_fragment" : "fwd_counter"
       },
@@ -381,7 +383,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 433,
+        "line" : 471,
         "column" : 46,
         "source_fragment" : "clone_counter"
       },
@@ -393,7 +395,7 @@
       "id" : 2,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 434,
+        "line" : 472,
         "column" : 46,
         "source_fragment" : "drop_counter"
       },
@@ -405,7 +407,7 @@
       "id" : 3,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 436,
+        "line" : 474,
         "column" : 46,
         "source_fragment" : "clone_reason_counter"
       },
@@ -581,6 +583,18 @@
       },
       "size" : 1,
       "bitwidth" : 32
+    },
+    {
+      "name" : "drop_pkts",
+      "id" : 14,
+      "source_info" : {
+        "filename" : "p4/adaptmon.p4",
+        "line" : 129,
+        "column" : 24,
+        "source_fragment" : "drop_pkts"
+      },
+      "size" : 4096,
+      "bitwidth" : 32
     }
   ],
   "calculations" : [
@@ -616,7 +630,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 474,
+        "line" : 512,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -673,7 +687,7 @@
       "id" : 2,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 172,
+        "line" : 176,
         "column" : 8,
         "source_fragment" : "verify_checksum( ..."
       },
@@ -743,7 +757,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 201,
+            "line" : 205,
             "column" : 8,
             "source_fragment" : "mark_to_drop(std_meta)"
           }
@@ -774,7 +788,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 205,
+            "line" : 209,
             "column" : 8,
             "source_fragment" : "std_meta.egress_spec = port"
           }
@@ -809,7 +823,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 209,
+            "line" : 213,
             "column" : 8,
             "source_fragment" : "std_meta.egress_spec = port"
           }
@@ -828,7 +842,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 210,
+            "line" : 214,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = dst_mac"
           }
@@ -870,7 +884,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 211,
+            "line" : 215,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
           }
@@ -896,7 +910,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 215,
+            "line" : 219,
             "column" : 8,
             "source_fragment" : "meta.do_drop = 1"
           }
@@ -922,7 +936,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 222,
+            "line" : 226,
             "column" : 8,
             "source_fragment" : "meta.do_clone = 1"
           }
@@ -941,7 +955,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 223,
+            "line" : 227,
             "column" : 8,
             "source_fragment" : "meta.clone_reason = 3"
           }
@@ -949,10 +963,68 @@
       ]
     },
     {
-      "name" : "AdaptMonIngress.nop",
+      "name" : "AdaptMonIngress.do_host_drop",
       "id" : 5,
       "runtime_data" : [],
-      "primitives" : []
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.do_drop"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 233,
+            "column" : 8,
+            "source_fragment" : "meta.do_drop = 1"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.do_clone"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 234,
+            "column" : 8,
+            "source_fragment" : "meta.do_clone = 1"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.clone_reason"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x03"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 235,
+            "column" : 8,
+            "source_fragment" : "meta.clone_reason = 3"
+          }
+        }
+      ]
     },
     {
       "name" : "AdaptMonIngress.nop",
@@ -967,8 +1039,20 @@
       "primitives" : []
     },
     {
-      "name" : "adaptmon283",
+      "name" : "AdaptMonIngress.nop",
       "id" : 8,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "AdaptMonIngress.nop",
+      "id" : 9,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "adaptmon309",
+      "id" : 10,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -981,7 +1065,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 283,
+            "line" : 309,
             "column" : 12,
             "source_fragment" : "mark_to_drop(std_meta)"
           }
@@ -989,8 +1073,8 @@
       ]
     },
     {
-      "name" : "adaptmon288",
-      "id" : 9,
+      "name" : "adaptmon314",
+      "id" : 11,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1007,7 +1091,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 288,
+            "line" : 314,
             "column" : 16,
             "source_fragment" : "std_meta.egress_spec = 2"
           }
@@ -1015,59 +1099,7 @@
       ]
     },
     {
-      "name" : "adaptmon290",
-      "id" : 10,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["standard_metadata", "egress_spec"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x0001"
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 290,
-            "column" : 16,
-            "source_fragment" : "std_meta.egress_spec = 1"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "adaptmon292",
-      "id" : 11,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["standard_metadata", "egress_spec"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x0001"
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 292,
-            "column" : 16,
-            "source_fragment" : "std_meta.egress_spec = 1"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "adaptmon294",
+      "name" : "adaptmon316",
       "id" : 12,
       "runtime_data" : [],
       "primitives" : [
@@ -1085,7 +1117,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 294,
+            "line" : 316,
             "column" : 16,
             "source_fragment" : "std_meta.egress_spec = 1"
           }
@@ -1093,8 +1125,60 @@
       ]
     },
     {
-      "name" : "adaptmon303",
+      "name" : "adaptmon318",
       "id" : 13,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0001"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 318,
+            "column" : 16,
+            "source_fragment" : "std_meta.egress_spec = 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon320",
+      "id" : 14,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0001"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 320,
+            "column" : 16,
+            "source_fragment" : "std_meta.egress_spec = 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon329",
+      "id" : 15,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1111,7 +1195,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 303,
+            "line" : 329,
             "column" : 16,
             "source_fragment" : "meta.l4_sport = hdr.tcp.srcPort"
           }
@@ -1130,7 +1214,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 304,
+            "line" : 330,
             "column" : 16,
             "source_fragment" : "meta.l4_dport = hdr.tcp.dstPort"
           }
@@ -1138,8 +1222,8 @@
       ]
     },
     {
-      "name" : "adaptmon306",
-      "id" : 14,
+      "name" : "adaptmon332",
+      "id" : 16,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1156,7 +1240,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 306,
+            "line" : 332,
             "column" : 16,
             "source_fragment" : "meta.l4_sport = hdr.udp.srcPort"
           }
@@ -1175,7 +1259,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 307,
+            "line" : 333,
             "column" : 16,
             "source_fragment" : "meta.l4_dport = hdr.udp.dstPort"
           }
@@ -1183,8 +1267,8 @@
       ]
     },
     {
-      "name" : "adaptmon299",
-      "id" : 15,
+      "name" : "adaptmon325",
+      "id" : 17,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1201,7 +1285,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 299,
+            "line" : 325,
             "column" : 12,
             "source_fragment" : "meta.l4_sport = 0"
           }
@@ -1220,7 +1304,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 300,
+            "line" : 326,
             "column" : 12,
             "source_fragment" : "meta.l4_dport = 0"
           }
@@ -1228,8 +1312,8 @@
       ]
     },
     {
-      "name" : "adaptmon333",
-      "id" : 16,
+      "name" : "adaptmon359",
+      "id" : 18,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1250,7 +1334,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 333,
+            "line" : 359,
             "column" : 16,
             "source_fragment" : "flow_first_ts.write(meta.flow_index, now)"
           }
@@ -1258,8 +1342,8 @@
       ]
     },
     {
-      "name" : "adaptmon311",
-      "id" : 17,
+      "name" : "adaptmon337",
+      "id" : 19,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1276,7 +1360,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 316,
+            "line" : 342,
             "column" : 20,
             "source_fragment" : "hdr.ipv4.srcAddr"
           }
@@ -1295,7 +1379,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 317,
+            "line" : 343,
             "column" : 20,
             "source_fragment" : "hdr.ipv4.dstAddr"
           }
@@ -1314,7 +1398,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 318,
+            "line" : 344,
             "column" : 20,
             "source_fragment" : "hdr.ipv4.protocol"
           }
@@ -1333,7 +1417,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 319,
+            "line" : 345,
             "column" : 20,
             "source_fragment" : "meta.l4_sport"
           }
@@ -1352,7 +1436,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 320,
+            "line" : 346,
             "column" : 20,
             "source_fragment" : "meta.l4_dport"
           }
@@ -1379,7 +1463,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 311,
+            "line" : 337,
             "column" : 12,
             "source_fragment" : "hash( ..."
           }
@@ -1402,7 +1486,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 330,
+            "line" : 356,
             "column" : 12,
             "source_fragment" : "pkt_counter.read(pkt_val, meta.flow_index)"
           }
@@ -1410,8 +1494,8 @@
       ]
     },
     {
-      "name" : "adaptmon353",
-      "id" : 18,
+      "name" : "adaptmon380",
+      "id" : 20,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1428,7 +1512,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 353,
+            "line" : 380,
             "column" : 16,
             "source_fragment" : "head_val = 1"
           }
@@ -1436,8 +1520,8 @@
       ]
     },
     {
-      "name" : "adaptmon355",
-      "id" : 19,
+      "name" : "adaptmon382",
+      "id" : 21,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1458,7 +1542,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 355,
+            "line" : 382,
             "column" : 16,
             "source_fragment" : "head_pkts.read(head_val, meta.flow_index)"
           }
@@ -1500,7 +1584,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 356,
+            "line" : 383,
             "column" : 16,
             "source_fragment" : "head_val = head_val + 1"
           }
@@ -1508,8 +1592,8 @@
       ]
     },
     {
-      "name" : "adaptmon344",
-      "id" : 20,
+      "name" : "adaptmon370",
+      "id" : 22,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1530,7 +1614,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 344,
+            "line" : 370,
             "column" : 12,
             "source_fragment" : "flow_src_ip.read(old_src, meta.flow_index)"
           }
@@ -1553,7 +1637,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 345,
+            "line" : 371,
             "column" : 12,
             "source_fragment" : "flow_dst_ip.read(old_dst, meta.flow_index)"
           }
@@ -1576,7 +1660,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 346,
+            "line" : 372,
             "column" : 12,
             "source_fragment" : "flow_protocol.read(old_proto, meta.flow_index)"
           }
@@ -1599,7 +1683,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 347,
+            "line" : 373,
             "column" : 12,
             "source_fragment" : "flow_src_port.read(old_sport, meta.flow_index)"
           }
@@ -1622,16 +1706,155 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 348,
+            "line" : 374,
             "column" : 12,
             "source_fragment" : "flow_dst_port.read(old_dport, meta.flow_index)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "new_flow_0"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "b2d",
+                  "left" : null,
+                  "right" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "or",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "or",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "or",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "or",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "or",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : "==",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "pkt_val_0"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0x00000000"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : "!=",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["scalars", "old_src_0"]
+                                          },
+                                          "right" : {
+                                            "type" : "field",
+                                            "value" : ["ipv4", "srcAddr"]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "!=",
+                                      "left" : {
+                                        "type" : "field",
+                                        "value" : ["scalars", "old_dst_0"]
+                                      },
+                                      "right" : {
+                                        "type" : "field",
+                                        "value" : ["ipv4", "dstAddr"]
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "!=",
+                                  "left" : {
+                                    "type" : "field",
+                                    "value" : ["scalars", "old_proto_0"]
+                                  },
+                                  "right" : {
+                                    "type" : "field",
+                                    "value" : ["ipv4", "protocol"]
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "!=",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "old_sport_0"]
+                              },
+                              "right" : {
+                                "type" : "field",
+                                "value" : ["scalars", "metadata_t.l4_sport"]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "!=",
+                          "left" : {
+                            "type" : "field",
+                            "value" : ["scalars", "old_dport_0"]
+                          },
+                          "right" : {
+                            "type" : "field",
+                            "value" : ["scalars", "metadata_t.l4_dport"]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 376,
+            "column" : 12,
+            "source_fragment" : "bool new_flow = pkt_val == 0 || old_src != hdr.ipv4.srcAddr ..."
           }
         }
       ]
     },
     {
-      "name" : "adaptmon375",
-      "id" : 21,
+      "name" : "adaptmon402",
+      "id" : 23,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1652,7 +1875,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 375,
+            "line" : 402,
             "column" : 16,
             "source_fragment" : "flow_syn_pkts.read(syn_val, meta.flow_index)"
           }
@@ -1694,7 +1917,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 376,
+            "line" : 403,
             "column" : 16,
             "source_fragment" : "syn_val = syn_val + 1"
           }
@@ -1717,7 +1940,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 377,
+            "line" : 404,
             "column" : 16,
             "source_fragment" : "flow_syn_pkts.write(meta.flow_index, syn_val)"
           }
@@ -1725,8 +1948,8 @@
       ]
     },
     {
-      "name" : "adaptmon358",
-      "id" : 22,
+      "name" : "adaptmon385",
+      "id" : 24,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1747,7 +1970,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 358,
+            "line" : 385,
             "column" : 12,
             "source_fragment" : "head_pkts.write(meta.flow_index, head_val)"
           }
@@ -1770,7 +1993,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 360,
+            "line" : 387,
             "column" : 12,
             "source_fragment" : "head_clone_n.read(head_n, 0)"
           }
@@ -1812,7 +2035,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 361,
+            "line" : 388,
             "column" : 12,
             "source_fragment" : "pkt_val = pkt_val + 1"
           }
@@ -1835,7 +2058,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 362,
+            "line" : 389,
             "column" : 12,
             "source_fragment" : "pkt_counter.write(meta.flow_index, pkt_val)"
           }
@@ -1854,7 +2077,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 363,
+            "line" : 390,
             "column" : 12,
             "source_fragment" : "meta.pkt_count_val = pkt_val"
           }
@@ -1877,7 +2100,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 365,
+            "line" : 392,
             "column" : 12,
             "source_fragment" : "byte_counter.read(byte_val, meta.flow_index)"
           }
@@ -1919,7 +2142,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 366,
+            "line" : 393,
             "column" : 12,
             "source_fragment" : "byte_val = byte_val + (bit<32>)std_meta.packet_length"
           }
@@ -1942,7 +2165,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 367,
+            "line" : 394,
             "column" : 12,
             "source_fragment" : "byte_counter.write(meta.flow_index, byte_val)"
           }
@@ -1961,7 +2184,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 368,
+            "line" : 395,
             "column" : 12,
             "source_fragment" : "meta.byte_count_val = byte_val"
           }
@@ -1984,7 +2207,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 369,
+            "line" : 396,
             "column" : 12,
             "source_fragment" : "flow_last_ts.write(meta.flow_index, now)"
           }
@@ -1992,8 +2215,8 @@
       ]
     },
     {
-      "name" : "adaptmon398",
-      "id" : 23,
+      "name" : "adaptmon425",
+      "id" : 25,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -2010,7 +2233,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 398,
+            "line" : 425,
             "column" : 16,
             "source_fragment" : "meta.do_clone = 1"
           }
@@ -2029,7 +2252,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 399,
+            "line" : 426,
             "column" : 16,
             "source_fragment" : "meta.clone_reason = 1"
           }
@@ -2037,8 +2260,8 @@
       ]
     },
     {
-      "name" : "adaptmon401",
-      "id" : 24,
+      "name" : "adaptmon428",
+      "id" : 26,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -2055,7 +2278,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 401,
+            "line" : 428,
             "column" : 16,
             "source_fragment" : "meta.do_clone = 1"
           }
@@ -2074,7 +2297,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 402,
+            "line" : 429,
             "column" : 16,
             "source_fragment" : "meta.clone_reason = 4"
           }
@@ -2082,98 +2305,98 @@
       ]
     },
     {
-      "name" : "adaptmon404",
-      "id" : 25,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "metadata_t.do_clone"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x01"
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 404,
-            "column" : 16,
-            "source_fragment" : "meta.do_clone = 1"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "metadata_t.clone_reason"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x02"
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 405,
-            "column" : 16,
-            "source_fragment" : "meta.clone_reason = 2"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "adaptmon407",
-      "id" : 26,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "metadata_t.do_clone"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x01"
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 407,
-            "column" : 16,
-            "source_fragment" : "meta.do_clone = 1"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "metadata_t.clone_reason"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x02"
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 408,
-            "column" : 16,
-            "source_fragment" : "meta.clone_reason = 2"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "adaptmon381",
+      "name" : "adaptmon431",
       "id" : 27,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.do_clone"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 431,
+            "column" : 16,
+            "source_fragment" : "meta.do_clone = 1"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.clone_reason"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x02"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 432,
+            "column" : 16,
+            "source_fragment" : "meta.clone_reason = 2"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon434",
+      "id" : 28,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.do_clone"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 434,
+            "column" : 16,
+            "source_fragment" : "meta.do_clone = 1"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.clone_reason"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x02"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 435,
+            "column" : 16,
+            "source_fragment" : "meta.clone_reason = 2"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon408",
+      "id" : 29,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -2194,7 +2417,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 381,
+            "line" : 408,
             "column" : 12,
             "source_fragment" : "flow_src_ip.write(meta.flow_index, hdr.ipv4.srcAddr)"
           }
@@ -2217,7 +2440,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 382,
+            "line" : 409,
             "column" : 12,
             "source_fragment" : "flow_dst_ip.write(meta.flow_index, hdr.ipv4.dstAddr)"
           }
@@ -2240,7 +2463,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 383,
+            "line" : 410,
             "column" : 12,
             "source_fragment" : "flow_protocol.write(meta.flow_index, hdr.ipv4.protocol)"
           }
@@ -2263,7 +2486,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 384,
+            "line" : 411,
             "column" : 12,
             "source_fragment" : "flow_src_port.write(meta.flow_index, meta.l4_sport)"
           }
@@ -2286,7 +2509,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 385,
+            "line" : 412,
             "column" : 12,
             "source_fragment" : "flow_dst_port.write(meta.flow_index, meta.l4_dport)"
           }
@@ -2309,7 +2532,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 386,
+            "line" : 413,
             "column" : 12,
             "source_fragment" : "flow_active.write(meta.flow_index, 1)"
           }
@@ -2332,7 +2555,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 389,
+            "line" : 416,
             "column" : 12,
             "source_fragment" : "flow_level.read(meta.flow_level, meta.flow_index)"
           }
@@ -2340,8 +2563,143 @@
       ]
     },
     {
-      "name" : "adaptmon276",
-      "id" : 28,
+      "name" : "adaptmon449",
+      "id" : 30,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "register_read",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "drop_val_0"]
+            },
+            {
+              "type" : "register_array",
+              "value" : "drop_pkts"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.flow_index"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 449,
+            "column" : 16,
+            "source_fragment" : "drop_pkts.read(drop_val, meta.flow_index)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon447",
+      "id" : 31,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "drop_val_0"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x00000000"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 447,
+            "column" : 12,
+            "source_fragment" : "bit<32> drop_val = 0"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon452",
+      "id" : 32,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "drop_val_0"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "drop_val_0"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x00000001"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 452,
+            "column" : 16,
+            "source_fragment" : "drop_val = drop_val + 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon454",
+      "id" : 33,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "drop_pkts"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata_t.flow_index"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "drop_val_0"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 454,
+            "column" : 12,
+            "source_fragment" : "drop_pkts.write(meta.flow_index, drop_val)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "adaptmon302",
+      "id" : 34,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -2358,7 +2716,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 276,
+            "line" : 302,
             "column" : 8,
             "source_fragment" : "meta.do_drop = 0"
           }
@@ -2377,7 +2735,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 277,
+            "line" : 303,
             "column" : 8,
             "source_fragment" : "meta.do_clone = 0"
           }
@@ -2396,7 +2754,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 278,
+            "line" : 304,
             "column" : 8,
             "source_fragment" : "meta.clone_reason = 0"
           }
@@ -2415,7 +2773,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 279,
+            "line" : 305,
             "column" : 8,
             "source_fragment" : "meta.flow_level = 0"
           }
@@ -2423,8 +2781,8 @@
       ]
     },
     {
-      "name" : "adaptmon442",
-      "id" : 29,
+      "name" : "adaptmon480",
+      "id" : 35,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -2437,7 +2795,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 442,
+            "line" : 480,
             "column" : 12,
             "source_fragment" : "hdr.cpu_hdr.setValid()"
           }
@@ -2456,7 +2814,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 443,
+            "line" : 481,
             "column" : 12,
             "source_fragment" : "hdr.cpu_hdr.flow_index = meta.flow_index"
           }
@@ -2488,7 +2846,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 444,
+            "line" : 482,
             "column" : 12,
             "source_fragment" : "hdr.cpu_hdr.flow_level = (bit<8>)meta.flow_level"
           }
@@ -2507,7 +2865,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 445,
+            "line" : 483,
             "column" : 12,
             "source_fragment" : "hdr.cpu_hdr.pkt_count = meta.pkt_count_val"
           }
@@ -2526,7 +2884,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 446,
+            "line" : 484,
             "column" : 12,
             "source_fragment" : "hdr.cpu_hdr.byte_count = meta.byte_count_val"
           }
@@ -2545,7 +2903,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 447,
+            "line" : 485,
             "column" : 12,
             "source_fragment" : "hdr.cpu_hdr.reason = meta.clone_reason"
           }
@@ -2564,7 +2922,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 448,
+            "line" : 486,
             "column" : 12,
             "source_fragment" : "clone_counter.count(0)"
           }
@@ -2596,7 +2954,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 449,
+            "line" : 487,
             "column" : 39,
             "source_fragment" : "(bit<32>)meta.clone_reason"
           }
@@ -2615,7 +2973,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 449,
+            "line" : 487,
             "column" : 12,
             "source_fragment" : "clone_reason_counter.count((bit<32>)meta.clone_reason)"
           }
@@ -2623,8 +2981,8 @@
       ]
     },
     {
-      "name" : "adaptmon455",
-      "id" : 30,
+      "name" : "adaptmon493",
+      "id" : 36,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -2641,7 +2999,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 455,
+            "line" : 493,
             "column" : 16,
             "source_fragment" : "clone_preserving_field_list( ..."
           }
@@ -2649,8 +3007,8 @@
       ]
     },
     {
-      "name" : "adaptmon459",
-      "id" : 31,
+      "name" : "adaptmon497",
+      "id" : 37,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -2663,7 +3021,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 459,
+            "line" : 497,
             "column" : 16,
             "source_fragment" : "mark_to_drop(std_meta)"
           }
@@ -2682,7 +3040,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 460,
+            "line" : 498,
             "column" : 16,
             "source_fragment" : "drop_counter.count(0)"
           }
@@ -2690,8 +3048,8 @@
       ]
     },
     {
-      "name" : "adaptmon462",
-      "id" : 32,
+      "name" : "adaptmon500",
+      "id" : 38,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -2708,7 +3066,7 @@
           ],
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 462,
+            "line" : 500,
             "column" : 16,
             "source_fragment" : "fwd_counter.count(0)"
           }
@@ -2722,18 +3080,18 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 194,
+        "line" : 198,
         "column" : 8,
         "source_fragment" : "AdaptMonIngress"
       },
-      "init_table" : "tbl_adaptmon276",
+      "init_table" : "tbl_adaptmon302",
       "tables" : [
         {
-          "name" : "tbl_adaptmon276",
+          "name" : "tbl_adaptmon302",
           "id" : 0,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 276,
+            "line" : 302,
             "column" : 21,
             "source_fragment" : "= 0; ..."
           },
@@ -2744,25 +3102,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [28],
-          "actions" : ["adaptmon276"],
+          "action_ids" : [34],
+          "actions" : ["adaptmon302"],
           "base_default_next" : "node_3",
           "next_tables" : {
-            "adaptmon276" : "node_3"
+            "adaptmon302" : "node_3"
           },
           "default_entry" : {
-            "action_id" : 28,
+            "action_id" : 34,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon283",
+          "name" : "tbl_adaptmon309",
           "id" : 1,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 283,
+            "line" : 309,
             "column" : 12,
             "source_fragment" : "mark_to_drop(std_meta)"
           },
@@ -2773,69 +3131,11 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [8],
-          "actions" : ["adaptmon283"],
-          "base_default_next" : null,
-          "next_tables" : {
-            "adaptmon283" : null
-          },
-          "default_entry" : {
-            "action_id" : 8,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_adaptmon288",
-          "id" : 2,
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 288,
-            "column" : 37,
-            "source_fragment" : "="
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [9],
-          "actions" : ["adaptmon288"],
-          "base_default_next" : null,
-          "next_tables" : {
-            "adaptmon288" : null
-          },
-          "default_entry" : {
-            "action_id" : 9,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_adaptmon290",
-          "id" : 3,
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 290,
-            "column" : 37,
-            "source_fragment" : "="
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
           "action_ids" : [10],
-          "actions" : ["adaptmon290"],
+          "actions" : ["adaptmon309"],
           "base_default_next" : null,
           "next_tables" : {
-            "adaptmon290" : null
+            "adaptmon309" : null
           },
           "default_entry" : {
             "action_id" : 10,
@@ -2845,11 +3145,11 @@
           }
         },
         {
-          "name" : "tbl_adaptmon292",
-          "id" : 4,
+          "name" : "tbl_adaptmon314",
+          "id" : 2,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 292,
+            "line" : 314,
             "column" : 37,
             "source_fragment" : "="
           },
@@ -2861,10 +3161,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [11],
-          "actions" : ["adaptmon292"],
+          "actions" : ["adaptmon314"],
           "base_default_next" : null,
           "next_tables" : {
-            "adaptmon292" : null
+            "adaptmon314" : null
           },
           "default_entry" : {
             "action_id" : 11,
@@ -2874,11 +3174,11 @@
           }
         },
         {
-          "name" : "tbl_adaptmon294",
-          "id" : 5,
+          "name" : "tbl_adaptmon316",
+          "id" : 3,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 294,
+            "line" : 316,
             "column" : 37,
             "source_fragment" : "="
           },
@@ -2890,10 +3190,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [12],
-          "actions" : ["adaptmon294"],
+          "actions" : ["adaptmon316"],
           "base_default_next" : null,
           "next_tables" : {
-            "adaptmon294" : null
+            "adaptmon316" : null
           },
           "default_entry" : {
             "action_id" : 12,
@@ -2903,11 +3203,69 @@
           }
         },
         {
-          "name" : "tbl_adaptmon299",
+          "name" : "tbl_adaptmon318",
+          "id" : 4,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 318,
+            "column" : 37,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [13],
+          "actions" : ["adaptmon318"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "adaptmon318" : null
+          },
+          "default_entry" : {
+            "action_id" : 13,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon320",
+          "id" : 5,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 320,
+            "column" : 37,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [14],
+          "actions" : ["adaptmon320"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "adaptmon320" : null
+          },
+          "default_entry" : {
+            "action_id" : 14,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon325",
           "id" : 6,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 299,
+            "line" : 325,
             "column" : 26,
             "source_fragment" : "= 0; ..."
           },
@@ -2918,25 +3276,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [15],
-          "actions" : ["adaptmon299"],
+          "action_ids" : [17],
+          "actions" : ["adaptmon325"],
           "base_default_next" : "node_15",
           "next_tables" : {
-            "adaptmon299" : "node_15"
+            "adaptmon325" : "node_15"
           },
           "default_entry" : {
-            "action_id" : 15,
+            "action_id" : 17,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon303",
+          "name" : "tbl_adaptmon329",
           "id" : 7,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 303,
+            "line" : 329,
             "column" : 30,
             "source_fragment" : "= hdr.tcp.srcPort; ..."
           },
@@ -2947,25 +3305,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [13],
-          "actions" : ["adaptmon303"],
-          "base_default_next" : "tbl_adaptmon311",
+          "action_ids" : [15],
+          "actions" : ["adaptmon329"],
+          "base_default_next" : "tbl_adaptmon337",
           "next_tables" : {
-            "adaptmon303" : "tbl_adaptmon311"
+            "adaptmon329" : "tbl_adaptmon337"
           },
           "default_entry" : {
-            "action_id" : 13,
+            "action_id" : 15,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon306",
+          "name" : "tbl_adaptmon332",
           "id" : 8,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 306,
+            "line" : 332,
             "column" : 30,
             "source_fragment" : "= hdr.udp.srcPort; ..."
           },
@@ -2976,25 +3334,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [14],
-          "actions" : ["adaptmon306"],
-          "base_default_next" : "tbl_adaptmon311",
+          "action_ids" : [16],
+          "actions" : ["adaptmon332"],
+          "base_default_next" : "tbl_adaptmon337",
           "next_tables" : {
-            "adaptmon306" : "tbl_adaptmon311"
+            "adaptmon332" : "tbl_adaptmon337"
           },
           "default_entry" : {
-            "action_id" : 14,
+            "action_id" : 16,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon311",
+          "name" : "tbl_adaptmon337",
           "id" : 9,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 311,
+            "line" : 337,
             "column" : 12,
             "source_fragment" : "hash( ..."
           },
@@ -3005,25 +3363,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [17],
-          "actions" : ["adaptmon311"],
+          "action_ids" : [19],
+          "actions" : ["adaptmon337"],
           "base_default_next" : "node_20",
           "next_tables" : {
-            "adaptmon311" : "node_20"
+            "adaptmon337" : "node_20"
           },
           "default_entry" : {
-            "action_id" : 17,
+            "action_id" : 19,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon333",
+          "name" : "tbl_adaptmon359",
           "id" : 10,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 333,
+            "line" : 359,
             "column" : 16,
             "source_fragment" : "flow_first_ts.write(meta.flow_index, now)"
           },
@@ -3034,25 +3392,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [16],
-          "actions" : ["adaptmon333"],
-          "base_default_next" : "tbl_adaptmon344",
+          "action_ids" : [18],
+          "actions" : ["adaptmon359"],
+          "base_default_next" : "tbl_adaptmon370",
           "next_tables" : {
-            "adaptmon333" : "tbl_adaptmon344"
+            "adaptmon359" : "tbl_adaptmon370"
           },
           "default_entry" : {
-            "action_id" : 16,
+            "action_id" : 18,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon344",
+          "name" : "tbl_adaptmon370",
           "id" : 11,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 344,
+            "line" : 370,
             "column" : 12,
             "source_fragment" : "flow_src_ip.read(old_src, meta.flow_index); ..."
           },
@@ -3063,25 +3421,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [20],
-          "actions" : ["adaptmon344"],
+          "action_ids" : [22],
+          "actions" : ["adaptmon370"],
           "base_default_next" : "node_23",
           "next_tables" : {
-            "adaptmon344" : "node_23"
+            "adaptmon370" : "node_23"
           },
           "default_entry" : {
-            "action_id" : 20,
+            "action_id" : 22,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon353",
+          "name" : "tbl_adaptmon380",
           "id" : 12,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 353,
+            "line" : 380,
             "column" : 25,
             "source_fragment" : "="
           },
@@ -3092,25 +3450,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [18],
-          "actions" : ["adaptmon353"],
-          "base_default_next" : "tbl_adaptmon358",
+          "action_ids" : [20],
+          "actions" : ["adaptmon380"],
+          "base_default_next" : "tbl_adaptmon385",
           "next_tables" : {
-            "adaptmon353" : "tbl_adaptmon358"
+            "adaptmon380" : "tbl_adaptmon385"
           },
           "default_entry" : {
-            "action_id" : 18,
+            "action_id" : 20,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon355",
+          "name" : "tbl_adaptmon382",
           "id" : 13,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 355,
+            "line" : 382,
             "column" : 16,
             "source_fragment" : "head_pkts.read(head_val, meta.flow_index); ..."
           },
@@ -3121,25 +3479,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [19],
-          "actions" : ["adaptmon355"],
-          "base_default_next" : "tbl_adaptmon358",
+          "action_ids" : [21],
+          "actions" : ["adaptmon382"],
+          "base_default_next" : "tbl_adaptmon385",
           "next_tables" : {
-            "adaptmon355" : "tbl_adaptmon358"
+            "adaptmon382" : "tbl_adaptmon385"
           },
           "default_entry" : {
-            "action_id" : 19,
+            "action_id" : 21,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon358",
+          "name" : "tbl_adaptmon385",
           "id" : 14,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 358,
+            "line" : 385,
             "column" : 12,
             "source_fragment" : "head_pkts.write(meta.flow_index, head_val); ..."
           },
@@ -3150,25 +3508,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [22],
-          "actions" : ["adaptmon358"],
+          "action_ids" : [24],
+          "actions" : ["adaptmon385"],
           "base_default_next" : "node_27",
           "next_tables" : {
-            "adaptmon358" : "node_27"
+            "adaptmon385" : "node_27"
           },
           "default_entry" : {
-            "action_id" : 22,
+            "action_id" : 24,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon375",
+          "name" : "tbl_adaptmon402",
           "id" : 15,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 375,
+            "line" : 402,
             "column" : 16,
             "source_fragment" : "flow_syn_pkts.read(syn_val, meta.flow_index); ..."
           },
@@ -3179,25 +3537,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [21],
-          "actions" : ["adaptmon375"],
-          "base_default_next" : "tbl_adaptmon381",
+          "action_ids" : [23],
+          "actions" : ["adaptmon402"],
+          "base_default_next" : "tbl_adaptmon408",
           "next_tables" : {
-            "adaptmon375" : "tbl_adaptmon381"
+            "adaptmon402" : "tbl_adaptmon408"
           },
           "default_entry" : {
-            "action_id" : 21,
+            "action_id" : 23,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon381",
+          "name" : "tbl_adaptmon408",
           "id" : 16,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 381,
+            "line" : 408,
             "column" : 12,
             "source_fragment" : "flow_src_ip.write(meta.flow_index, hdr.ipv4.srcAddr); ..."
           },
@@ -3208,83 +3566,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [27],
-          "actions" : ["adaptmon381"],
+          "action_ids" : [29],
+          "actions" : ["adaptmon408"],
           "base_default_next" : "node_30",
           "next_tables" : {
-            "adaptmon381" : "node_30"
+            "adaptmon408" : "node_30"
           },
           "default_entry" : {
-            "action_id" : 27,
+            "action_id" : 29,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon398",
+          "name" : "tbl_adaptmon425",
           "id" : 17,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 398,
-            "column" : 30,
-            "source_fragment" : "= 1; ..."
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [23],
-          "actions" : ["adaptmon398"],
-          "base_default_next" : "AdaptMonIngress.host_clone_table",
-          "next_tables" : {
-            "adaptmon398" : "AdaptMonIngress.host_clone_table"
-          },
-          "default_entry" : {
-            "action_id" : 23,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_adaptmon401",
-          "id" : 18,
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 401,
-            "column" : 30,
-            "source_fragment" : "= 1; ..."
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [24],
-          "actions" : ["adaptmon401"],
-          "base_default_next" : "AdaptMonIngress.host_clone_table",
-          "next_tables" : {
-            "adaptmon401" : "AdaptMonIngress.host_clone_table"
-          },
-          "default_entry" : {
-            "action_id" : 24,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_adaptmon404",
-          "id" : 19,
-          "source_info" : {
-            "filename" : "p4/adaptmon.p4",
-            "line" : 404,
+            "line" : 425,
             "column" : 30,
             "source_fragment" : "= 1; ..."
           },
@@ -3296,10 +3596,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [25],
-          "actions" : ["adaptmon404"],
+          "actions" : ["adaptmon425"],
           "base_default_next" : "AdaptMonIngress.host_clone_table",
           "next_tables" : {
-            "adaptmon404" : "AdaptMonIngress.host_clone_table"
+            "adaptmon425" : "AdaptMonIngress.host_clone_table"
           },
           "default_entry" : {
             "action_id" : 25,
@@ -3309,11 +3609,11 @@
           }
         },
         {
-          "name" : "tbl_adaptmon407",
-          "id" : 20,
+          "name" : "tbl_adaptmon428",
+          "id" : 18,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 407,
+            "line" : 428,
             "column" : 30,
             "source_fragment" : "= 1; ..."
           },
@@ -3325,13 +3625,71 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [26],
-          "actions" : ["adaptmon407"],
+          "actions" : ["adaptmon428"],
           "base_default_next" : "AdaptMonIngress.host_clone_table",
           "next_tables" : {
-            "adaptmon407" : "AdaptMonIngress.host_clone_table"
+            "adaptmon428" : "AdaptMonIngress.host_clone_table"
           },
           "default_entry" : {
             "action_id" : 26,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon431",
+          "id" : 19,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 431,
+            "column" : 30,
+            "source_fragment" : "= 1; ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [27],
+          "actions" : ["adaptmon431"],
+          "base_default_next" : "AdaptMonIngress.host_clone_table",
+          "next_tables" : {
+            "adaptmon431" : "AdaptMonIngress.host_clone_table"
+          },
+          "default_entry" : {
+            "action_id" : 27,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon434",
+          "id" : 20,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 434,
+            "column" : 30,
+            "source_fragment" : "= 1; ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [28],
+          "actions" : ["adaptmon434"],
+          "base_default_next" : "AdaptMonIngress.host_clone_table",
+          "next_tables" : {
+            "adaptmon434" : "AdaptMonIngress.host_clone_table"
+          },
+          "default_entry" : {
+            "action_id" : 28,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -3342,7 +3700,7 @@
           "id" : 21,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 262,
+            "line" : 274,
             "column" : 10,
             "source_fragment" : "host_clone_table"
           },
@@ -3360,15 +3718,52 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [4, 7],
+          "action_ids" : [4, 8],
           "actions" : ["AdaptMonIngress.do_force_clone", "AdaptMonIngress.nop"],
+          "base_default_next" : "AdaptMonIngress.host_drop_table",
+          "next_tables" : {
+            "AdaptMonIngress.do_force_clone" : "AdaptMonIngress.host_drop_table",
+            "AdaptMonIngress.nop" : "AdaptMonIngress.host_drop_table"
+          },
+          "default_entry" : {
+            "action_id" : 8,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "AdaptMonIngress.host_drop_table",
+          "id" : 22,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 288,
+            "column" : 10,
+            "source_fragment" : "host_drop_table"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.srcAddr",
+              "target" : ["ipv4", "srcAddr"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 256,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [5, 9],
+          "actions" : ["AdaptMonIngress.do_host_drop", "AdaptMonIngress.nop"],
           "base_default_next" : "AdaptMonIngress.drop_table",
           "next_tables" : {
-            "AdaptMonIngress.do_force_clone" : "AdaptMonIngress.drop_table",
+            "AdaptMonIngress.do_host_drop" : "AdaptMonIngress.drop_table",
             "AdaptMonIngress.nop" : "AdaptMonIngress.drop_table"
           },
           "default_entry" : {
-            "action_id" : 7,
+            "action_id" : 9,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
@@ -3376,10 +3771,10 @@
         },
         {
           "name" : "AdaptMonIngress.drop_table",
-          "id" : 22,
+          "id" : 23,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 244,
+            "line" : 256,
             "column" : 10,
             "source_fragment" : "drop_table"
           },
@@ -3421,26 +3816,142 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [3, 6],
+          "action_ids" : [3, 7],
           "actions" : ["AdaptMonIngress.do_drop_flow", "AdaptMonIngress.nop"],
-          "base_default_next" : "AdaptMonIngress.ipv4_forward",
+          "base_default_next" : "tbl_adaptmon447",
           "next_tables" : {
-            "AdaptMonIngress.do_drop_flow" : "AdaptMonIngress.ipv4_forward",
-            "AdaptMonIngress.nop" : "AdaptMonIngress.ipv4_forward"
+            "AdaptMonIngress.do_drop_flow" : "tbl_adaptmon447",
+            "AdaptMonIngress.nop" : "tbl_adaptmon447"
           },
           "default_entry" : {
-            "action_id" : 6,
+            "action_id" : 7,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
           }
         },
         {
-          "name" : "AdaptMonIngress.ipv4_forward",
-          "id" : 23,
+          "name" : "tbl_adaptmon447",
+          "id" : 24,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 229,
+            "line" : 447,
+            "column" : 12,
+            "source_fragment" : "bit<32> drop_val = 0"
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [31],
+          "actions" : ["adaptmon447"],
+          "base_default_next" : "node_42",
+          "next_tables" : {
+            "adaptmon447" : "node_42"
+          },
+          "default_entry" : {
+            "action_id" : 31,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon449",
+          "id" : 25,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 449,
+            "column" : 16,
+            "source_fragment" : "drop_pkts.read(drop_val, meta.flow_index)"
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [30],
+          "actions" : ["adaptmon449"],
+          "base_default_next" : "node_44",
+          "next_tables" : {
+            "adaptmon449" : "node_44"
+          },
+          "default_entry" : {
+            "action_id" : 30,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon452",
+          "id" : 26,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 452,
+            "column" : 25,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [32],
+          "actions" : ["adaptmon452"],
+          "base_default_next" : "tbl_adaptmon454",
+          "next_tables" : {
+            "adaptmon452" : "tbl_adaptmon454"
+          },
+          "default_entry" : {
+            "action_id" : 32,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_adaptmon454",
+          "id" : 27,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 454,
+            "column" : 12,
+            "source_fragment" : "drop_pkts.write(meta.flow_index, drop_val)"
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [33],
+          "actions" : ["adaptmon454"],
+          "base_default_next" : "AdaptMonIngress.ipv4_forward",
+          "next_tables" : {
+            "adaptmon454" : "AdaptMonIngress.ipv4_forward"
+          },
+          "default_entry" : {
+            "action_id" : 33,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "AdaptMonIngress.ipv4_forward",
+          "id" : 28,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 241,
             "column" : 10,
             "source_fragment" : "ipv4_forward"
           },
@@ -3458,7 +3969,7 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [1, 2, 0, 5],
+          "action_ids" : [1, 2, 0, 6],
           "actions" : ["AdaptMonIngress.forward_l2", "AdaptMonIngress.forward_l3", "AdaptMonIngress.drop_pkt", "AdaptMonIngress.nop"],
           "base_default_next" : null,
           "next_tables" : {
@@ -3482,7 +3993,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 281,
+            "line" : 307,
             "column" : 12,
             "source_fragment" : "std_meta.ingress_port == 255"
           },
@@ -3500,7 +4011,7 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon283",
+          "true_next" : "tbl_adaptmon309",
           "false_next" : "node_5"
         },
         {
@@ -3508,7 +4019,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 284,
+            "line" : 310,
             "column" : 19,
             "source_fragment" : "hdr.ethernet.etherType == 0x0806"
           },
@@ -3534,7 +4045,7 @@
           "id" : 2,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 287,
+            "line" : 313,
             "column" : 16,
             "source_fragment" : "std_meta.ingress_port == 1"
           },
@@ -3552,7 +4063,7 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon288",
+          "true_next" : "tbl_adaptmon314",
           "false_next" : "node_8"
         },
         {
@@ -3560,7 +4071,7 @@
           "id" : 3,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 289,
+            "line" : 315,
             "column" : 23,
             "source_fragment" : "std_meta.ingress_port == 2"
           },
@@ -3578,7 +4089,7 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon290",
+          "true_next" : "tbl_adaptmon316",
           "false_next" : "node_10"
         },
         {
@@ -3586,7 +4097,7 @@
           "id" : 4,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 291,
+            "line" : 317,
             "column" : 23,
             "source_fragment" : "std_meta.ingress_port == 3"
           },
@@ -3604,15 +4115,15 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon292",
-          "false_next" : "tbl_adaptmon294"
+          "true_next" : "tbl_adaptmon318",
+          "false_next" : "tbl_adaptmon320"
         },
         {
           "name" : "node_13",
           "id" : 5,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 296,
+            "line" : 322,
             "column" : 19,
             "source_fragment" : "hdr.ipv4.isValid()"
           },
@@ -3628,14 +4139,14 @@
             }
           },
           "false_next" : null,
-          "true_next" : "tbl_adaptmon299"
+          "true_next" : "tbl_adaptmon325"
         },
         {
           "name" : "node_15",
           "id" : 6,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 302,
+            "line" : 328,
             "column" : 16,
             "source_fragment" : "hdr.tcp.isValid()"
           },
@@ -3650,7 +4161,7 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon303",
+          "true_next" : "tbl_adaptmon329",
           "false_next" : "node_17"
         },
         {
@@ -3658,7 +4169,7 @@
           "id" : 7,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 305,
+            "line" : 331,
             "column" : 23,
             "source_fragment" : "hdr.udp.isValid()"
           },
@@ -3673,15 +4184,15 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon306",
-          "false_next" : "tbl_adaptmon311"
+          "true_next" : "tbl_adaptmon332",
+          "false_next" : "tbl_adaptmon337"
         },
         {
           "name" : "node_20",
           "id" : 8,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 331,
+            "line" : 357,
             "column" : 16,
             "source_fragment" : "pkt_val == 0"
           },
@@ -3699,17 +4210,17 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon333",
-          "false_next" : "tbl_adaptmon344"
+          "true_next" : "tbl_adaptmon359",
+          "false_next" : "tbl_adaptmon370"
         },
         {
           "name" : "node_23",
           "id" : 9,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 350,
+            "line" : 379,
             "column" : 16,
-            "source_fragment" : "pkt_val == 0 || old_src != hdr.ipv4.srcAddr ..."
+            "source_fragment" : "new_flow"
           },
           "expression" : {
             "type" : "expression",
@@ -3825,15 +4336,15 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon353",
-          "false_next" : "tbl_adaptmon355"
+          "true_next" : "tbl_adaptmon380",
+          "false_next" : "tbl_adaptmon382"
         },
         {
           "name" : "node_27",
           "id" : 10,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 373,
+            "line" : 400,
             "column" : 16,
             "source_fragment" : "hdr.tcp.isValid() && hdr.tcp.ctrl == 2"
           },
@@ -3868,15 +4379,15 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon375",
-          "false_next" : "tbl_adaptmon381"
+          "true_next" : "tbl_adaptmon402",
+          "false_next" : "tbl_adaptmon408"
         },
         {
           "name" : "node_30",
           "id" : 11,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 397,
+            "line" : 424,
             "column" : 16,
             "source_fragment" : "meta.flow_level >= 2"
           },
@@ -3894,7 +4405,7 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon398",
+          "true_next" : "tbl_adaptmon425",
           "false_next" : "node_32"
         },
         {
@@ -3902,7 +4413,7 @@
           "id" : 12,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 400,
+            "line" : 427,
             "column" : 23,
             "source_fragment" : "head_val <= head_n"
           },
@@ -3920,7 +4431,7 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon401",
+          "true_next" : "tbl_adaptmon428",
           "false_next" : "node_34"
         },
         {
@@ -3928,7 +4439,7 @@
           "id" : 13,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 403,
+            "line" : 430,
             "column" : 23,
             "source_fragment" : "meta.flow_level == 1 && (pkt_val & 7) == 0"
           },
@@ -3976,7 +4487,7 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon404",
+          "true_next" : "tbl_adaptmon431",
           "false_next" : "node_36"
         },
         {
@@ -3984,7 +4495,7 @@
           "id" : 14,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 406,
+            "line" : 433,
             "column" : 23,
             "source_fragment" : "meta.flow_level == 0 && (pkt_val & 63) == 0"
           },
@@ -4032,8 +4543,57 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon407",
+          "true_next" : "tbl_adaptmon434",
           "false_next" : "AdaptMonIngress.host_clone_table"
+        },
+        {
+          "name" : "node_42",
+          "id" : 15,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 448,
+            "column" : 17,
+            "source_fragment" : "new_flow"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "d2b",
+              "left" : null,
+              "right" : {
+                "type" : "field",
+                "value" : ["scalars", "new_flow_0"]
+              }
+            }
+          },
+          "false_next" : "tbl_adaptmon449",
+          "true_next" : "node_44"
+        },
+        {
+          "name" : "node_44",
+          "id" : 16,
+          "source_info" : {
+            "filename" : "p4/adaptmon.p4",
+            "line" : 451,
+            "column" : 16,
+            "source_fragment" : "meta.do_drop == 1"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["scalars", "metadata_t.do_drop"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x01"
+              }
+            }
+          },
+          "true_next" : "tbl_adaptmon452",
+          "false_next" : "tbl_adaptmon454"
         }
       ]
     },
@@ -4042,18 +4602,18 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 424,
+        "line" : 462,
         "column" : 8,
         "source_fragment" : "AdaptMonEgress"
       },
-      "init_table" : "node_43",
+      "init_table" : "node_50",
       "tables" : [
         {
-          "name" : "tbl_adaptmon442",
-          "id" : 24,
+          "name" : "tbl_adaptmon480",
+          "id" : 29,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 442,
+            "line" : 480,
             "column" : 12,
             "source_fragment" : "hdr.cpu_hdr.setValid(); ..."
           },
@@ -4064,25 +4624,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [29],
-          "actions" : ["adaptmon442"],
+          "action_ids" : [35],
+          "actions" : ["adaptmon480"],
           "base_default_next" : null,
           "next_tables" : {
-            "adaptmon442" : null
+            "adaptmon480" : null
           },
           "default_entry" : {
-            "action_id" : 29,
+            "action_id" : 35,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon455",
-          "id" : 25,
+          "name" : "tbl_adaptmon493",
+          "id" : 30,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 455,
+            "line" : 493,
             "column" : 16,
             "source_fragment" : "clone_preserving_field_list( ..."
           },
@@ -4093,25 +4653,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [30],
-          "actions" : ["adaptmon455"],
-          "base_default_next" : "node_48",
+          "action_ids" : [36],
+          "actions" : ["adaptmon493"],
+          "base_default_next" : "node_55",
           "next_tables" : {
-            "adaptmon455" : "node_48"
+            "adaptmon493" : "node_55"
           },
           "default_entry" : {
-            "action_id" : 30,
+            "action_id" : 36,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon459",
-          "id" : 26,
+          "name" : "tbl_adaptmon497",
+          "id" : 31,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 459,
+            "line" : 497,
             "column" : 16,
             "source_fragment" : "mark_to_drop(std_meta); ..."
           },
@@ -4122,25 +4682,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [31],
-          "actions" : ["adaptmon459"],
+          "action_ids" : [37],
+          "actions" : ["adaptmon497"],
           "base_default_next" : null,
           "next_tables" : {
-            "adaptmon459" : null
+            "adaptmon497" : null
           },
           "default_entry" : {
-            "action_id" : 31,
+            "action_id" : 37,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_adaptmon462",
-          "id" : 27,
+          "name" : "tbl_adaptmon500",
+          "id" : 32,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 462,
+            "line" : 500,
             "column" : 16,
             "source_fragment" : "fwd_counter.count(0)"
           },
@@ -4151,14 +4711,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [32],
-          "actions" : ["adaptmon462"],
+          "action_ids" : [38],
+          "actions" : ["adaptmon500"],
           "base_default_next" : null,
           "next_tables" : {
-            "adaptmon462" : null
+            "adaptmon500" : null
           },
           "default_entry" : {
-            "action_id" : 32,
+            "action_id" : 38,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4168,11 +4728,11 @@
       "action_profiles" : [],
       "conditionals" : [
         {
-          "name" : "node_43",
-          "id" : 15,
+          "name" : "node_50",
+          "id" : 17,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 439,
+            "line" : 477,
             "column" : 12,
             "source_fragment" : "std_meta.instance_type == 2"
           },
@@ -4190,15 +4750,15 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon442",
-          "false_next" : "node_45"
+          "true_next" : "tbl_adaptmon480",
+          "false_next" : "node_52"
         },
         {
-          "name" : "node_45",
-          "id" : 16,
+          "name" : "node_52",
+          "id" : 18,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 450,
+            "line" : 488,
             "column" : 19,
             "source_fragment" : "std_meta.instance_type == 0 ..."
           },
@@ -4234,14 +4794,14 @@
             }
           },
           "false_next" : null,
-          "true_next" : "node_46"
+          "true_next" : "node_53"
         },
         {
-          "name" : "node_46",
-          "id" : 17,
+          "name" : "node_53",
+          "id" : 19,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 454,
+            "line" : 492,
             "column" : 16,
             "source_fragment" : "meta.do_clone == 1"
           },
@@ -4259,15 +4819,15 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon455",
-          "false_next" : "node_48"
+          "true_next" : "tbl_adaptmon493",
+          "false_next" : "node_55"
         },
         {
-          "name" : "node_48",
-          "id" : 18,
+          "name" : "node_55",
+          "id" : 20,
           "source_info" : {
             "filename" : "p4/adaptmon.p4",
-            "line" : 458,
+            "line" : 496,
             "column" : 16,
             "source_fragment" : "meta.do_drop == 1"
           },
@@ -4285,8 +4845,8 @@
               }
             }
           },
-          "true_next" : "tbl_adaptmon459",
-          "false_next" : "tbl_adaptmon462"
+          "true_next" : "tbl_adaptmon497",
+          "false_next" : "tbl_adaptmon500"
         }
       ]
     }
@@ -4297,7 +4857,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 474,
+        "line" : 512,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -4323,7 +4883,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/adaptmon.p4",
-        "line" : 172,
+        "line" : 176,
         "column" : 8,
         "source_fragment" : "verify_checksum( ..."
       },

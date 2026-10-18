@@ -1,0 +1,2967 @@
+{
+  "n_flows": 1300,
+  "overall": {
+    "tp": 784,
+    "fn": 56,
+    "fp": 33,
+    "tn": 427,
+    "tpr": 0.9333333333333333,
+    "tpr_ci95": [
+      0.9142978150521913,
+      0.9492513000161471
+    ],
+    "fpr": 0.07173913043478261,
+    "fpr_ci95": [
+      0.04989339467953021,
+      0.09927577164472229
+    ]
+  },
+  "benign": {
+    "n": 460,
+    "n_escalated_clone_or_above": 33,
+    "false_positives_by_trigger": {
+      "IF-flow": {
+        "k": 30,
+        "n": 460,
+        "rate": 0.06521739130434782,
+        "ci95": [
+          0.044430941215879864,
+          0.09179544155668266
+        ]
+      },
+      "IF-pair": {
+        "k": 1,
+        "n": 460,
+        "rate": 0.002173913043478261,
+        "ci95": [
+          5.503719840714834e-05,
+          0.01205225132249248
+        ]
+      },
+      "DPI-head": {
+        "k": 2,
+        "n": 460,
+        "rate": 0.004347826086956522,
+        "ci95": [
+          0.0005269762972641707,
+          0.015616901704441724
+        ]
+      }
+    },
+    "n_dropped": 0,
+    "drop_rate": 0.0,
+    "packet_drops": {
+      "flows_with_dropped_packets": 12,
+      "packets_dropped": 222,
+      "packets_seen": 75257,
+      "dropped_share": 0.0029498917044261663,
+      "packets_delivered_after_drop": 22299,
+      "flows_with_delivery_after_drop": 19
+    }
+  },
+  "per_attack_class": {
+    "null_scan": {
+      "n": 320,
+      "n_observed": 318,
+      "detected_clone_or_above": 320,
+      "detected_recall": 1.0,
+      "detected_recall_ci95": [
+        0.9885384416119251,
+        1.0
+      ],
+      "recall_by_trigger": {
+        "IF-pair": {
+          "k": 16,
+          "n": 320,
+          "rate": 0.05,
+          "ci95": [
+            0.02884590142849765,
+            0.07992853850509973
+          ]
+        },
+        "DPI-head": {
+          "k": 304,
+          "n": 320,
+          "rate": 0.95,
+          "ci95": [
+            0.9200714614949003,
+            0.9711540985715024
+          ]
+        }
+      },
+      "detect_latency_s": {
+        "n": 320,
+        "mean": 0.5536031261086464,
+        "median": 0.5337625741958618,
+        "p95": 0.9598100066184998,
+        "max": 1.043628215789795
+      },
+      "dpi_confirmed": 320,
+      "dpi_confirmed_recall": 1.0,
+      "dpi_confirmed_recall_ci95": [
+        0.9885384416119251,
+        1.0
+      ],
+      "dpi_latency_s": {
+        "n": 320,
+        "mean": 0.11063310280442237,
+        "median": 0.11408710479736328,
+        "p95": 0.16773899793624877,
+        "max": 0.19231176376342773
+      },
+      "dropped": 318,
+      "packet_drops": {
+        "flows_with_dropped_packets": 72,
+        "packets_dropped": 144,
+        "packets_seen": 397,
+        "dropped_share": 0.36272040302267,
+        "packets_delivered_after_drop": 0,
+        "flows_with_delivery_after_drop": 0
+      },
+      "time_to_drop": {
+        "n_phases": 40,
+        "n_phases_dropped": 40,
+        "n_phases_drop_in_force_at_start": 10,
+        "per_phase_s": {
+          "n": 40,
+          "mean": 0.4017286360263824,
+          "median": 0.39548182487487793,
+          "p95": 0.9516056180000305,
+          "max": 0.966027021408081
+        },
+        "n_flows_dropped": 320,
+        "per_flow_s": {
+          "n": 320,
+          "mean": 0.40170800164341924,
+          "median": 0.3954664468765259,
+          "p95": 0.9516039729118349,
+          "max": 0.966027021408081
+        }
+      }
+    },
+    "rate_spike": {
+      "n": 40,
+      "n_observed": 40,
+      "detected_clone_or_above": 40,
+      "detected_recall": 1.0,
+      "detected_recall_ci95": [
+        0.9119026971211976,
+        1.0
+      ],
+      "recall_by_trigger": {
+        "IF-flow": {
+          "k": 40,
+          "n": 40,
+          "rate": 1.0,
+          "ci95": [
+            0.9119026971211976,
+            1.0
+          ]
+        }
+      },
+      "detect_latency_s": {
+        "n": 40,
+        "mean": 3.070946753025055,
+        "median": 1.7821269035339355,
+        "p95": 7.542651867866516,
+        "max": 7.804153919219971
+      },
+      "dpi_confirmed": 0,
+      "dpi_confirmed_recall": 0.0,
+      "dpi_confirmed_recall_ci95": [
+        0.0,
+        0.08809730287880237
+      ],
+      "dpi_latency_s": {
+        "n": 0
+      },
+      "dropped": 0,
+      "packet_drops": {
+        "flows_with_dropped_packets": 0,
+        "packets_dropped": 0,
+        "packets_seen": 199343,
+        "dropped_share": 0.0,
+        "packets_delivered_after_drop": 0,
+        "flows_with_delivery_after_drop": 0
+      },
+      "time_to_drop": {
+        "n_phases": 40,
+        "n_phases_dropped": 0,
+        "n_phases_drop_in_force_at_start": 0,
+        "per_phase_s": {
+          "n": 0
+        },
+        "n_flows_dropped": 0,
+        "per_flow_s": {
+          "n": 0
+        }
+      }
+    },
+    "sqli": {
+      "n": 160,
+      "n_observed": 160,
+      "detected_clone_or_above": 160,
+      "detected_recall": 1.0,
+      "detected_recall_ci95": [
+        0.9772082505445334,
+        1.0
+      ],
+      "recall_by_trigger": {
+        "DPI-head": {
+          "k": 160,
+          "n": 160,
+          "rate": 1.0,
+          "ci95": [
+            0.9772082505445334,
+            1.0
+          ]
+        }
+      },
+      "detect_latency_s": {
+        "n": 160,
+        "mean": 0.46130654960870743,
+        "median": 0.45902788639068604,
+        "p95": 0.9101805806159972,
+        "max": 1.0181777477264404
+      },
+      "dpi_confirmed": 160,
+      "dpi_confirmed_recall": 1.0,
+      "dpi_confirmed_recall_ci95": [
+        0.9772082505445334,
+        1.0
+      ],
+      "dpi_latency_s": {
+        "n": 160,
+        "mean": 0.04831302613019943,
+        "median": 0.033550143241882324,
+        "p95": 0.10222053527832031,
+        "max": 0.14966702461242676
+      },
+      "dropped": 160,
+      "packet_drops": {
+        "flows_with_dropped_packets": 0,
+        "packets_dropped": 0,
+        "packets_seen": 901,
+        "dropped_share": 0.0,
+        "packets_delivered_after_drop": 0,
+        "flows_with_delivery_after_drop": 0
+      },
+      "time_to_drop": {
+        "n_phases": 40,
+        "n_phases_dropped": 40,
+        "n_phases_drop_in_force_at_start": 2,
+        "per_phase_s": {
+          "n": 40,
+          "mean": 0.41414604187011717,
+          "median": 0.44024980068206787,
+          "p95": 0.8843750953674316,
+          "max": 0.9096643924713135
+        },
+        "n_flows_dropped": 160,
+        "per_flow_s": {
+          "n": 160,
+          "mean": 0.46130654960870743,
+          "median": 0.45902788639068604,
+          "p95": 0.9101805806159972,
+          "max": 1.0181777477264404
+        }
+      }
+    },
+    "syn_scan": {
+      "n": 320,
+      "n_observed": 320,
+      "detected_clone_or_above": 264,
+      "detected_recall": 0.825,
+      "detected_recall_ci95": [
+        0.7788476404610364,
+        0.8650152704448397
+      ],
+      "recall_by_trigger": {
+        "IF-pair": {
+          "k": 98,
+          "n": 320,
+          "rate": 0.30625,
+          "ci95": [
+            0.25618646920276267,
+            0.35994309422929277
+          ]
+        },
+        "DPI-head": {
+          "k": 166,
+          "n": 320,
+          "rate": 0.51875,
+          "ci95": [
+            0.4624887324464663,
+            0.574661050484788
+          ]
+        }
+      },
+      "detect_latency_s": {
+        "n": 264,
+        "mean": 1.016721439180952,
+        "median": 0.7101638317108154,
+        "p95": 2.792680084705353,
+        "max": 2.9266586303710938
+      },
+      "dpi_confirmed": 264,
+      "dpi_confirmed_recall": 0.825,
+      "dpi_confirmed_recall_ci95": [
+        0.7788476404610364,
+        0.8650152704448397
+      ],
+      "dpi_latency_s": {
+        "n": 264,
+        "mean": 0.6410569693102981,
+        "median": 0.11806094646453857,
+        "p95": 2.1557067155838014,
+        "max": 2.1634445190429688
+      },
+      "dropped": 264,
+      "packet_drops": {
+        "flows_with_dropped_packets": 80,
+        "packets_dropped": 136,
+        "packets_seen": 400,
+        "dropped_share": 0.34,
+        "packets_delivered_after_drop": 40,
+        "flows_with_delivery_after_drop": 40
+      },
+      "time_to_drop": {
+        "n_phases": 40,
+        "n_phases_dropped": 33,
+        "n_phases_drop_in_force_at_start": 12,
+        "per_phase_s": {
+          "n": 33,
+          "mean": 0.33522841424653027,
+          "median": 0.20514321327209473,
+          "p95": 0.9815692901611328,
+          "max": 1.0327582359313965
+        },
+        "n_flows_dropped": 264,
+        "per_flow_s": {
+          "n": 264,
+          "mean": 0.33518963329719775,
+          "median": 0.20510053634643555,
+          "p95": 0.9954198360443115,
+          "max": 1.0327582359313965
+        }
+      }
+    }
+  },
+  "attack_packet_drops": {
+    "flows_with_dropped_packets": 152,
+    "packets_dropped": 280,
+    "packets_seen": 201041,
+    "dropped_share": 0.001392750732437662,
+    "packets_delivered_after_drop": 40,
+    "flows_with_delivery_after_drop": 40
+  },
+  "attack_time_to_drop": {
+    "n_phases": 160,
+    "n_phases_dropped": 113,
+    "n_phases_drop_in_force_at_start": 24,
+    "per_phase_s": {
+      "n": 113,
+      "mean": 0.3867037591681016,
+      "median": 0.3635120391845703,
+      "p95": 0.9310776710510251,
+      "max": 1.0327582359313965
+    },
+    "n_flows_dropped": 744,
+    "per_flow_s": {
+      "n": 744,
+      "mean": 0.39092160168514456,
+      "median": 0.3634871244430542,
+      "p95": 0.9594651103019715,
+      "max": 1.0327582359313965
+    }
+  },
+  "detect_latency_s_by_trigger": {
+    "IF-flow": {
+      "n": 40,
+      "mean": 3.070946753025055,
+      "median": 1.7821269035339355,
+      "p95": 7.542651867866516,
+      "max": 7.804153919219971
+    },
+    "IF-pair": {
+      "n": 114,
+      "mean": 1.6064904781810023,
+      "median": 2.0007888078689575,
+      "p95": 2.9266340494155885,
+      "max": 2.9266586303710938
+    },
+    "DPI-head": {
+      "n": 630,
+      "mean": 0.5337088789258685,
+      "median": 0.550696611404419,
+      "p95": 0.9660188674926757,
+      "max": 2.926630973815918
+    }
+  },
+  "inspection": {
+    "forwarded_packets": 622062,
+    "cloned_packets": 220364,
+    "cloned_per_forwarded": 0.35424764734061875,
+    "inspection_reduction_packets": 0.6457523526593812,
+    "forwarded_bytes": 266025030,
+    "cloned_bytes": 78745710,
+    "inspection_reduction_bytes": 0.7039913499868791,
+    "dropped_packets": 543,
+    "inspection_reduction_packets_incl_dropped": 0.6460613069281487,
+    "per_run_reduction_packets": [
+      0.8854498280911753,
+      0.5685293524309059,
+      0.4429029235529869,
+      0.580610995266938,
+      0.7507582200683601
+    ],
+    "clones_by_reason": {
+      "head": {
+        "packets": 11286,
+        "bytes": 1100698,
+        "share_of_forwarded_packets": 0.018142886078879598,
+        "share_of_forwarded_bytes": 0.004137573069722049
+      },
+      "sample": {
+        "packets": 23743,
+        "bytes": 11391074,
+        "share_of_forwarded_packets": 0.038168221174095185,
+        "share_of_forwarded_bytes": 0.04281955724241437
+      },
+      "level": {
+        "packets": 168266,
+        "bytes": 44767319,
+        "share_of_forwarded_packets": 0.27049715301690186,
+        "share_of_forwarded_bytes": 0.1682823567391384
+      },
+      "hostpair": {
+        "packets": 17069,
+        "bytes": 21486619,
+        "share_of_forwarded_packets": 0.027439387070742144,
+        "share_of_forwarded_bytes": 0.08076916296184611
+      }
+    }
+  },
+  "drop_accounting": {
+    "switch_dropped_packets": 543,
+    "attributed_attack": 280,
+    "attributed_benign": 222,
+    "attributed_share": 0.9244935543278084,
+    "switch_dropped_bytes": 344818
+  },
+  "capacity": {
+    "budget_pps": 2500,
+    "max_pps": 3470.114943184574,
+    "windows_over_budget": 7,
+    "dpi_kernel_drops": 24920,
+    "dpi_kernel_received": 180947
+  },
+  "resources": {
+    "poll_total_ms": {
+      "n": 1168,
+      "mean": 233.10860930643375,
+      "p95_max_over_runs": 670.1869530006661,
+      "max": 1597.197409002547
+    },
+    "poll_read_ms": {
+      "n": 1168,
+      "mean": 187.40396692194935,
+      "p95_max_over_runs": 514.4593095001255,
+      "max": 1572.723755001789
+    },
+    "controller_cpu_pct": {
+      "n": 1168,
+      "mean": 18.671549650650388,
+      "p95_max_over_runs": 75.2,
+      "max": 91.0
+    },
+    "controller_rss_mb": {
+      "n": 1168,
+      "mean": 146.39126641475937,
+      "p95_max_over_runs": 147.28515625,
+      "max": 147.3203125
+    },
+    "dpi_cpu_pct": {
+      "n": 1168,
+      "mean": 9.921874747547147,
+      "p95_max_over_runs": 88.825,
+      "max": 108.8
+    },
+    "dpi_rss_mb": {
+      "n": 1168,
+      "mean": 174.10905898686045,
+      "p95_max_over_runs": 180.984375,
+      "max": 180.984375
+    }
+  },
+  "series_dir": "results/paper_run_D",
+  "n_runs": 5,
+  "per_run": {
+    "run_01": {
+      "n_flows": 264,
+      "overall": {
+        "tp": 160,
+        "fn": 8,
+        "fp": 5,
+        "tn": 91,
+        "tpr": 0.9523809523809523,
+        "tpr_ci95": [
+          0.9083298342350349,
+          0.979220179424047
+        ],
+        "fpr": 0.052083333333333336,
+        "fpr_ci95": [
+          0.017125282440164674,
+          0.11737120004655993
+        ]
+      },
+      "benign": {
+        "n": 96,
+        "n_escalated_clone_or_above": 5,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 5,
+            "n": 96,
+            "rate": 0.052083333333333336,
+            "ci95": [
+              0.017125282440164674,
+              0.11737120004655993
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0,
+        "packet_drops": {
+          "flows_with_dropped_packets": 1,
+          "packets_dropped": 25,
+          "packets_seen": 14633,
+          "dropped_share": 0.001708467163261122,
+          "packets_delivered_after_drop": 1849,
+          "flows_with_delivery_after_drop": 2
+        }
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 64,
+              "n": 64,
+              "rate": 1.0,
+              "ci95": [
+                0.9439909106133634,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.7377072796225548,
+            "median": 0.7953590154647827,
+            "p95": 0.9660049080848694,
+            "max": 0.966027021408081
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.0972788892686367,
+            "median": 0.11217916011810303,
+            "p95": 0.12537492513656617,
+            "max": 0.12538504600524902
+          },
+          "dropped": 64,
+          "packet_drops": {
+            "flows_with_dropped_packets": 24,
+            "packets_dropped": 48,
+            "packets_seen": 95,
+            "dropped_share": 0.5052631578947369,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 3,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.45235294103622437,
+              "median": 0.5310317277908325,
+              "p95": 0.9491016507148743,
+              "max": 0.966027021408081
+            },
+            "n_flows_dropped": 64,
+            "per_flow_s": {
+              "n": 64,
+              "mean": 0.4523446448147297,
+              "median": 0.5310250520706177,
+              "p95": 0.9660049080848694,
+              "max": 0.966027021408081
+            }
+          }
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 8,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.6305833524471807,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 8,
+              "n": 8,
+              "rate": 1.0,
+              "ci95": [
+                0.6305833524471807,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 8,
+            "mean": 5.965427219867706,
+            "median": 6.085998177528381,
+            "p95": 6.617126393318176,
+            "max": 6.659176588058472
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 39996,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 0,
+            "n_phases_drop_in_force_at_start": 0,
+            "per_phase_s": {
+              "n": 0
+            },
+            "n_flows_dropped": 0,
+            "per_flow_s": {
+              "n": 0
+            }
+          }
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.4962635189294815,
+            "median": 0.507157564163208,
+            "p95": 0.9378177285194397,
+            "max": 0.9613771438598633
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.02633727341890335,
+            "median": 0.02394270896911621,
+            "p95": 0.04018913507461548,
+            "max": 0.04177999496459961
+          },
+          "dropped": 32,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 171,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 0,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.36041173338890076,
+              "median": 0.26127004623413086,
+              "p95": 0.7301497220993042,
+              "max": 0.7515575885772705
+            },
+            "n_flows_dropped": 32,
+            "per_flow_s": {
+              "n": 32,
+              "mean": 0.4962635189294815,
+              "median": 0.507157564163208,
+              "p95": 0.9378177285194397,
+              "max": 0.9613771438598633
+            }
+          }
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 56,
+          "detected_recall": 0.875,
+          "detected_recall_ci95": [
+            0.7684736940339959,
+            0.944457208820398
+          ],
+          "recall_by_trigger": {
+            "IF-pair": {
+              "k": 16,
+              "n": 64,
+              "rate": 0.25,
+              "ci95": [
+                0.15015557408527277,
+                0.3739904568818191
+              ]
+            },
+            "DPI-head": {
+              "k": 40,
+              "n": 64,
+              "rate": 0.625,
+              "ci95": [
+                0.4950764600526648,
+                0.7429510775519335
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 56,
+            "mean": 0.6393417290278843,
+            "median": 0.5660847425460815,
+            "p95": 2.000789761543274,
+            "max": 2.000798463821411
+          },
+          "dpi_confirmed": 56,
+          "dpi_confirmed_recall": 0.875,
+          "dpi_confirmed_recall_ci95": [
+            0.7684736940339959,
+            0.944457208820398
+          ],
+          "dpi_latency_s": {
+            "n": 56,
+            "mean": 0.3505638326917376,
+            "median": 0.0614013671875,
+            "p95": 2.0568751096725464,
+            "max": 2.0568838119506836
+          },
+          "dropped": 56,
+          "packet_drops": {
+            "flows_with_dropped_packets": 16,
+            "packets_dropped": 32,
+            "packets_seen": 80,
+            "dropped_share": 0.4,
+            "packets_delivered_after_drop": 8,
+            "flows_with_delivery_after_drop": 8
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 7,
+            "n_phases_drop_in_force_at_start": 3,
+            "per_phase_s": {
+              "n": 7,
+              "mean": 0.19451291220528738,
+              "median": 0.008798360824584961,
+              "p95": 0.5843666553497314,
+              "max": 0.5921874046325684
+            },
+            "n_flows_dropped": 56,
+            "per_flow_s": {
+              "n": 56,
+              "mean": 0.1945037373474666,
+              "median": 0.008787751197814941,
+              "p95": 0.5921776294708252,
+              "max": 0.5921874046325684
+            }
+          }
+        }
+      },
+      "attack_packet_drops": {
+        "flows_with_dropped_packets": 40,
+        "packets_dropped": 80,
+        "packets_seen": 40342,
+        "dropped_share": 0.0019830449655445937,
+        "packets_delivered_after_drop": 8,
+        "flows_with_delivery_after_drop": 8
+      },
+      "attack_time_to_drop": {
+        "n_phases": 32,
+        "n_phases_dropped": 23,
+        "n_phases_drop_in_force_at_start": 6,
+        "per_phase_s": {
+          "n": 23,
+          "mean": 0.3419003382973049,
+          "median": 0.23118281364440918,
+          "p95": 0.901057696342468,
+          "max": 0.966027021408081
+        },
+        "n_flows_dropped": 152,
+        "per_flow_s": {
+          "n": 152,
+          "mean": 0.36659670503515945,
+          "median": 0.35593318939208984,
+          "p95": 0.963456392288208,
+          "max": 0.966027021408081
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 8,
+          "mean": 5.965427219867706,
+          "median": 6.085998177528381,
+          "p95": 6.617126393318176,
+          "max": 6.659176588058472
+        },
+        "IF-pair": {
+          "n": 16,
+          "mean": 1.1239853650331497,
+          "median": 1.1239882707595825,
+          "p95": 2.0007936358451843,
+          "max": 2.000798463821411
+        },
+        "DPI-head": {
+          "n": 136,
+          "mean": 0.5949490403427797,
+          "median": 0.6328797340393066,
+          "p95": 0.9659979343414307,
+          "max": 0.966027021408081
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 125648,
+        "cloned_packets": 14393,
+        "cloned_per_forwarded": 0.11455017190882465,
+        "inspection_reduction_packets": 0.8854498280911753,
+        "forwarded_bytes": 52164414,
+        "cloned_bytes": 7398197,
+        "inspection_reduction_bytes": 0.8581754028713904,
+        "dropped_packets": 109,
+        "inspection_reduction_packets_incl_dropped": 0.8855491145622112,
+        "per_run_reduction_packets": [
+          0.8854498280911753
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2288,
+            "bytes": 224415,
+            "share_of_forwarded_packets": 0.018209601426206545,
+            "share_of_forwarded_bytes": 0.004302070756512284
+          },
+          "sample": {
+            "packets": 9603,
+            "bytes": 3546350,
+            "share_of_forwarded_packets": 0.07642779829364574,
+            "share_of_forwarded_bytes": 0.06798408585592469
+          },
+          "level": {
+            "packets": 2230,
+            "bytes": 3332555,
+            "share_of_forwarded_packets": 0.017747994397045715,
+            "share_of_forwarded_bytes": 0.06388560216549159
+          },
+          "hostpair": {
+            "packets": 272,
+            "bytes": 294877,
+            "share_of_forwarded_packets": 0.0021647777919266524,
+            "share_of_forwarded_bytes": 0.005652838350680984
+          }
+        }
+      },
+      "drop_accounting": {
+        "switch_dropped_packets": 109,
+        "attributed_attack": 80,
+        "attributed_benign": 25,
+        "attributed_share": 0.963302752293578,
+        "switch_dropped_bytes": 42594
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 1570.853907324958,
+            "p99_pps": 1141.364740757507,
+            "windows_over_budget": 0,
+            "n_windows": 268
+          },
+          "2": {
+            "max_pps": 1235.035334644355,
+            "p99_pps": 1155.5767186222622,
+            "windows_over_budget": 0,
+            "n_windows": 268
+          }
+        },
+        "max_pps": 1570.853907324958,
+        "windows_over_budget": 0,
+        "dpi_kernel_received": 10209,
+        "dpi_kernel_drops": 0
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 235,
+          "mean": 132.21249382977282,
+          "median": 121.61217299944838,
+          "p95": 177.30365110000986,
+          "max": 1131.9687489994976
+        },
+        "poll_read_ms": {
+          "n": 235,
+          "mean": 107.77864345964576,
+          "median": 98.04982999776256,
+          "p95": 140.2082867014541,
+          "max": 1099.926687002153
+        },
+        "controller_cpu_pct": {
+          "n": 235,
+          "mean": 10.20340425531915,
+          "median": 9.9,
+          "p95": 13.659999999999997,
+          "max": 23.2
+        },
+        "controller_rss_mb": {
+          "n": 235,
+          "mean": 146.17204122340425,
+          "median": 146.21875,
+          "p95": 146.58984375,
+          "max": 146.68359375
+        },
+        "dpi_cpu_pct": {
+          "n": 235,
+          "mean": 3.2148936170212767,
+          "median": 1.9,
+          "p95": 16.229999999999997,
+          "max": 21.5
+        },
+        "dpi_rss_mb": {
+          "n": 235,
+          "mean": 172.60309175531916,
+          "median": 172.66796875,
+          "p95": 174.262890625,
+          "max": 174.2734375
+        }
+      }
+    },
+    "run_02": {
+      "n_flows": 259,
+      "overall": {
+        "tp": 152,
+        "fn": 16,
+        "fp": 5,
+        "tn": 86,
+        "tpr": 0.9047619047619048,
+        "tpr_ci95": [
+          0.8499480089523902,
+          0.944578233079393
+        ],
+        "fpr": 0.054945054945054944,
+        "fpr_ci95": [
+          0.01807892650697888,
+          0.12358107731838751
+        ]
+      },
+      "benign": {
+        "n": 91,
+        "n_escalated_clone_or_above": 5,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 3,
+            "n": 91,
+            "rate": 0.03296703296703297,
+            "ci95": [
+              0.006850886310878659,
+              0.09333242800564356
+            ]
+          },
+          "IF-pair": {
+            "k": 1,
+            "n": 91,
+            "rate": 0.01098901098901099,
+            "ci95": [
+              0.0002781789712100313,
+              0.059710812816331664
+            ]
+          },
+          "DPI-head": {
+            "k": 1,
+            "n": 91,
+            "rate": 0.01098901098901099,
+            "ci95": [
+              0.0002781789712100313,
+              0.059710812816331664
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0,
+        "packet_drops": {
+          "flows_with_dropped_packets": 3,
+          "packets_dropped": 35,
+          "packets_seen": 15429,
+          "dropped_share": 0.0022684555058655777,
+          "packets_delivered_after_drop": 4829,
+          "flows_with_delivery_after_drop": 4
+        }
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 63,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 64,
+              "n": 64,
+              "rate": 1.0,
+              "ci95": [
+                0.9439909106133634,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.4942382834851742,
+            "median": 0.39698970317840576,
+            "p95": 1.0435966372489929,
+            "max": 1.043628215789795
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.12668533995747566,
+            "median": 0.14445340633392334,
+            "p95": 0.16818259954452514,
+            "max": 0.16820812225341797
+          },
+          "dropped": 63,
+          "packet_drops": {
+            "flows_with_dropped_packets": 16,
+            "packets_dropped": 32,
+            "packets_seen": 79,
+            "dropped_share": 0.4050632911392405,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 2,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.3175638020038605,
+              "median": 0.343289852142334,
+              "p95": 0.6553213953971861,
+              "max": 0.7207660675048828
+            },
+            "n_flows_dropped": 64,
+            "per_flow_s": {
+              "n": 64,
+              "mean": 0.3175428509712219,
+              "median": 0.343265175819397,
+              "p95": 0.72071453332901,
+              "max": 0.7207660675048828
+            }
+          }
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 8,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.6305833524471807,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 8,
+              "n": 8,
+              "rate": 1.0,
+              "ci95": [
+                0.6305833524471807,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 8,
+            "mean": 1.64931720495224,
+            "median": 1.6342086791992188,
+            "p95": 2.088436245918274,
+            "max": 2.095484972000122
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 39765,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 0,
+            "n_phases_drop_in_force_at_start": 0,
+            "per_phase_s": {
+              "n": 0
+            },
+            "n_flows_dropped": 0,
+            "per_flow_s": {
+              "n": 0
+            }
+          }
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.46906255930662155,
+            "median": 0.4568324089050293,
+            "p95": 0.8979119896888733,
+            "max": 0.9448018074035645
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.052700430154800415,
+            "median": 0.05386459827423096,
+            "p95": 0.08131450414657593,
+            "max": 0.09008026123046875
+          },
+          "dropped": 32,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 193,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 1,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.42064088582992554,
+              "median": 0.42292308807373047,
+              "p95": 0.8173212885856628,
+              "max": 0.8798496723175049
+            },
+            "n_flows_dropped": 32,
+            "per_flow_s": {
+              "n": 32,
+              "mean": 0.46906255930662155,
+              "median": 0.4568324089050293,
+              "p95": 0.8979119896888733,
+              "max": 0.9448018074035645
+            }
+          }
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 48,
+          "detected_recall": 0.75,
+          "detected_recall_ci95": [
+            0.6260095431181809,
+            0.8498444259147272
+          ],
+          "recall_by_trigger": {
+            "IF-pair": {
+              "k": 15,
+              "n": 64,
+              "rate": 0.234375,
+              "ci95": [
+                0.13751547844059606,
+                0.3569341103962659
+              ]
+            },
+            "DPI-head": {
+              "k": 33,
+              "n": 64,
+              "rate": 0.515625,
+              "ci95": [
+                0.3872588082204235,
+                0.6424980032802374
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 48,
+            "mean": 1.2598674694697063,
+            "median": 0.8622022867202759,
+            "p95": 2.5867396235466003,
+            "max": 2.586763620376587
+          },
+          "dpi_confirmed": 48,
+          "dpi_confirmed_recall": 0.75,
+          "dpi_confirmed_recall_ci95": [
+            0.6260095431181809,
+            0.8498444259147272
+          ],
+          "dpi_latency_s": {
+            "n": 48,
+            "mean": 0.7709489713112513,
+            "median": 0.12272083759307861,
+            "p95": 2.1501515746116637,
+            "max": 2.1501755714416504
+          },
+          "dropped": 48,
+          "packet_drops": {
+            "flows_with_dropped_packets": 16,
+            "packets_dropped": 24,
+            "packets_seen": 80,
+            "dropped_share": 0.3,
+            "packets_delivered_after_drop": 8,
+            "flows_with_delivery_after_drop": 8
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 6,
+            "n_phases_drop_in_force_at_start": 2,
+            "per_phase_s": {
+              "n": 6,
+              "mean": 0.5011260112126669,
+              "median": 0.6411682367324829,
+              "p95": 0.9288214445114136,
+              "max": 0.9954330921173096
+            },
+            "n_flows_dropped": 48,
+            "per_flow_s": {
+              "n": 48,
+              "mean": 0.5009866505861282,
+              "median": 0.6407735347747803,
+              "p95": 0.9954229831695557,
+              "max": 0.9954330921173096
+            }
+          }
+        }
+      },
+      "attack_packet_drops": {
+        "flows_with_dropped_packets": 32,
+        "packets_dropped": 56,
+        "packets_seen": 40117,
+        "dropped_share": 0.001395916942941895,
+        "packets_delivered_after_drop": 8,
+        "flows_with_delivery_after_drop": 8
+      },
+      "attack_time_to_drop": {
+        "n_phases": 32,
+        "n_phases_dropped": 22,
+        "n_phases_drop_in_force_at_start": 5,
+        "per_phase_s": {
+          "n": 22,
+          "mean": 0.40510879863392224,
+          "median": 0.399969220161438,
+          "p95": 0.8723065137863159,
+          "max": 0.9954330921173096
+        },
+        "n_flows_dropped": 144,
+        "per_flow_s": {
+          "n": 144,
+          "mean": 0.41236183047294617,
+          "median": 0.4240093231201172,
+          "p95": 0.9878256320953366,
+          "max": 0.9954330921173096
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 8,
+          "mean": 1.64931720495224,
+          "median": 1.6342086791992188,
+          "p95": 2.088436245918274,
+          "max": 2.095484972000122
+        },
+        "IF-pair": {
+          "n": 15,
+          "mean": 2.255969206492106,
+          "median": 1.9665651321411133,
+          "p95": 2.5867522716522218,
+          "max": 2.586763620376587
+        },
+        "DPI-head": {
+          "n": 129,
+          "mean": 0.5680259882017623,
+          "median": 0.5337669849395752,
+          "p95": 1.0435837745666503,
+          "max": 2.5867412090301514
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 123925,
+        "cloned_packets": 53470,
+        "cloned_per_forwarded": 0.4314706475690942,
+        "inspection_reduction_packets": 0.5685293524309059,
+        "forwarded_bytes": 54207284,
+        "cloned_bytes": 10463094,
+        "inspection_reduction_bytes": 0.806979925428472,
+        "dropped_packets": 105,
+        "inspection_reduction_packets_incl_dropped": 0.5688946222688059,
+        "per_run_reduction_packets": [
+          0.5685293524309059
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2283,
+            "bytes": 226599,
+            "share_of_forwarded_packets": 0.018422432923138995,
+            "share_of_forwarded_bytes": 0.004180231571830826
+          },
+          "sample": {
+            "packets": 2611,
+            "bytes": 2032462,
+            "share_of_forwarded_packets": 0.021069195077667944,
+            "share_of_forwarded_bytes": 0.037494259996497886
+          },
+          "level": {
+            "packets": 46900,
+            "bytes": 5810556,
+            "share_of_forwarded_packets": 0.37845471051038937,
+            "share_of_forwarded_bytes": 0.10719142468012233
+          },
+          "hostpair": {
+            "packets": 1676,
+            "bytes": 2393477,
+            "share_of_forwarded_packets": 0.013524309057897923,
+            "share_of_forwarded_bytes": 0.04415415832307702
+          }
+        }
+      },
+      "drop_accounting": {
+        "switch_dropped_packets": 105,
+        "attributed_attack": 56,
+        "attributed_benign": 35,
+        "attributed_share": 0.8666666666666667,
+        "switch_dropped_bytes": 47162
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 2286.3663593595493,
+            "p99_pps": 2105.3667432749608,
+            "windows_over_budget": 0,
+            "n_windows": 269
+          },
+          "2": {
+            "max_pps": 2296.839865357532,
+            "p99_pps": 2178.959926721843,
+            "windows_over_budget": 0,
+            "n_windows": 269
+          }
+        },
+        "max_pps": 2296.839865357532,
+        "windows_over_budget": 0,
+        "dpi_kernel_received": 50041,
+        "dpi_kernel_drops": 1453
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 236,
+          "mean": 241.57169958469518,
+          "median": 250.02494899854355,
+          "p95": 382.166287248765,
+          "max": 656.0598789983487
+        },
+        "poll_read_ms": {
+          "n": 236,
+          "mean": 197.34837191103676,
+          "median": 201.73728200097685,
+          "p95": 303.11328825064265,
+          "max": 473.5580349988595
+        },
+        "controller_cpu_pct": {
+          "n": 236,
+          "mean": 19.72076271186441,
+          "median": 20.4,
+          "p95": 29.925,
+          "max": 42.3
+        },
+        "controller_rss_mb": {
+          "n": 236,
+          "mean": 146.75859043961864,
+          "median": 146.740234375,
+          "p95": 147.28515625,
+          "max": 147.3203125
+        },
+        "dpi_cpu_pct": {
+          "n": 236,
+          "mean": 13.301694915254236,
+          "median": 3.2,
+          "p95": 88.825,
+          "max": 103.3
+        },
+        "dpi_rss_mb": {
+          "n": 236,
+          "mean": 175.50564420021186,
+          "median": 175.509765625,
+          "p95": 180.984375,
+          "max": 180.984375
+        }
+      }
+    },
+    "run_03": {
+      "n_flows": 261,
+      "overall": {
+        "tp": 152,
+        "fn": 16,
+        "fp": 8,
+        "tn": 85,
+        "tpr": 0.9047619047619048,
+        "tpr_ci95": [
+          0.8499480089523902,
+          0.944578233079393
+        ],
+        "fpr": 0.08602150537634409,
+        "fpr_ci95": [
+          0.03787203609336513,
+          0.1624772433780166
+        ]
+      },
+      "benign": {
+        "n": 93,
+        "n_escalated_clone_or_above": 8,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 8,
+            "n": 93,
+            "rate": 0.08602150537634409,
+            "ci95": [
+              0.03787203609336513,
+              0.1624772433780166
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0,
+        "packet_drops": {
+          "flows_with_dropped_packets": 3,
+          "packets_dropped": 59,
+          "packets_seen": 16018,
+          "dropped_share": 0.003683356224247721,
+          "packets_delivered_after_drop": 6748,
+          "flows_with_delivery_after_drop": 5
+        }
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 63,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-pair": {
+              "k": 16,
+              "n": 64,
+              "rate": 0.25,
+              "ci95": [
+                0.15015557408527277,
+                0.3739904568818191
+              ]
+            },
+            "DPI-head": {
+              "k": 48,
+              "n": 64,
+              "rate": 0.75,
+              "ci95": [
+                0.6260095431181809,
+                0.8498444259147272
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.4897060841321945,
+            "median": 0.3634852170944214,
+            "p95": 0.9594602108001709,
+            "max": 0.959484338760376
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.10913079604506493,
+            "median": 0.11451530456542969,
+            "p95": 0.13942786455154416,
+            "max": 0.14573001861572266
+          },
+          "dropped": 63,
+          "packet_drops": {
+            "flows_with_dropped_packets": 8,
+            "packets_dropped": 16,
+            "packets_seen": 71,
+            "dropped_share": 0.22535211267605634,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 2,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.4310569763183594,
+              "median": 0.3551419973373413,
+              "p95": 0.9359727025032043,
+              "max": 0.959484338760376
+            },
+            "n_flows_dropped": 64,
+            "per_flow_s": {
+              "n": 64,
+              "mean": 0.43102939054369926,
+              "median": 0.35512804985046387,
+              "p95": 0.9594602108001709,
+              "max": 0.959484338760376
+            }
+          }
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 8,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.6305833524471807,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 8,
+              "n": 8,
+              "rate": 1.0,
+              "ci95": [
+                0.6305833524471807,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 8,
+            "mean": 1.698437362909317,
+            "median": 1.6754955053329468,
+            "p95": 1.9284205913543702,
+            "max": 1.9462754726409912
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 39776,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 0,
+            "n_phases_drop_in_force_at_start": 0,
+            "per_phase_s": {
+              "n": 0
+            },
+            "n_flows_dropped": 0,
+            "per_flow_s": {
+              "n": 0
+            }
+          }
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.45558732748031616,
+            "median": 0.512121319770813,
+            "p95": 0.8921183824539184,
+            "max": 1.0181777477264404
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.06195808947086334,
+            "median": 0.05248665809631348,
+            "p95": 0.12067722082138062,
+            "max": 0.14966702461242676
+          },
+          "dropped": 32,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 177,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 1,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.3250380754470825,
+              "median": 0.25694334506988525,
+              "p95": 0.7807135939598082,
+              "max": 0.9096643924713135
+            },
+            "n_flows_dropped": 32,
+            "per_flow_s": {
+              "n": 32,
+              "mean": 0.45558732748031616,
+              "median": 0.512121319770813,
+              "p95": 0.8921183824539184,
+              "max": 1.0181777477264404
+            }
+          }
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 48,
+          "detected_recall": 0.75,
+          "detected_recall_ci95": [
+            0.6260095431181809,
+            0.8498444259147272
+          ],
+          "recall_by_trigger": {
+            "IF-pair": {
+              "k": 37,
+              "n": 64,
+              "rate": 0.578125,
+              "ci95": [
+                0.44815862493697944,
+                0.7006191938565355
+              ]
+            },
+            "DPI-head": {
+              "k": 11,
+              "n": 64,
+              "rate": 0.171875,
+              "ci95": [
+                0.08904899632910289,
+                0.2867536578734714
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 48,
+            "mean": 1.0341249257326126,
+            "median": 0.8229738473892212,
+            "p95": 2.2103294253349306,
+            "max": 2.2103469371795654
+          },
+          "dpi_confirmed": 48,
+          "dpi_confirmed_recall": 0.75,
+          "dpi_confirmed_recall_ci95": [
+            0.6260095431181809,
+            0.8498444259147272
+          ],
+          "dpi_latency_s": {
+            "n": 48,
+            "mean": 0.7722905625899633,
+            "median": 0.14989233016967773,
+            "p95": 2.163427007198334,
+            "max": 2.1634445190429688
+          },
+          "dropped": 48,
+          "packet_drops": {
+            "flows_with_dropped_packets": 16,
+            "packets_dropped": 32,
+            "packets_seen": 80,
+            "dropped_share": 0.4,
+            "packets_delivered_after_drop": 8,
+            "flows_with_delivery_after_drop": 8
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 6,
+            "n_phases_drop_in_force_at_start": 3,
+            "per_phase_s": {
+              "n": 6,
+              "mean": 0.22304519017537436,
+              "median": 0.02509760856628418,
+              "p95": 0.8383980989456177,
+              "max": 1.0327582359313965
+            },
+            "n_flows_dropped": 48,
+            "per_flow_s": {
+              "n": 48,
+              "mean": 0.22303595642248789,
+              "median": 0.02509021759033203,
+              "p95": 1.0327454209327698,
+              "max": 1.0327582359313965
+            }
+          }
+        }
+      },
+      "attack_packet_drops": {
+        "flows_with_dropped_packets": 24,
+        "packets_dropped": 48,
+        "packets_seen": 40104,
+        "dropped_share": 0.0011968880909634949,
+        "packets_delivered_after_drop": 8,
+        "flows_with_delivery_after_drop": 8
+      },
+      "attack_time_to_drop": {
+        "n_phases": 32,
+        "n_phases_dropped": 22,
+        "n_phases_drop_in_force_at_start": 6,
+        "per_phase_s": {
+          "n": 22,
+          "mean": 0.33577416159889917,
+          "median": 0.23860442638397217,
+          "p95": 0.9569933414459229,
+          "max": 1.0327582359313965
+        },
+        "n_flows_dropped": 144,
+        "per_flow_s": {
+          "n": 144,
+          "mean": 0.367155565155877,
+          "median": 0.2552945613861084,
+          "p95": 1.0305541396141051,
+          "max": 1.0327582359313965
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 8,
+          "mean": 1.698437362909317,
+          "median": 1.6754955053329468,
+          "p95": 1.9284205913543702,
+          "max": 1.9462754726409912
+        },
+        "IF-pair": {
+          "n": 53,
+          "mean": 1.0826604231348578,
+          "median": 0.892195463180542,
+          "p95": 2.210329008102417,
+          "max": 2.2103469371795654
+        },
+        "DPI-head": {
+          "n": 91,
+          "mean": 0.41952722937196163,
+          "median": 0.3560447692871094,
+          "p95": 0.9594616889953613,
+          "max": 1.0327410697937012
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 127003,
+        "cloned_packets": 70753,
+        "cloned_per_forwarded": 0.5570970764470131,
+        "inspection_reduction_packets": 0.4429029235529869,
+        "forwarded_bytes": 56132590,
+        "cloned_bytes": 32767447,
+        "inspection_reduction_bytes": 0.4162491522304601,
+        "dropped_packets": 114,
+        "inspection_reduction_packets_incl_dropped": 0.4434025346727818,
+        "per_run_reduction_packets": [
+          0.4429029235529869
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2111,
+            "bytes": 203552,
+            "share_of_forwarded_packets": 0.016621654606584095,
+            "share_of_forwarded_bytes": 0.0036262712980106564
+          },
+          "sample": {
+            "packets": 1616,
+            "bytes": 1421052,
+            "share_of_forwarded_packets": 0.012724108879317811,
+            "share_of_forwarded_bytes": 0.025315988448065554
+          },
+          "level": {
+            "packets": 53621,
+            "bytes": 14731466,
+            "share_of_forwarded_packets": 0.42220262513483936,
+            "share_of_forwarded_bytes": 0.2624405180662428
+          },
+          "hostpair": {
+            "packets": 13405,
+            "bytes": 16411377,
+            "share_of_forwarded_packets": 0.10554868782627182,
+            "share_of_forwarded_bytes": 0.2923680699572209
+          }
+        }
+      },
+      "drop_accounting": {
+        "switch_dropped_packets": 114,
+        "attributed_attack": 48,
+        "attributed_benign": 59,
+        "attributed_share": 0.9385964912280702,
+        "switch_dropped_bytes": 92564
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 2503.3640742299144,
+            "p99_pps": 2159.9900900084144,
+            "windows_over_budget": 1,
+            "n_windows": 268
+          },
+          "2": {
+            "max_pps": 3470.114943184574,
+            "p99_pps": 2719.2501174450795,
+            "windows_over_budget": 4,
+            "n_windows": 268
+          }
+        },
+        "max_pps": 3470.114943184574,
+        "windows_over_budget": 5,
+        "dpi_kernel_received": 52783,
+        "dpi_kernel_drops": 9255
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 236,
+          "mean": 294.18425524984787,
+          "median": 245.60906199985766,
+          "p95": 639.0891205001026,
+          "max": 1205.749022999953
+        },
+        "poll_read_ms": {
+          "n": 236,
+          "mean": 238.46306942367985,
+          "median": 204.779055000472,
+          "p95": 514.4593095001255,
+          "max": 1176.8899870003224
+        },
+        "controller_cpu_pct": {
+          "n": 236,
+          "mean": 22.622457627118642,
+          "median": 19.55,
+          "p95": 43.525000000000006,
+          "max": 87.1
+        },
+        "controller_rss_mb": {
+          "n": 236,
+          "mean": 146.29185977224577,
+          "median": 146.28515625,
+          "p95": 146.81640625,
+          "max": 146.828125
+        },
+        "dpi_cpu_pct": {
+          "n": 236,
+          "mean": 13.60593220338983,
+          "median": 3.0,
+          "p95": 81.69999999999999,
+          "max": 104.1
+        },
+        "dpi_rss_mb": {
+          "n": 236,
+          "mean": 175.0647014036017,
+          "median": 175.416015625,
+          "p95": 179.734375,
+          "max": 179.73828125
+        }
+      }
+    },
+    "run_04": {
+      "n_flows": 257,
+      "overall": {
+        "tp": 160,
+        "fn": 8,
+        "fp": 6,
+        "tn": 83,
+        "tpr": 0.9523809523809523,
+        "tpr_ci95": [
+          0.9083298342350349,
+          0.979220179424047
+        ],
+        "fpr": 0.06741573033707865,
+        "fpr_ci95": [
+          0.02514052856839484,
+          0.1409795646912205
+        ]
+      },
+      "benign": {
+        "n": 89,
+        "n_escalated_clone_or_above": 6,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 5,
+            "n": 89,
+            "rate": 0.056179775280898875,
+            "ci95": [
+              0.018490804666485516,
+              0.1262527960497284
+            ]
+          },
+          "DPI-head": {
+            "k": 1,
+            "n": 89,
+            "rate": 0.011235955056179775,
+            "ci95": [
+              0.0002844292949488092,
+              0.06101830434708265
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0,
+        "packet_drops": {
+          "flows_with_dropped_packets": 2,
+          "packets_dropped": 28,
+          "packets_seen": 14467,
+          "dropped_share": 0.0019354392755927283,
+          "packets_delivered_after_drop": 4392,
+          "flows_with_delivery_after_drop": 4
+        }
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 64,
+              "n": 64,
+              "rate": 1.0,
+              "ci95": [
+                0.9439909106133634,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.41868017241358757,
+            "median": 0.43092477321624756,
+            "p95": 0.6510163426399231,
+            "max": 0.6511080265045166
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.14208365231752396,
+            "median": 0.13402223587036133,
+            "p95": 0.19220170974731446,
+            "max": 0.19231176376342773
+          },
+          "dropped": 64,
+          "packet_drops": {
+            "flows_with_dropped_packets": 8,
+            "packets_dropped": 16,
+            "packets_seen": 72,
+            "dropped_share": 0.2222222222222222,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 1,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.36942529678344727,
+              "median": 0.426405668258667,
+              "p95": 0.6204886674880981,
+              "max": 0.6511080265045166
+            },
+            "n_flows_dropped": 64,
+            "per_flow_s": {
+              "n": 64,
+              "mean": 0.3693884462118149,
+              "median": 0.42639195919036865,
+              "p95": 0.6510163426399231,
+              "max": 0.6511080265045166
+            }
+          }
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 8,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.6305833524471807,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 8,
+              "n": 8,
+              "rate": 1.0,
+              "ci95": [
+                0.6305833524471807,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 8,
+            "mean": 1.6443924307823181,
+            "median": 1.7560381889343262,
+            "p95": 1.990128469467163,
+            "max": 2.0829102993011475
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 39807,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 0,
+            "n_phases_drop_in_force_at_start": 0,
+            "per_phase_s": {
+              "n": 0
+            },
+            "n_flows_dropped": 0,
+            "per_flow_s": {
+              "n": 0
+            }
+          }
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.42168257385492325,
+            "median": 0.43748700618743896,
+            "p95": 0.860836923122406,
+            "max": 0.8947577476501465
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.0761331096291542,
+            "median": 0.07836699485778809,
+            "p95": 0.102264404296875,
+            "max": 0.10596489906311035
+          },
+          "dropped": 32,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 187,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 0,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.518628865480423,
+              "median": 0.5872863531112671,
+              "p95": 0.890932559967041,
+              "max": 0.8947577476501465
+            },
+            "n_flows_dropped": 32,
+            "per_flow_s": {
+              "n": 32,
+              "mean": 0.42168257385492325,
+              "median": 0.43748700618743896,
+              "p95": 0.860836923122406,
+              "max": 0.8947577476501465
+            }
+          }
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 56,
+          "detected_recall": 0.875,
+          "detected_recall_ci95": [
+            0.7684736940339959,
+            0.944457208820398
+          ],
+          "recall_by_trigger": {
+            "IF-pair": {
+              "k": 15,
+              "n": 64,
+              "rate": 0.234375,
+              "ci95": [
+                0.13751547844059606,
+                0.3569341103962659
+              ]
+            },
+            "DPI-head": {
+              "k": 41,
+              "n": 64,
+              "rate": 0.640625,
+              "ci95": [
+                0.5109625981612298,
+                0.7568097089687873
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 56,
+            "mean": 1.0831118481499808,
+            "median": 0.7729678153991699,
+            "p95": 2.79268342256546,
+            "max": 2.7928452491760254
+          },
+          "dpi_confirmed": 56,
+          "dpi_confirmed_recall": 0.875,
+          "dpi_confirmed_recall_ci95": [
+            0.7684736940339959,
+            0.944457208820398
+          ],
+          "dpi_latency_s": {
+            "n": 56,
+            "mean": 0.7073646017483303,
+            "median": 0.13758885860443115,
+            "p95": 2.155718684196472,
+            "max": 2.155745267868042
+          },
+          "dropped": 56,
+          "packet_drops": {
+            "flows_with_dropped_packets": 16,
+            "packets_dropped": 24,
+            "packets_seen": 80,
+            "dropped_share": 0.3,
+            "packets_delivered_after_drop": 8,
+            "flows_with_delivery_after_drop": 8
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 7,
+            "n_phases_drop_in_force_at_start": 2,
+            "per_phase_s": {
+              "n": 7,
+              "mean": 0.3798621041434152,
+              "median": 0.20514321327209473,
+              "p95": 0.8354354143142699,
+              "max": 0.8622012138366699
+            },
+            "n_flows_dropped": 56,
+            "per_flow_s": {
+              "n": 56,
+              "mean": 0.37982840623174396,
+              "median": 0.20510053634643555,
+              "p95": 0.8621881008148193,
+              "max": 0.8622012138366699
+            }
+          }
+        }
+      },
+      "attack_packet_drops": {
+        "flows_with_dropped_packets": 24,
+        "packets_dropped": 40,
+        "packets_seen": 40146,
+        "dropped_share": 0.0009963632740497186,
+        "packets_delivered_after_drop": 8,
+        "flows_with_delivery_after_drop": 8
+      },
+      "attack_time_to_drop": {
+        "n_phases": 32,
+        "n_phases_dropped": 23,
+        "n_phases_drop_in_force_at_start": 3,
+        "per_phase_s": {
+          "n": 23,
+          "mean": 0.4244986098745595,
+          "median": 0.4675142765045166,
+          "p95": 0.8816658973693847,
+          "max": 0.8947577476501465
+        },
+        "n_flows_dropped": 152,
+        "per_flow_s": {
+          "n": 152,
+          "mean": 0.3842440373019168,
+          "median": 0.38526010513305664,
+          "p95": 0.8621854305267334,
+          "max": 0.8947577476501465
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 8,
+          "mean": 1.6443924307823181,
+          "median": 1.7560381889343262,
+          "p95": 1.990128469467163,
+          "max": 2.0829102993011475
+        },
+        "IF-pair": {
+          "n": 15,
+          "mean": 2.439412832260132,
+          "median": 2.130310297012329,
+          "p95": 2.7927347660064696,
+          "max": 2.7928452491760254
+        },
+        "DPI-head": {
+          "n": 137,
+          "mean": 0.46972587160820506,
+          "median": 0.46749424934387207,
+          "p95": 0.8621870994567871,
+          "max": 2.792680263519287
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 120852,
+        "cloned_packets": 50684,
+        "cloned_per_forwarded": 0.41938900473306195,
+        "inspection_reduction_packets": 0.580610995266938,
+        "forwarded_bytes": 51215950,
+        "cloned_bytes": 14158666,
+        "inspection_reduction_bytes": 0.723549675442904,
+        "dropped_packets": 80,
+        "inspection_reduction_packets_incl_dropped": 0.5808884331690537,
+        "per_run_reduction_packets": [
+          0.580610995266938
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2294,
+            "bytes": 219732,
+            "share_of_forwarded_packets": 0.018981895210670903,
+            "share_of_forwarded_bytes": 0.004290304094720493
+          },
+          "sample": {
+            "packets": 2864,
+            "bytes": 2223224,
+            "share_of_forwarded_packets": 0.023698407970079105,
+            "share_of_forwarded_bytes": 0.04340882088490011
+          },
+          "level": {
+            "packets": 44300,
+            "bytes": 9972840,
+            "share_of_forwarded_packets": 0.3665640618276901,
+            "share_of_forwarded_bytes": 0.19472137097915787
+          },
+          "hostpair": {
+            "packets": 1226,
+            "bytes": 1742870,
+            "share_of_forwarded_packets": 0.01014463972462185,
+            "share_of_forwarded_bytes": 0.03402982859831752
+          }
+        }
+      },
+      "drop_accounting": {
+        "switch_dropped_packets": 80,
+        "attributed_attack": 40,
+        "attributed_benign": 28,
+        "attributed_share": 0.85,
+        "switch_dropped_bytes": 45532
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 2301.98226118246,
+            "p99_pps": 2152.947506644835,
+            "windows_over_budget": 0,
+            "n_windows": 263
+          },
+          "2": {
+            "max_pps": 2586.9704748598006,
+            "p99_pps": 2463.899618460796,
+            "windows_over_budget": 2,
+            "n_windows": 263
+          }
+        },
+        "max_pps": 2586.9704748598006,
+        "windows_over_budget": 2,
+        "dpi_kernel_received": 44434,
+        "dpi_kernel_drops": 14212
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 231,
+          "mean": 384.798310398355,
+          "median": 363.0604729987681,
+          "p95": 670.1869530006661,
+          "max": 1597.197409002547
+        },
+        "poll_read_ms": {
+          "n": 231,
+          "mean": 303.4031184415259,
+          "median": 289.3242749996716,
+          "p95": 490.8160004997626,
+          "max": 1572.723755001789
+        },
+        "controller_cpu_pct": {
+          "n": 231,
+          "mean": 31.441558441558442,
+          "median": 30.3,
+          "p95": 75.2,
+          "max": 91.0
+        },
+        "controller_rss_mb": {
+          "n": 231,
+          "mean": 146.57212188852813,
+          "median": 146.5546875,
+          "p95": 147.09765625,
+          "max": 147.09765625
+        },
+        "dpi_cpu_pct": {
+          "n": 231,
+          "mean": 14.323809523809524,
+          "median": 4.2,
+          "p95": 84.9,
+          "max": 108.8
+        },
+        "dpi_rss_mb": {
+          "n": 231,
+          "mean": 174.04697646103895,
+          "median": 174.140625,
+          "p95": 177.6171875,
+          "max": 177.64453125
+        }
+      }
+    },
+    "run_05": {
+      "n_flows": 259,
+      "overall": {
+        "tp": 160,
+        "fn": 8,
+        "fp": 9,
+        "tn": 82,
+        "tpr": 0.9523809523809523,
+        "tpr_ci95": [
+          0.9083298342350349,
+          0.979220179424047
+        ],
+        "fpr": 0.0989010989010989,
+        "fpr_ci95": [
+          0.046229859893912956,
+          0.1794585301958546
+        ]
+      },
+      "benign": {
+        "n": 91,
+        "n_escalated_clone_or_above": 9,
+        "false_positives_by_trigger": {
+          "IF-flow": {
+            "k": 9,
+            "n": 91,
+            "rate": 0.0989010989010989,
+            "ci95": [
+              0.046229859893912956,
+              0.1794585301958546
+            ]
+          }
+        },
+        "n_dropped": 0,
+        "drop_rate": 0.0,
+        "packet_drops": {
+          "flows_with_dropped_packets": 3,
+          "packets_dropped": 75,
+          "packets_seen": 14710,
+          "dropped_share": 0.005098572399728076,
+          "packets_delivered_after_drop": 4481,
+          "flows_with_delivery_after_drop": 4
+        }
+      },
+      "per_attack_class": {
+        "null_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 64,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 64,
+              "n": 64,
+              "rate": 1.0,
+              "ci95": [
+                0.9439909106133634,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 64,
+            "mean": 0.6276838108897209,
+            "median": 0.6039830446243286,
+            "p95": 0.9511823534965516,
+            "max": 0.9511909484863281
+          },
+          "dpi_confirmed": 64,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.9439909106133634,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 64,
+            "mean": 0.07798683643341064,
+            "median": 0.06291699409484863,
+            "p95": 0.1262327551841736,
+            "max": 0.12625932693481445
+          },
+          "dropped": 64,
+          "packet_drops": {
+            "flows_with_dropped_packets": 16,
+            "packets_dropped": 32,
+            "packets_seen": 80,
+            "dropped_share": 0.4,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 2,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.43824416399002075,
+              "median": 0.47853660583496094,
+              "p95": 0.8607326865196226,
+              "max": 0.9511909484863281
+            },
+            "n_flows_dropped": 64,
+            "per_flow_s": {
+              "n": 64,
+              "mean": 0.43823467567563057,
+              "median": 0.47852957248687744,
+              "p95": 0.9511823534965516,
+              "max": 0.9511909484863281
+            }
+          }
+        },
+        "rate_spike": {
+          "n": 8,
+          "n_observed": 8,
+          "detected_clone_or_above": 8,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.6305833524471807,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "IF-flow": {
+              "k": 8,
+              "n": 8,
+              "rate": 1.0,
+              "ci95": [
+                0.6305833524471807,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 8,
+            "mean": 4.397159546613693,
+            "median": 4.136926651000977,
+            "p95": 7.802764368057251,
+            "max": 7.804153919219971
+          },
+          "dpi_confirmed": 0,
+          "dpi_confirmed_recall": 0.0,
+          "dpi_confirmed_recall_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "dpi_latency_s": {
+            "n": 0
+          },
+          "dropped": 0,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 39999,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 0,
+            "n_phases_drop_in_force_at_start": 0,
+            "per_phase_s": {
+              "n": 0
+            },
+            "n_flows_dropped": 0,
+            "per_flow_s": {
+              "n": 0
+            }
+          }
+        },
+        "sqli": {
+          "n": 32,
+          "n_observed": 32,
+          "detected_clone_or_above": 32,
+          "detected_recall": 1.0,
+          "detected_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "recall_by_trigger": {
+            "DPI-head": {
+              "k": 32,
+              "n": 32,
+              "rate": 1.0,
+              "ci95": [
+                0.8911188393206471,
+                1.0
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 32,
+            "mean": 0.46393676847219467,
+            "median": 0.44024980068206787,
+            "p95": 0.9299060344696044,
+            "max": 0.9820685386657715
+          },
+          "dpi_confirmed": 32,
+          "dpi_confirmed_recall": 1.0,
+          "dpi_confirmed_recall_ci95": [
+            0.8911188393206471,
+            1.0
+          ],
+          "dpi_latency_s": {
+            "n": 32,
+            "mean": 0.02443622797727585,
+            "median": 0.02383589744567871,
+            "p95": 0.028718423843383786,
+            "max": 0.03378701210021973
+          },
+          "dropped": 32,
+          "packet_drops": {
+            "flows_with_dropped_packets": 0,
+            "packets_dropped": 0,
+            "packets_seen": 173,
+            "dropped_share": 0.0,
+            "packets_delivered_after_drop": 0,
+            "flows_with_delivery_after_drop": 0
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 8,
+            "n_phases_drop_in_force_at_start": 0,
+            "per_phase_s": {
+              "n": 8,
+              "mean": 0.44601064920425415,
+              "median": 0.5104689598083496,
+              "p95": 0.7280066251754761,
+              "max": 0.7412140369415283
+            },
+            "n_flows_dropped": 32,
+            "per_flow_s": {
+              "n": 32,
+              "mean": 0.46393676847219467,
+              "median": 0.44024980068206787,
+              "p95": 0.9299060344696044,
+              "max": 0.9820685386657715
+            }
+          }
+        },
+        "syn_scan": {
+          "n": 64,
+          "n_observed": 64,
+          "detected_clone_or_above": 56,
+          "detected_recall": 0.875,
+          "detected_recall_ci95": [
+            0.7684736940339959,
+            0.944457208820398
+          ],
+          "recall_by_trigger": {
+            "IF-pair": {
+              "k": 15,
+              "n": 64,
+              "rate": 0.234375,
+              "ci95": [
+                0.13751547844059606,
+                0.3569341103962659
+              ]
+            },
+            "DPI-head": {
+              "k": 41,
+              "n": 64,
+              "rate": 0.640625,
+              "ci95": [
+                0.5109625981612298,
+                0.7568097089687873
+              ]
+            }
+          },
+          "detect_latency_s": {
+            "n": 56,
+            "mean": 1.1043825830732072,
+            "median": 0.6597199440002441,
+            "p95": 2.92664235830307,
+            "max": 2.9266586303710938
+          },
+          "dpi_confirmed": 56,
+          "dpi_confirmed_recall": 0.875,
+          "dpi_confirmed_recall_ci95": [
+            0.7684736940339959,
+            0.944457208820398
+          ],
+          "dpi_latency_s": {
+            "n": 56,
+            "mean": 0.6414205346788678,
+            "median": 0.11573386192321777,
+            "p95": 2.0586888194084167,
+            "max": 2.0587050914764404
+          },
+          "dropped": 56,
+          "packet_drops": {
+            "flows_with_dropped_packets": 16,
+            "packets_dropped": 24,
+            "packets_seen": 80,
+            "dropped_share": 0.3,
+            "packets_delivered_after_drop": 8,
+            "flows_with_delivery_after_drop": 8
+          },
+          "time_to_drop": {
+            "n_phases": 8,
+            "n_phases_dropped": 7,
+            "n_phases_drop_in_force_at_start": 2,
+            "per_phase_s": {
+              "n": 7,
+              "mean": 0.3852693353380476,
+              "median": 0.240462064743042,
+              "p95": 0.8785536527633665,
+              "max": 0.9723267555236816
+            },
+            "n_flows_dropped": 56,
+            "per_flow_s": {
+              "n": 56,
+              "mean": 0.3852567502430507,
+              "median": 0.2404477596282959,
+              "p95": 0.9723140597343445,
+              "max": 0.9723267555236816
+            }
+          }
+        }
+      },
+      "attack_packet_drops": {
+        "flows_with_dropped_packets": 32,
+        "packets_dropped": 56,
+        "packets_seen": 40332,
+        "dropped_share": 0.0013884756520876724,
+        "packets_delivered_after_drop": 8,
+        "flows_with_delivery_after_drop": 8
+      },
+      "attack_time_to_drop": {
+        "n_phases": 32,
+        "n_phases_dropped": 23,
+        "n_phases_drop_in_force_at_start": 4,
+        "per_phase_s": {
+          "n": 23,
+          "mean": 0.42482277621393616,
+          "median": 0.4407641887664795,
+          "p95": 0.9301932573318479,
+          "max": 0.9723267555236816
+        },
+        "n_flows_dropped": 152,
+        "per_flow_s": {
+          "n": 152,
+          "mean": 0.424127459526062,
+          "median": 0.4063640832901001,
+          "p95": 0.9723103880882263,
+          "max": 0.9820685386657715
+        }
+      },
+      "detect_latency_s_by_trigger": {
+        "IF-flow": {
+          "n": 8,
+          "mean": 4.397159546613693,
+          "median": 4.136926651000977,
+          "p95": 7.802764368057251,
+          "max": 7.804153919219971
+        },
+        "IF-pair": {
+          "n": 15,
+          "mean": 2.48962771097819,
+          "median": 2.107266426086426,
+          "p95": 2.926650786399841,
+          "max": 2.9266586303710938
+        },
+        "DPI-head": {
+          "n": 137,
+          "mean": 0.5804288282881688,
+          "median": 0.5801737308502197,
+          "p95": 0.9723119735717773,
+          "max": 2.926630973815918
+        }
+      },
+      "inspection": {
+        "forwarded_packets": 124634,
+        "cloned_packets": 31064,
+        "cloned_per_forwarded": 0.24924177993163985,
+        "inspection_reduction_packets": 0.7507582200683601,
+        "forwarded_bytes": 52304792,
+        "cloned_bytes": 13958306,
+        "inspection_reduction_bytes": 0.7331352354866453,
+        "dropped_packets": 135,
+        "inspection_reduction_packets_incl_dropped": 0.7510278995583839,
+        "per_run_reduction_packets": [
+          0.7507582200683601
+        ],
+        "clones_by_reason": {
+          "head": {
+            "packets": 2310,
+            "bytes": 226400,
+            "share_of_forwarded_packets": 0.018534268337692766,
+            "share_of_forwarded_bytes": 0.0043284752953419645
+          },
+          "sample": {
+            "packets": 7049,
+            "bytes": 2167986,
+            "share_of_forwarded_packets": 0.05655760065471701,
+            "share_of_forwarded_bytes": 0.0414490894065691
+          },
+          "level": {
+            "packets": 21215,
+            "bytes": 10919902,
+            "share_of_forwarded_packets": 0.17021839947365888,
+            "share_of_forwarded_bytes": 0.20877440827983793
+          },
+          "hostpair": {
+            "packets": 490,
+            "bytes": 644018,
+            "share_of_forwarded_packets": 0.003931511465571192,
+            "share_of_forwarded_bytes": 0.012312791531605747
+          }
+        }
+      },
+      "drop_accounting": {
+        "switch_dropped_packets": 135,
+        "attributed_attack": 56,
+        "attributed_benign": 75,
+        "attributed_share": 0.9703703703703703,
+        "switch_dropped_bytes": 116966
+      },
+      "capacity": {
+        "budget_pps": 2500,
+        "per_switch": {
+          "1": {
+            "max_pps": 2041.2333952844424,
+            "p99_pps": 1980.0258916029247,
+            "windows_over_budget": 0,
+            "n_windows": 263
+          },
+          "2": {
+            "max_pps": 2028.2784997173362,
+            "p99_pps": 2009.0628937316771,
+            "windows_over_budget": 0,
+            "n_windows": 263
+          }
+        },
+        "max_pps": 2041.2333952844424,
+        "windows_over_budget": 0,
+        "dpi_kernel_received": 23480,
+        "dpi_kernel_drops": 0
+      },
+      "resources": {
+        "poll_total_ms": {
+          "n": 230,
+          "mean": 112.77628746949789,
+          "median": 108.01505500057829,
+          "p95": 148.26928570109882,
+          "max": 324.71929500025
+        },
+        "poll_read_ms": {
+          "n": 230,
+          "mean": 90.02663137385832,
+          "median": 87.75335899917991,
+          "p95": 115.16598775124291,
+          "max": 170.7785739999963
+        },
+        "controller_cpu_pct": {
+          "n": 230,
+          "mean": 9.369565217391305,
+          "median": 9.1,
+          "p95": 12.064999999999994,
+          "max": 24.9
+        },
+        "controller_rss_mb": {
+          "n": 230,
+          "mean": 146.16171875,
+          "median": 146.10546875,
+          "p95": 146.71875,
+          "max": 146.71875
+        },
+        "dpi_cpu_pct": {
+          "n": 230,
+          "mean": 5.163043478260869,
+          "median": 1.9,
+          "p95": 31.324999999999562,
+          "max": 78.3
+        },
+        "dpi_rss_mb": {
+          "n": 230,
+          "mean": 173.32488111413045,
+          "median": 173.22265625,
+          "p95": 175.6548828125,
+          "max": 176.25390625
+        }
+      }
+    }
+  }
+}

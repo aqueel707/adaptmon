@@ -1,0 +1,123 @@
+{
+  "checks": {
+    "monitor_started_logged": true,
+    "decision_a_b_c_logged": true,
+    "z_score_trigger_removed_logged": true,
+    "mirroring_configured_logged": true,
+    "dpi_started_logged": true,
+    "flow_model_trained_once": true,
+    "trained_once_per_successful_model": true,
+    "flow_model_trained_on_warmup_vectors_only": true,
+    "no_scores_during_warmup": true,
+    "flow_level_register_matches_controller": true,
+    "udp_spike_never_reaches_drop_no_dpi_rule_for_udp": true
+  },
+  "mismatches": [],
+  "flow_model": {
+    "n_train": 7270,
+    "thresholds": {
+      "monitor": -2.5912431922403556e-17,
+      "clone": -0.06317627120864583,
+      "warmup_min": -0.15066467966684427,
+      "warmup_p1": -0.06317627120864583,
+      "warmup_p5": -2.5912431922403556e-17,
+      "warmup_p10": 0.052968907186429326,
+      "warmup_mean": 0.12714293088294146,
+      "warmup_std": 0.05731050037985884,
+      "n_warmup": 7270
+    },
+    "fit_seconds": 1.5768423389999953
+  },
+  "host_pair_model": {
+    "n_train": 139,
+    "thresholds": {
+      "monitor": 3.0791341698588326e-17,
+      "clone": -0.049558397113442676,
+      "warmup_min": -0.049558397113442676,
+      "warmup_p1": -0.049558397113442676,
+      "warmup_p5": 3.0791341698588326e-17,
+      "warmup_p10": 0.03947139727413553,
+      "warmup_mean": 0.16103385973483936,
+      "warmup_std": 0.07951958044628568,
+      "n_warmup": 139
+    },
+    "fit_seconds": 1.1254692180009442
+  },
+  "n_windows": 27,
+  "n_pair_rows": 296,
+  "max_level_per_flow_hist": {
+    "0": 3379,
+    "1": 169,
+    "2": 21
+  },
+  "max_level_per_pair_hist": {
+    "0": 10
+  },
+  "entropy_source_counts": {
+    "flow_distribution": 10038,
+    "payload_sampled": 8399
+  },
+  "spike_flow_max_level": 2,
+  "spike_flow_reached_drop": false,
+  "spike_flow_scores": [
+    [
+      "16",
+      "1",
+      "-0.112829",
+      "2",
+      "0"
+    ],
+    [
+      "16",
+      "2",
+      "-0.120019",
+      "2",
+      "0"
+    ],
+    [
+      "17",
+      "1",
+      "-0.136727",
+      "2",
+      "2"
+    ],
+    [
+      "17",
+      "2",
+      "-0.141794",
+      "2",
+      "2"
+    ],
+    [
+      "18",
+      "1",
+      "-0.142291",
+      "2",
+      "2"
+    ],
+    [
+      "18",
+      "2",
+      "-0.143285",
+      "2",
+      "2"
+    ],
+    [
+      "19",
+      "1",
+      "-0.143285",
+      "2",
+      "2"
+    ],
+    [
+      "19",
+      "2",
+      "-0.143285",
+      "2",
+      "2"
+    ]
+  ],
+  "poll_ms_mean": 2011.9298755185068,
+  "poll_ms_max": 6379.896151000139,
+  "forced_drops_total": 0
+}

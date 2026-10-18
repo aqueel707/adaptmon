@@ -1,0 +1,75 @@
+{
+  "seed": 1812250808,
+  "n_cycles": 2,
+  "head_clone_n": 3,
+  "rate_spike_pps": 1000,
+  "rate_spike_s": 5,
+  "warmup_s": 30,
+  "phase_gap_s": 1.5,
+  "sqli_gap_s": 0.1,
+  "nmap_max_rate": 500,
+  "schedule": {
+    "seed": 1812250808,
+    "warmup": {
+      "iperf_mbps": 1.88,
+      "http_interval": 1.5,
+      "http_seed": 1334374442
+    },
+    "cycles": [
+      {
+        "scan_ports": [
+          187,
+          266,
+          335,
+          360,
+          516,
+          593,
+          746,
+          864
+        ],
+        "order": [
+          "null",
+          "syn",
+          "spike",
+          "sqli"
+        ],
+        "benign_s": 6.94,
+        "iperf_mbps": 2.63,
+        "http_seed": 1084553610,
+        "sqli_order": [
+          3,
+          2,
+          1,
+          0
+        ]
+      },
+      {
+        "scan_ports": [
+          16,
+          200,
+          213,
+          309,
+          362,
+          494,
+          542,
+          847
+        ],
+        "order": [
+          "null",
+          "syn",
+          "spike",
+          "sqli"
+        ],
+        "benign_s": 7.59,
+        "iperf_mbps": 2.24,
+        "http_seed": 1577534732,
+        "sqli_order": [
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    ]
+  }
+}

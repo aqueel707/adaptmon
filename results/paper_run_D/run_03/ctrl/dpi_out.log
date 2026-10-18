@@ -1,0 +1,9 @@
+/home/adaptmon/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+Failed to create /root/.cache for shader cache (Permission denied)---disabling.
+/usr/lib/python3/dist-packages/scapy/layers/ipsec.py:478: CryptographyDeprecationWarning: TripleDES has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.TripleDES and will be removed from cryptography.hazmat.primitives.ciphers.algorithms in 48.0.0.
+  cipher=algorithms.TripleDES,
+/usr/lib/python3/dist-packages/scapy/layers/ipsec.py:482: CryptographyDeprecationWarning: TripleDES has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.TripleDES and will be removed from cryptography.hazmat.primitives.ciphers.algorithms in 48.0.0.
+  cipher=algorithms.TripleDES,
+DPI sniffing on {'am_s1dpi': 1, 'am_s2dpi': 2}
+DPI stopped: {'clones': 43528, 'short': 0, 'non_ip': 0, 'tcp': 5044, 'udp': 38426, 'other_l4': 58, 'http_payload_pkts': 232, 'confirmed': 269, 'clones_by_reason': {'4': 2111, '2': 725, '1': 37976, '3': 2716}}

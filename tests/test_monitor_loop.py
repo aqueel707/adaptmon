@@ -21,6 +21,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from controller import monitor as mon
+from controller.policy import MonitoringLevel
 from controller.dataplane import FLOW_REGISTERS, MAX_FLOWS
 from controller.features import entropy_snapshot_key
 from controller.utils import ip_str_to_int
@@ -31,6 +32,7 @@ class FakeSwitch:
         self.r = {k: [0] * MAX_FLOWS for k in FLOW_REGISTERS}
         self.drop_rules = {}
         self.host_clone_rules = {}
+        self.host_drop_rules = {}
         self._h = 0
         self.level_writes = []
 
@@ -88,9 +90,17 @@ class FakeSwitch:
     def delete_host_clone_rule(self, h):
         return self.host_clone_rules.pop(h, None) is not None
 
+    def add_host_drop_rule(self, src_ip):
+        self._h += 1
+        self.host_drop_rules[self._h] = src_ip
+        return self._h
+
+    def delete_host_drop_rule(self, h):
+        return self.host_drop_rules.pop(h, None) is not None
+
     def clear_flow_entries(self, idx):
         for i in idx:
-            for k in ("pkt_counter", "byte_counter", "flow_level", "flow_syn_pkts"):
+            for k in ("pkt_counter", "byte_counter", "flow_level", "flow_syn_pkts", "drop_pkts"):
                 self.r[k][i] = 0
 
 
@@ -223,79 +233,6 @@ def test_flow_escalates_to_clone_via_score_not_drop(ctl):
     assert max(sw.r["flow_level"][s] for s in slots) < 2   # benign flows stay below
 
 
-def test_dpi_confirmation_force_clones_then_force_drops(ctl):
-    """
-    A DPI confirmation on a flow below CLONE jumps it straight to CLONE
-    (force_clone, bypassing the up-hysteresis -- waiting for K_UP
-    anomalous score windows would just leave a confirmed attack's packets
-    uninspected in the meantime). A second confirmation on a flow already
-    at CLONE forces DROP, unchanged from before.
-    """
-    c, sw, out = ctl
-    rng = np.random.default_rng(0)
-    slots = list(range(100, 160))
-    t = train(c, sw, rng, 0.0, slots)
-    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 9999)
-    atk_ft = {"src": atk[0], "dst": atk[1], "proto": atk[2],
-             "sport": atk[3], "dport": atk[4]}
-
-    # Confirmation while the flow is still NORMAL: force_clone, immediately
-    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=7, five_tuple=atk_ft, level=2)
-    t += 1
-    benign_step(sw, rng, t, slots)
-    sw.set_flow(7, atk, 1, 60, 50_000_000, 50_000_000 + int(1e6))
-    c._poll(T0 + t)
-    assert sw.r["flow_level"][7] == 2        # CLONE on the very first poll, no waiting
-    assert sw.drop_rules == {}
-    assert c._pending_confirmations == []
-    assert c.policy.state((1, 7)).escalated_by == "DPI-sample"
-    forced_clone = [json.loads(l) for l in open(out / "alerts.jsonl")
-                   if json.loads(l)["type"] == "forced_clone"]
-    assert len(forced_clone) == 1 and forced_clone[0]["attack_class"] == "syn_scan"
-
-    # A second confirmation now that the flow is at CLONE forces DROP
-    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=7, five_tuple=atk_ft, level=2)
-    t += 1
-    benign_step(sw, rng, t, slots)
-    sw.set_flow(7, atk, 2, 120, 50_000_000, 50_000_000 + int(2e6))
-    c._poll(T0 + t)
-    assert sw.r["flow_level"][7] == 3
-    assert list(sw.drop_rules.values()) == [atk]
-    assert c._pending_confirmations == []
-    forced_drop = [json.loads(l) for l in open(out / "alerts.jsonl")
-                  if json.loads(l)["type"] == "forced_drop"]
-    assert len(forced_drop) == 1
-    assert forced_drop[0]["attack_class"] == "syn_scan"
-    assert forced_drop[0]["detector"] == "dpi_confirmation"
-    assert c.policy.state((1, 7)).escalated_by == "dpi_confirmed:syn_scan"
-
-
-def test_dpi_confirmation_on_scan_class_also_force_clones_the_host_pair(ctl):
-    """A confirmed syn_scan/null_scan also force-clones the whole host
-    pair (installs host_clone_table), since each probe is its own
-    short-lived flow -- escalating just that one 5-tuple would miss the
-    scan's other probes. A non-scan class (sqli) does not."""
-    c, sw, out = ctl
-    rng = np.random.default_rng(0)
-    slots = list(range(100, 160))
-    t = train(c, sw, rng, 0.0, slots)
-    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 9999)
-    atk_ft = {"src": atk[0], "dst": atk[1], "proto": atk[2],
-             "sport": atk[3], "dport": atk[4]}
-
-    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=7, five_tuple=atk_ft, level=2)
-    t += 1
-    benign_step(sw, rng, t, slots)
-    sw.set_flow(7, atk, 1, 60, 50_000_000, 50_000_000 + int(1e6))
-    c._poll(T0 + t)
-    assert list(sw.host_clone_rules.values()) == [atk[0]]
-    pair_key = (1, atk[0], atk[1])
-    assert c.pair_policy.state(pair_key).level == 2
-    assert c.pair_policy.state(pair_key).escalated_by == "DPI-sample"
-    pe = [json.loads(l) for l in open(out / "alerts.jsonl") if json.loads(l)["type"] == "pair_escalation"]
-    assert len(pe) == 1 and pe[0]["detector"] == "dpi_confirmation"
-
-
 def _confirm_once(c, sw, out, rng, t, slots, atk, cls, clone_reason, slot=7):
     ft = {"src": atk[0], "dst": atk[1], "proto": atk[2], "sport": atk[3], "dport": atk[4]}
     write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=slot, five_tuple=ft,
@@ -307,43 +244,172 @@ def _confirm_once(c, sw, out, rng, t, slots, atk, cls, clone_reason, slot=7):
     return t
 
 
-def test_dpi_head_confirmation_tags_flow_and_scan_pair_dpi_head(ctl):
-    """A confirmation made on a flow-head clone (clone_reason 4) is credited
-    to DPI-head -- on the flow, on the host pair a scan class force-clones,
-    and on both forced_clone/pair_escalation alerts."""
+def _alerts(out, typ):
+    return [json.loads(l) for l in open(out / "alerts.jsonl") if json.loads(l)["type"] == typ]
+
+
+def _flow_rows(c, out, slot):
+    c._flow_f.flush()
+    return [r for r in csv.DictReader(open(out / "flow_windows.csv")) if r["slot"] == str(slot)]
+
+
+def test_dpi_confirmation_forces_drop_from_normal(ctl):
+    """Any DPI confirmation forces the flow straight to DROP and installs its
+    5-tuple drop rule -- here on a flow-head clone (reason 4) of a NORMAL
+    flow. sqli is not a scan class: no source-IP rule."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 8000)
+    sw.r["drop_pkts"][7] = 5
+    _confirm_once(c, sw, out, rng, t, slots, atk, "sqli", clone_reason=4)
+    assert sw.r["flow_level"][7] == 3
+    assert list(sw.drop_rules.values()) == [atk]
+    assert sw.host_drop_rules == {} and sw.host_clone_rules == {}
+    assert c._pending_confirmations == []
+    assert c.policy.state((1, 7)).escalated_by == "DPI-head"
+    fd = _alerts(out, "forced_drop")
+    assert len(fd) == 1 and fd[0]["trigger"] == "DPI-head" and fd[0]["prev_level"] == "NORMAL"
+    assert _alerts(out, "forced_clone") == []
+    row = _flow_rows(c, out, 7)[-1]
+    assert row["level"] == "3" and row["escalated_by"] == "DPI-head"
+    assert row["drop_pkts"] == "5"          # the data plane's per-slot drop counter, logged
+
+
+@pytest.mark.parametrize("reason,trigger", [(2, "DPI-sample"), (None, "DPI-sample")])
+def test_sampled_confirmation_also_drops(ctl, reason, trigger):
+    """A confirmation on an adaptive-sampling clone (or an older alert with no
+    clone_reason) drops the flow just the same."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 8000)
+    _confirm_once(c, sw, out, rng, t, slots, atk, "sqli", clone_reason=reason)
+    assert sw.r["flow_level"][7] == 3 and list(sw.drop_rules.values()) == [atk]
+    assert c.policy.state((1, 7)).escalated_by == trigger
+
+
+def test_confirmation_on_flow_already_at_clone_drops_it(ctl):
+    """A flow the IF already escalated to CLONE is confirmed on a level clone
+    (reason 1): DROP. Its CLONE row keeps the IF-flow tag (what detected it)."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    th = c.model.thresholds
+    c.model.score = lambda X: np.where(X[:, 3] > 10_000, th.clone - 1.0, th.monitor + 1.0)
+    atk = ("10.0.1.3", "10.0.2.1", 17, 4444, 9999)
+    pk = 0
+    for w in range(2):
+        t += 1
+        benign_step(sw, rng, t, slots)
+        pk += 50000
+        sw.set_flow(7, atk, pk, pk * 60, 50_000_000, 50_000_000 + int((w + 1) * 1e6))
+        c._poll(T0 + t)
+    assert sw.r["flow_level"][7] == 2 and c.policy.state((1, 7)).escalated_by == "IF-flow"
+    ft = {"src": atk[0], "dst": atk[1], "proto": atk[2], "sport": atk[3], "dport": atk[4]}
+    write_confirmed_alert(out, ts=T0 + t, switch=1, flow_idx=7, five_tuple=ft, level=2,
+                          attack_class="sqli", clone_reason=1)
+    t += 1
+    benign_step(sw, rng, t, slots)
+    pk += 50000
+    sw.set_flow(7, atk, pk, pk * 60, 50_000_000, 50_000_000 + int(3e6))
+    c._poll(T0 + t)
+    assert sw.r["flow_level"][7] == 3 and list(sw.drop_rules.values()) == [atk]
+    assert _alerts(out, "forced_drop")[0]["trigger"] == "DPI-level"
+    levels = [(r["level"], r["escalated_by"]) for r in _flow_rows(c, out, 7)]
+    assert ("2", "IF-flow") in levels and levels[-1] == ("3", "DPI-level")
+
+
+def test_scan_confirmation_drops_the_flow_and_its_source(ctl):
+    """A confirmed scan class forces the flow AND its host pair to DROP: the
+    5-tuple drop rule plus a source-IP drop rule (host_drop_table); all
+    tagged with what caught it (DPI-head here)."""
     c, sw, out = ctl
     rng = np.random.default_rng(0)
     slots = list(range(100, 160))
     t = train(c, sw, rng, 0.0, slots)
     atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 9999)
     _confirm_once(c, sw, out, rng, t, slots, atk, "null_scan", clone_reason=4)
-    assert sw.r["flow_level"][7] == 2
-    assert c.policy.state((1, 7)).escalated_by == "DPI-head"
-    assert c.pair_policy.state((1, atk[0], atk[1])).escalated_by == "DPI-head"
-    alerts = [json.loads(l) for l in open(out / "alerts.jsonl")]
-    fc = [a for a in alerts if a["type"] == "forced_clone"]
-    pe = [a for a in alerts if a["type"] == "pair_escalation"]
-    assert fc[0]["trigger"] == "DPI-head" and fc[0]["clone_reason"] == 4
-    assert pe[0]["trigger"] == "DPI-head"
-    # The same window's flow_windows.csv row already carries it (rows are
-    # written after section 6, not before)
-    c._flow_f.flush()
-    rows = [r for r in csv.DictReader(open(out / "flow_windows.csv")) if r["slot"] == "7"]
-    assert rows[-1]["escalated_by"] == "DPI-head" and rows[-1]["level"] == "2"
+    assert sw.r["flow_level"][7] == 3 and list(sw.drop_rules.values()) == [atk]
+    pst = c.pair_policy.state((1, atk[0], atk[1]))
+    assert pst.level == 3 and pst.escalated_by == "DPI-head"
+    assert list(sw.host_drop_rules.values()) == [atk[0]] and sw.host_clone_rules == {}
+    pe = _alerts(out, "pair_escalation")
+    assert len(pe) == 1 and pe[0]["level_name"] == "DROP" and pe[0]["trigger"] == "DPI-head"
 
 
-def test_dpi_sample_confirmation_on_non_scan_class_tags_dpi_sample_only(ctl):
-    """clone_reason 2 (adaptive sampling) -> DPI-sample; sqli is not a scan
-    class, so no host pair is force-cloned."""
+def test_scan_drop_replaces_a_host_clone_rule(ctl):
+    """A pair already at CLONE (host-clone rule) that gets a confirmed scan
+    goes to DROP: its host-clone rule is removed (the drop rule clones too)."""
     c, sw, out = ctl
     rng = np.random.default_rng(0)
     slots = list(range(100, 160))
     t = train(c, sw, rng, 0.0, slots)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 9999)
+    pst = c.pair_policy.state((1, atk[0], atk[1]))
+    pst.rule_handle = sw.add_host_clone_rule(atk[0])
+    pst.level, pst.escalated_by = MonitoringLevel.CLONE, "IF-pair"
+    _confirm_once(c, sw, out, rng, t, slots, atk, "syn_scan", clone_reason=3)
+    assert sw.host_clone_rules == {} and list(sw.host_drop_rules.values()) == [atk[0]]
+    assert pst.level == 3 and pst.rule_handle is None and pst.drop_handle is not None
+    # the confirmation came through the IF-pair host-clone rule: credited to IF-pair
+    assert c.policy.state((1, 7)).escalated_by == "IF-pair"
+
+
+def test_forced_drop_dwells_k_down_windows_then_its_rule_is_removed(ctl):
+    """Unchanged dwell/removal: the IF never sets DROP, so a forced DROP
+    leaves after K_DOWN scored windows below it and its drop rule goes."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    th = c.model.thresholds
+    c.model.score = lambda X: np.full(len(X), th.monitor + 1.0)       # raw NORMAL
     atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 8000)
-    _confirm_once(c, sw, out, rng, t, slots, atk, "sqli", clone_reason=2)
-    assert sw.r["flow_level"][7] == 2
-    assert c.policy.state((1, 7)).escalated_by == "DPI-sample"
-    assert sw.host_clone_rules == {}
+    t = _confirm_once(c, sw, out, rng, t, slots, atk, "sqli", clone_reason=4)
+    levels, rules = [sw.r["flow_level"][7]], [len(sw.drop_rules)]
+    for k in range(mon.K_DOWN):
+        t += 1
+        benign_step(sw, rng, t, slots)
+        sw.set_flow(7, atk, 2 + k, 60 * (2 + k), 50_000_000, 50_000_000 + int((2 + k) * 1e6))
+        c._poll(T0 + t)
+        levels.append(sw.r["flow_level"][7]); rules.append(len(sw.drop_rules))
+    assert levels == [3, 3, 3, 0] and rules == [1, 1, 1, 0]
+
+
+@pytest.mark.parametrize("pair_raw,end_level,clone_rule_back",
+                         [("NORMAL", 0, False), ("CLONE", 2, True)])
+def test_source_drop_dwells_k_down_pair_windows_then_is_lifted(ctl, pair_raw, end_level,
+                                                               clone_rule_back):
+    """A source drop leaves after K_DOWN pair windows below DROP: the
+    host-drop rule is removed; a pair that lands at CLONE gets its host-clone
+    rule (full capture) back, as any CLONE pair has."""
+    c, sw, out = ctl
+    rng = np.random.default_rng(0)
+    slots = list(range(100, 160))
+    t = train(c, sw, rng, 0.0, slots)
+    th = c.model.thresholds
+    c.model.score = lambda X: np.full(len(X), th.monitor + 1.0)
+    pth = c.pair_model.thresholds
+    pscore = pth.monitor + 1.0 if pair_raw == "NORMAL" else pth.clone - 1.0
+    c.pair_model.score = lambda X: np.full(len(X), pscore)
+    atk = ("10.0.1.3", "10.0.2.1", 6, 4444, 9999)
+    t = _confirm_once(c, sw, out, rng, t, slots, atk, "null_scan", clone_reason=4)
+    pkey = (1, atk[0], atk[1])
+    seen = [(int(c.pair_policy.state(pkey).level), len(sw.host_drop_rules))]
+    for k in range(mon.K_DOWN):
+        t += 1
+        benign_step(sw, rng, t, slots)
+        sw.set_flow(7, atk, 2 + k, 60 * (2 + k), 50_000_000, 50_000_000 + int((2 + k) * 1e6))
+        c._poll(T0 + t)
+        seen.append((int(c.pair_policy.state(pkey).level), len(sw.host_drop_rules)))
+    assert seen == [(3, 1), (3, 1), (3, 1), (end_level, 0)]
+    # (the patched pair score applies to every pair, so benign pairs may hold
+    # host-clone rules too in the CLONE variant: check the attacker's only)
+    assert (atk[0] in sw.host_clone_rules.values()) == clone_rule_back
 
 
 @pytest.mark.parametrize("pair_trigger", ["IF-pair", "DPI-head"])

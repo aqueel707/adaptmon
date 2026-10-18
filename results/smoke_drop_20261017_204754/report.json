@@ -1,0 +1,99 @@
+{
+  "out_dir": "/home/adaptmon/Desktop/adaptmon_v12/adaptmon/results/smoke_drop_20261017_204754",
+  "checks": {
+    "dpi_confirmed_sqli_and_forced_drop": {
+      "pass": true,
+      "confirmed": 2,
+      "forced_drop": [
+        {
+          "type": "forced_drop",
+          "detector": "dpi_confirmation",
+          "ts": 1792250291.7674913,
+          "window": 9,
+          "switch": 1,
+          "flow_idx": 2689,
+          "five_tuple": {
+            "src": "10.0.1.2",
+            "dst": "10.0.2.2",
+            "proto": 6,
+            "sport": 47001,
+            "dport": 8001
+          },
+          "attack_class": "sqli",
+          "clone_reason": 4,
+          "trigger": "DPI-head",
+          "prev_level": "NORMAL",
+          "level": 3,
+          "level_name": "DROP"
+        },
+        {
+          "type": "forced_drop",
+          "detector": "dpi_confirmation",
+          "ts": 1792250291.7674913,
+          "window": 9,
+          "switch": 2,
+          "flow_idx": 2689,
+          "five_tuple": {
+            "src": "10.0.1.2",
+            "dst": "10.0.2.2",
+            "proto": 6,
+            "sport": 47001,
+            "dport": 8001
+          },
+          "attack_class": "sqli",
+          "clone_reason": 4,
+          "trigger": "DPI-head",
+          "prev_level": "NORMAL",
+          "level": 3,
+          "level_name": "DROP"
+        }
+      ]
+    },
+    "attack_later_packets_dropped": {
+      "pass": true,
+      "sqli_request_reached_server": true,
+      "drop_rule_lifetime_s": 7.001,
+      "client_sends_while_rule_installed": 23,
+      "bytes_received_while_rule_installed": 0,
+      "delivered_after_rule_removed": [
+        {
+          "s_after_drop": 7.307,
+          "bytes": 11
+        },
+        {
+          "s_after_drop": 7.311,
+          "bytes": 297
+        },
+        {
+          "s_after_drop": 7.555,
+          "bytes": 11
+        }
+      ],
+      "bytes_sent": 488,
+      "bytes_received": 488
+    },
+    "switch_counted_the_drops": {
+      "pass": true,
+      "attack_flow_drop_pkts": 6,
+      "s1_dropped": 6
+    },
+    "benign_flows_delivered_in_full": {
+      "pass": true,
+      "benign_h1": {
+        "sent": 505,
+        "received": 505,
+        "drop_pkts": 0
+      },
+      "benign_h2_other_flow": {
+        "sent": 505,
+        "received": 505,
+        "drop_pkts": 0
+      }
+    },
+    "sqli_is_not_a_scan_no_source_drop": {
+      "pass": true,
+      "host_drop_rules_on_s1": 0
+    }
+  },
+  "all_pass": true
+}

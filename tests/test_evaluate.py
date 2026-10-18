@@ -145,3 +145,99 @@ def test_join_triggers_latency_and_pair_only_detection(tmp_path):
     assert m["overall"]["tp"] == 2 and m["overall"]["fn"] == 1 and m["overall"]["fp"] == 1
     assert m["per_attack_class"]["syn_scan"]["recall_by_trigger"]["DPI-head"]["k"] == 2
     assert m["benign"]["false_positives_by_trigger"]["IF-flow"]["k"] == 1
+
+
+def test_trigger_is_the_first_detection_not_a_later_forced_drop(tmp_path):
+    """IF-flow had the flow at CLONE; a DPI-level confirmation then forced it
+    to DROP. The detection is still the IF's; the flow is still blocked."""
+    d = str(tmp_path / "run_01")
+    gts = [gt(C, D, 1, 8000, "attack", "rate_spike", 10.0, 20.0)]
+    flows = [frow(11.0, C, D, 1, 8000, 1), frow(12.0, C, D, 1, 8000, 2, "IF-flow"),
+             frow(13.0, C, D, 1, 8000, 3, "DPI-level")]
+    write_run(d, gts, flows, [])
+    j = ev.join_run(d).iloc[0]
+    assert j["trigger"] == "IF-flow" and j["flow_max_level"] == 3 and j["blocked"]
+    assert j["detect_latency_s"] == pytest.approx(2.0)
+
+
+# --- drop metrics (Run D: drop_pkts register) -----------------------------
+
+DROP_HDR = FLOW_HDR + ["pkt_count", "drop_pkts"]
+
+
+def drow(ts, src, dst, sport, dport, level, pkts, drops, switch=1, by=""):
+    return {**frow(ts, src, dst, sport, dport, level, by), "switch": switch,
+            "pkt_count": pkts, "drop_pkts": drops}
+
+
+def write_drop_run(d, gts, flows, pairs, switch_dropped):
+    write_run(d, gts, [], pairs)
+    with open(os.path.join(d, "ctrl", "flow_windows.csv"), "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=DROP_HDR)
+        w.writeheader()
+        w.writerows(flows)
+    win = windows([(0, 0, 0, 0, 0), (40, 100, 10, 50, 5)])
+    win["s1_dropped"], win["s2_dropped"] = [0, switch_dropped], [0, 0]
+    win["s1_dropped_bytes"], win["s2_dropped_bytes"] = [0, 64 * switch_dropped], [0, 0]
+    win.to_csv(os.path.join(d, "ctrl", "windows.csv"), index=False)
+
+
+def test_drop_packets_time_to_drop_and_accounting(tmp_path):
+    d = str(tmp_path / "run_01")
+    sq1, sq2, syn, ben = 56000, 56001, 57000, 51000
+    gts = [gt(C, D, sq1, 8001, "attack", "sqli", 10.0, 25.0),
+           gt(C, D, sq2, 8002, "attack", "sqli", 10.5, 11.0),
+           gt(A, B, syn, 22, "attack", "syn_scan", 30.0, 30.1),
+           gt(A, B, ben, 8000, "benign", None, 30.5, 33.0)]
+    flows = [
+        # forced DROP at 11; drops 0 -> 2 -> 4, slot aged, re-occupied: 1 more
+        drow(11.0, C, D, sq1, 8001, 3, 3, 0, by="DPI-head"),
+        drow(12.0, C, D, sq1, 8001, 3, 7, 2, by="DPI-head"),
+        drow(13.0, C, D, sq1, 8001, 3, 9, 4, by="DPI-head"),
+        drow(20.0, C, D, sq1, 8001, 0, 2, 1),
+        drow(11.0, C, D, sq1, 8001, 3, 3, 0, switch=2, by="DPI-head"),
+        drow(20.0, C, D, sq1, 8001, 0, 4, 0, switch=2),     # the 1 s1 let through
+        drow(11.0, C, D, sq2, 8002, 0, 4, 0),
+        # the scan source is dropped at 31 (pair DROP); its benign flow is hit
+        drow(31.0, A, B, syn, 22, 0, 1, 1),
+        drow(31.0, A, B, ben, 8000, 0, 5, 2),
+    ]
+    pairs = [dict(ts=31.0, window=31, switch=1, src=A, dst=B, scored=1, score=-1,
+                  raw_level=0, level=3, escalated_by="DPI-head")]
+    write_drop_run(d, gts, flows, pairs, switch_dropped=9)
+    j = ev.join_run(d).set_index("sport")
+    assert (j.loc[sq1, "pkts_dropped"], j.loc[sq1, "pkts_total"]) == (5, 11)
+    assert j.loc[sq1, "drop_latency_s"] == pytest.approx(1.0)
+    assert j.loc[sq2, "pkts_dropped"] == 0 and np.isnan(j.loc[sq2, "drop_ts"])
+    assert j.loc[syn, "drop_latency_s"] == pytest.approx(1.0)
+    assert j.loc[ben, "drop_latency_s"] == pytest.approx(0.5)
+
+    m = ev.evaluate_run(d)
+    sq = m["per_attack_class"]["sqli"]
+    assert sq["packet_drops"] == {"flows_with_dropped_packets": 1, "packets_dropped": 5,
+                                  "packets_seen": 15, "dropped_share": 5 / 15,
+                                  # re-occupied slot at 20: 2 pkts, 1 dropped, 1 through
+                                  "packets_delivered_after_drop": 1,
+                                  "flows_with_delivery_after_drop": 1}
+    td = sq["time_to_drop"]
+    assert (td["n_phases"], td["n_phases_dropped"], td["n_flows_dropped"]) == (1, 1, 1)
+    assert td["per_phase_s"]["median"] == pytest.approx(1.0)
+    bd = m["benign"]["packet_drops"]
+    assert (bd["packets_dropped"], bd["flows_with_dropped_packets"]) == (2, 1)
+    da = m["drop_accounting"]
+    assert (da["switch_dropped_packets"], da["attributed_attack"], da["attributed_benign"]) \
+        == (9, 6, 2)
+    assert da["attributed_share"] == pytest.approx(8 / 9)
+    assert m["inspection"]["dropped_packets"] == 9
+    assert m["inspection"]["inspection_reduction_packets_incl_dropped"] == \
+        pytest.approx(1 - 15 / 159)
+
+
+def test_drop_metrics_are_none_for_runs_without_the_register(tmp_path):
+    d = str(tmp_path / "run_01")
+    write_run(d, [gt(C, D, 56000, 8000, "attack", "sqli", 10.0, 11.0)],
+              [frow(11.0, C, D, 56000, 8000, 3, "DPI-head")], [])
+    m = ev.evaluate_run(d)
+    assert m["per_attack_class"]["sqli"]["packet_drops"] is None
+    assert m["per_attack_class"]["sqli"]["time_to_drop"] is None
+    assert m["drop_accounting"] is None and m["benign"]["packet_drops"] is None

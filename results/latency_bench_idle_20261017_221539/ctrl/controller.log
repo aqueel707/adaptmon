@@ -1,0 +1,20 @@
+2026-10-17 22:15:59 [INFO] controller.utils: Logging to results/latency_bench_idle_20261017_221539/ctrl/controller.log
+2026-10-17 22:15:59 [INFO] __main__: AdaptMon Controller starting (run_id=20261017_221559, out_dir=results/latency_bench_idle_20261017_221539/ctrl)
+2026-10-17 22:15:59 [INFO] __main__: DPI started (pid=279) on 1:am_s1dpi,2:am_s2dpi
+2026-10-17 22:15:59 [INFO] controller.dataplane: DataPlaneManager initialized with 2 switches
+2026-10-17 22:15:59 [INFO] __main__: Waiting for switches to come up...
+2026-10-17 22:15:59 [INFO] controller.dataplane: All switches are alive
+2026-10-17 22:15:59 [INFO] __main__: S1: mirroring session 100 -> CPU port 255 configured
+2026-10-17 22:15:59 [INFO] __main__: S2: mirroring session 100 -> CPU port 255 configured
+2026-10-17 22:15:59 [INFO] controller.monitor: Decision A: score -> level thresholds are per-model warm-up percentiles (MONITOR < p5, CLONE < p1); DROP is never set from a score -- only by DPI. Any DPI confirmation forces the flow to DROP (5-tuple drop rule) and, for a scan class, its source (source-IP drop rule). The z-score trigger of the earlier switch-global design is removed.
+2026-10-17 22:15:59 [INFO] controller.monitor: Decision B: a second IsolationForest scores host-pair aggregates ['new_flows', 'distinct_dst_ports', 'syn_only_ratio', 'pkt_count']; a pair escalating to CLONE installs a src-IP clone rule (every packet from that source is cloned from then on).
+2026-10-17 22:15:59 [INFO] controller.monitor: Decision C: data-plane adaptive sampling (NORMAL 1-in-64, MONITOR 1-in-8, CLONE/DROP every packet); the entropy feature is payload byte entropy from sampled clones (payload_sampled) when available this window, else flow-distribution entropy (flow_distribution).
+2026-10-17 22:15:59 [INFO] controller.monitor: Flow features=['pkt_count', 'byte_count', 'duration_s', 'pkt_rate', 'mean_pkt_size', 'entropy'], hysteresis up=2 / down=3 windows, train_until=1792255762.0020163
+2026-10-17 22:15:59 [INFO] controller.monitor: Flow-head cloning: the first N=3 packets of every new flow are cloned to the CPU port (clone_reason 4; N=0 disables). head_clone_n read back per switch: {1: 3, 2: 3}
+2026-10-17 22:15:59 [INFO] controller.monitor: Monitor started for switches [1, 2]
+2026-10-17 22:19:23 [INFO] controller.model: IsolationForest[pkt_count,byte_count,duration_s,pkt_rate,mean_pkt_size,entropy] trained once on 19521 warm-up vectors (604 ms); frozen. Thresholds: NORMAL > 0.0000 (p5), MONITOR > -0.0792 (p1), else CLONE (warm-up min was -0.0923); DROP only on DPI confirmation
+2026-10-17 22:19:23 [INFO] controller.model: IsolationForest[new_flows,distinct_dst_ports,syn_only_ratio,pkt_count] trained once on 9952 warm-up vectors (313 ms); frozen. Thresholds: NORMAL > 0.0000 (p5), MONITOR > -0.2303 (p1), else CLONE (warm-up min was -0.2760); DROP only on DPI confirmation
+2026-10-17 23:53:11 [INFO] __main__: Duration elapsed, stopping
+2026-10-17 23:53:16 [INFO] __main__: Received signal, shutting down...
+2026-10-17 23:53:18 [INFO] controller.monitor: Monitor stopped
+2026-10-17 23:53:20 [INFO] __main__: Controller terminated cleanly

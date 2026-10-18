@@ -60,3 +60,18 @@ def test_set_head_clone_n_writes_then_reads_back(monkeypatch):
     assert sw.set_head_clone_n(3) == 3
     assert sent[0] == "register_write head_clone_n 0 3\n"
     assert sent[1] == "register_read head_clone_n 0\n"
+
+
+def test_host_drop_rule_add_parses_handle_and_delete(monkeypatch):
+    sw = SwitchInterface(1, 9090)
+    sent = []
+
+    def fake_cli(cmds, timeout=15):
+        sent.append(cmds)
+        return "Entry has been added with handle 7\n" if cmds.startswith("table_add") else ""
+    monkeypatch.setattr(sw, "_cli", fake_cli)
+    assert sw.add_host_drop_rule("10.0.1.1") == 7
+    assert sent[0] == ("table_add AdaptMonIngress.host_drop_table "
+                       "AdaptMonIngress.do_host_drop 10.0.1.1 => \n")
+    assert sw.delete_host_drop_rule(7)
+    assert sent[1] == "table_delete AdaptMonIngress.host_drop_table 7\n"

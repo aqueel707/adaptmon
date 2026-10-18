@@ -1,0 +1,64 @@
+2026-10-17 20:59:53 [INFO] controller.utils: Logging to results/dev_pilot_drop/paper_run.log
+2026-10-17 20:59:53 [INFO] __main__: Series: results/dev_pilot_drop (1 run(s) x 2 cycles), seeds=[1812250808], purpose=dev, head_clone_n=3, rate_spike_pps=1000
+2026-10-17 20:59:53 [INFO] __main__: === run 1/1 (seed 1812250808) -> results/dev_pilot_drop/run_01 ===
+2026-10-17 20:59:53 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 20:59:54 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 20:59:54 [INFO] topo.namespace_topo: Building topology...
+2026-10-17 20:59:54 [INFO] topo.namespace_topo:   Namespace: adaptmon_h1 (10.0.1.1)
+2026-10-17 20:59:54 [INFO] topo.namespace_topo:   Namespace: adaptmon_h2 (10.0.1.2)
+2026-10-17 20:59:54 [INFO] topo.namespace_topo:   Namespace: adaptmon_h3 (10.0.2.1)
+2026-10-17 20:59:54 [INFO] topo.namespace_topo:   Namespace: adaptmon_h4 (10.0.2.2)
+2026-10-17 20:59:54 [INFO] topo.namespace_topo:   h1: 10.0.1.1 <--> am_s1p1 (s1 port 1)
+2026-10-17 20:59:54 [INFO] topo.namespace_topo:   h2: 10.0.1.2 <--> am_s1p2 (s1 port 2)
+2026-10-17 20:59:54 [INFO] topo.namespace_topo:   h3: 10.0.2.1 <--> am_s2p1 (s2 port 1)
+2026-10-17 20:59:55 [INFO] topo.namespace_topo:   h4: 10.0.2.2 <--> am_s2p2 (s2 port 2)
+2026-10-17 20:59:55 [INFO] topo.namespace_topo:   Inter-switch: am_s1p3 <--> am_s2p3
+2026-10-17 20:59:55 [INFO] topo.namespace_topo:   s1 CPU port 255: am_s1cpu <--> am_s1dpi
+2026-10-17 20:59:55 [INFO] topo.namespace_topo:   s2 CPU port 255: am_s2cpu <--> am_s2dpi
+2026-10-17 20:59:55 [INFO] topo.namespace_topo:   h1 ARP table: 10.0.2.1 dev am_h1 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.2 dev am_h1 lladdr 00:00:00:01:00:02 PERMANENT
+10.0.2.2 dev am_h1 lladdr 00:00:00:02:00:02 PERMANENT
+2026-10-17 20:59:56 [INFO] topo.namespace_topo:   h2 ARP table: 10.0.2.1 dev am_h2 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h2 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.2.2 dev am_h2 lladdr 00:00:00:02:00:02 PERMANENT
+2026-10-17 20:59:56 [INFO] topo.namespace_topo:   h3 ARP table: 10.0.2.2 dev am_h3 lladdr 00:00:00:02:00:02 PERMANENT
+10.0.1.1 dev am_h3 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h3 lladdr 00:00:00:01:00:02 PERMANENT
+2026-10-17 20:59:56 [INFO] topo.namespace_topo:   h4 ARP table: 10.0.2.1 dev am_h4 lladdr 00:00:00:02:00:01 PERMANENT
+10.0.1.1 dev am_h4 lladdr 00:00:00:01:00:01 PERMANENT
+10.0.1.2 dev am_h4 lladdr 00:00:00:01:00:02 PERMANENT
+2026-10-17 20:59:56 [INFO] topo.namespace_topo: Topology built successfully
+2026-10-17 20:59:56 [INFO] topo.namespace_topo: Starting BMv2 switches...
+2026-10-17 20:59:56 [INFO] topo.namespace_topo:   s1: simple_switch --thrift-port 9090 --device-id 1 --notifications-addr ipc:///tmp/adaptmon-1-s1-notifications.ipc --log-level warn -i 1@am_s1p1 -i 2@am_s1p2 -i 3@am_s1p3 -i 255@am_s1cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 20:59:58 [INFO] topo.namespace_topo:   s1: running (pid=231, thrift=9090)
+2026-10-17 20:59:58 [INFO] topo.namespace_topo:   s2: simple_switch --thrift-port 9091 --device-id 2 --notifications-addr ipc:///tmp/adaptmon-1-s2-notifications.ipc --log-level warn -i 1@am_s2p1 -i 2@am_s2p2 -i 3@am_s2p3 -i 255@am_s2cpu /home/adaptmon/Desktop/adaptmon_v12/adaptmon/p4/build/adaptmon.json
+2026-10-17 21:00:00 [INFO] topo.namespace_topo:   s2: running (pid=244, thrift=9091)
+2026-10-17 21:00:01 [INFO] topo.namespace_topo: Installing forwarding rules...
+2026-10-17 21:00:01 [INFO] topo.namespace_topo:   s1: 4 rules installed
+2026-10-17 21:00:01 [INFO] topo.namespace_topo:   s2: 4 rules installed
+2026-10-17 21:00:05 [INFO] __main__: Warm-up: 30s benign-only (train_until=1792251036, now=1792251006)
+2026-10-17 21:00:41 [INFO] __main__: Attack phase: 2 cycles
+2026-10-17 21:00:41 [INFO] __main__: -- cycle 0: benign 6.94s, iperf3 2.63M; then ['null', 'syn', 'spike', 'sqli'] --
+2026-10-17 21:00:55 [INFO] __main__: -- cycle 0: null --
+2026-10-17 21:00:57 [INFO] __main__: -- cycle 0: syn --
+2026-10-17 21:01:02 [INFO] __main__: -- cycle 0: spike --
+2026-10-17 21:01:08 [INFO] __main__: -- cycle 0: sqli --
+2026-10-17 21:01:08 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56000
+2026-10-17 21:01:08 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56001
+2026-10-17 21:01:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56002
+2026-10-17 21:01:09 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56003
+2026-10-17 21:01:09 [INFO] __main__: -- cycle 1: benign 7.59s, iperf3 2.24M; then ['null', 'syn', 'spike', 'sqli'] --
+2026-10-17 21:01:24 [INFO] __main__: -- cycle 1: null --
+2026-10-17 21:01:25 [INFO] __main__: -- cycle 1: syn --
+2026-10-17 21:01:29 [INFO] __main__: -- cycle 1: spike --
+2026-10-17 21:01:36 [INFO] __main__: -- cycle 1: sqli --
+2026-10-17 21:01:36 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_block sport=56020
+2026-10-17 21:01:36 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=sql_comment_dashes sport=56021
+2026-10-17 21:01:36 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=union_select sport=56022
+2026-10-17 21:01:37 [INFO] traffic.paper_traffic: SQLi POST sent: pattern=or_1_eq_1 sport=56023
+2026-10-17 21:01:37 [INFO] __main__: Settling 6s for the last confirmations/forced drops...
+2026-10-17 21:01:50 [INFO] topo.namespace_topo:   s1 stopped
+2026-10-17 21:01:53 [INFO] topo.namespace_topo:   s2 stopped
+2026-10-17 21:01:53 [INFO] topo.namespace_topo: Tearing down previous topology...
+2026-10-17 21:01:54 [INFO] topo.namespace_topo: Teardown complete
+2026-10-17 21:01:54 [INFO] __main__: Run complete: {'n_flows': 78, 'by_class': {'benign': 36, 'null_scan': 16, 'syn_scan': 16, 'rate_spike': 2, 'sqli': 8}}

@@ -8,16 +8,14 @@ The Isolation Forest score alone sets a raw level of at most CLONE
 warm-up 1st percentile for CLONE; score-based DROP and the z-score trigger
 of the earlier switch-global design are both removed).
 
-DPI confirmations bypass the up-hysteresis below, on the reasoning that a
-content/pattern match is already strong evidence on its own -- waiting for
-K_UP consecutive anomalous score windows would just let packets already in
-hand go uninspected in the meantime (this matters most for a scan, where
-each probe is its own short-lived flow that may never survive two poll
-windows for per-flow hysteresis to act on):
-  * a confirmation on a flow/pair below CLONE escalates it straight to
-    CLONE (controller/monitor.py calls force_clone() for that)
-  * a confirmation on a flow already at CLONE escalates it to DROP
-    (force_drop())
+A DPI confirmation (on a head, sampled or level clone alike) escalates
+the flow straight to DROP, bypassing the up-hysteresis -- a content/pattern
+match is already strong evidence on its own, and waiting for K_UP anomalous
+score windows would let the attack's packets through meanwhile (this
+matters most for a scan, whose probes are each a short-lived flow): the
+controller calls force_drop() on the flow, and for a scan class on its host
+pair too (controller/monitor.py section 6). force_clone() remains for
+callers that only want full capture.
 
 Hysteresis (applies identically to flow keys and host-pair keys):
   * escalate only after K_UP = 2 consecutive windows whose raw level is above
@@ -27,7 +25,9 @@ Hysteresis (applies identically to flow keys and host-pair keys):
   * force_clone()/force_drop() clear the per-key window history, so leaving
     a DPI-forced level still needs K_DOWN fresh windows below it, counted
     from the moment it was forced (not windows from before the attack
-    was confirmed)
+    was confirmed). The IF score never sets DROP, so a forced DROP dwells
+    exactly K_DOWN scored windows unless confirmed again, then its rule is
+    removed.
 """
 
 import logging
@@ -71,6 +71,8 @@ class FlowState:
     # The installed data-plane rule's handle: a drop_table handle for a
     # flow-key FlowState, or a host_clone_table handle for a pair-key one
     rule_handle: Optional[int] = None
+    # Pair keys only: host_drop_table handle while the pair is at DROP
+    drop_handle: Optional[int] = None
     max_level  : MonitoringLevel = MonitoringLevel.NORMAL
     # Which detector/signal last moved this key, for logging only
     escalated_by: Optional[str] = None
